@@ -1,10 +1,13 @@
 // tools/ccp_peds.js
+// Changelog (2026-06-04):
+// - Hide and block View Formulary for iOS Other User limited access.
 // Changelog (2026-05-01):
 // - Update hardcoded formulary page links for the new CPG page numbering.
 // Changelog (2026-01-15):
 // - Fix PDF modal back to avoid blank viewer layer; preserve hash/state.
 // - Align age/weight logic, cap Dexamethasone at 12 mg, and clear invalid weight outputs.
-export async function run(mountEl){
+export async function run(mountEl, params = {}){
+  const canViewProtectedContent = params.accessType !== 'non_ambulance_staff';
   mountEl.innerHTML = `
     <style>
       :root{
@@ -115,6 +118,7 @@ export async function run(mountEl){
       .view-btn:focus-visible{outline:2px solid #93c5fd;outline-offset:2px}
       .view-btn:active{transform:translateY(1px) scale(.99);box-shadow:0 4px 10px rgba(37,99,235,.4)}
       .view-btn[disabled]{opacity:.35;cursor:not-allowed;box-shadow:none}
+      .view-btn.limited{display:none}
       .header{font-size:14px;font-style:italic;font-weight:700;color:var(--text);opacity:.85;margin-bottom:8px;white-space:pre-wrap}
       .sec-h{font-size:12px;font-weight:900;color:#64748b;margin:8px 0 4px;letter-spacing:.08em;text-transform:uppercase}
       .sec-k{font-size:20px;font-weight:1000;color:var(--text)}
@@ -161,7 +165,7 @@ export async function run(mountEl){
         <div class="result" aria-live="polite">
           <div class="title-row">
             <div id="rTitle" class="title">—</div>
-            <button id="viewFormularyBtn" class="view-btn" type="button" disabled>View Formulary</button>
+            <button id="viewFormularyBtn" class="view-btn ${canViewProtectedContent ? '' : 'limited'}" type="button" disabled>View Formulary</button>
           </div>
           <div id="rContext" class="context"></div>
           <div id="rHeader" class="header"></div>
@@ -602,6 +606,12 @@ export async function run(mountEl){
   function hideAlert(){ alertEl.style.display = 'none'; alertEl.textContent=''; }
 
   function updateFormularyButton(name){
+    if (!canViewProtectedContent) {
+      viewBtn.disabled = true;
+      viewBtn.removeAttribute('data-page');
+      viewBtn.dataset.title = '';
+      return;
+    }
     const page = name ? FORMULARY_PAGES[name] : null;
     viewBtn.dataset.title = name || '';
     if (page){
@@ -1291,6 +1301,10 @@ Ref. Dose Calculation: ${refStr}`) ]};
   }
 
   viewBtn.addEventListener('click', ()=>{
+    if (!canViewProtectedContent) {
+      alert('Protected Content\\n\\nThis section is available to ambulance staff only. Other app tools remain available.');
+      return;
+    }
     const page = Number(viewBtn.dataset.page);
     if (!Number.isFinite(page)) return;
     const title = viewBtn.dataset.title || rTitle.textContent || 'Formulary';

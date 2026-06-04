@@ -1,5 +1,6 @@
 <!--
   CHANGELOG (2026-06-04):
+  - Hide global search for Other User and pass gate access type to tool modules.
   - Add iOS gate access policy to hide/block protected document/internal tools for Other User access.
 
   CHANGELOG (2026-05-29):
@@ -288,6 +289,7 @@
     body.global-search-active #scBanner,
     body.global-search-active #sections{display:none!important}
     body.shortcuts-mode-on #globalSearch{display:none!important}
+    body[data-access-type="non_ambulance_staff"] #globalSearch{display:none!important}
 
     /* Sections */
     .sections{display:flex; flex-direction:column; gap:8px}
@@ -575,7 +577,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260604-gate-test-1";
+  const ASSET_VERSION = "asset-20260604-gate-test-2";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -1807,7 +1809,7 @@ function wireCharlieModal(){
       // Default: load tool module. APP_VERSION controls cache refresh between releases.
       const ver = encodeURIComponent(TOOL_MODULE_VERSION);
       const mod = await import(`./tools/${actionId}.js?ver=${ver}`);
-      await mod.run(mountEl, params);
+      await mod.run(mountEl, { ...params, accessType: gateAccessType });
       if (options.fromHistory) {
         currentTool = actionId;
       } else if (options.pushState !== false) {
