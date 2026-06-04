@@ -1,5 +1,6 @@
 // ios-ambulance-gate-test-worker.js
 // CHANGELOG (2026-06-04):
+// - Preserve selected iOS device model for registration cookies and future access checks.
 // - Persist locked retry countdown across webclip closes and override locked retry TTL to two minutes for testing.
 // - Restore approved registration helper wording and match phone country-code text sizing to phone inputs.
 // - Simplify gate titles, split device type/model selection, and remove the gate reset test button.
@@ -127,6 +128,7 @@ async function sessionInfo(req, env) {
       access_type: payload.access_type || "",
       first_name: payload.first_name || "",
       install_id: payload.install_id || "",
+      device_label: payload.device_label || "",
       check_expires_at: payload.check_exp || 0,
       cookie_expires_at: payload.exp || 0
     }, 200);
@@ -142,9 +144,9 @@ async function sessionInfo(req, env) {
     platform: PLATFORM,
     install_id: payload.install_id,
     app_version: "",
-    device_label: deviceLabel(req)
+    device_label: cleanText(payload.device_label, 160) || deviceLabel(req)
   });
-  return responseWithSessionCookie(req, env, api, payload.install_id);
+  return responseWithSessionCookie(req, env, api, payload.install_id, payload.device_label || "");
 }
 
 async function gateCheck(req, env) {
@@ -152,8 +154,9 @@ async function gateCheck(req, env) {
   const installId = cleanText(body.install_id, 120);
   if (!installId) return json({ ok: false, status: "error", reason_code: "missing_device" }, 400);
 
-  const api = await callAccessApi(env, "check", iosBody(req, body, installId));
-  return responseWithSessionCookie(req, env, api, installId);
+  const ios = iosBody(req, body, installId);
+  const api = await callAccessApi(env, "check", ios);
+  return responseWithSessionCookie(req, env, api, installId, ios.device_label);
 }
 
 async function gateRegister(req, env, endpoint) {
@@ -161,8 +164,9 @@ async function gateRegister(req, env, endpoint) {
   const installId = cleanText(body.install_id, 120);
   if (!installId) return json({ ok: false, status: "error", reason_code: "missing_device" }, 400);
 
-  const api = await callAccessApi(env, endpoint, iosBody(req, body, installId));
-  return responseWithSessionCookie(req, env, api, installId);
+  const ios = iosBody(req, body, installId);
+  const api = await callAccessApi(env, endpoint, ios);
+  return responseWithSessionCookie(req, env, api, installId, ios.device_label);
 }
 
 function iosBody(req, body, installId) {
@@ -186,13 +190,13 @@ async function authorizeProtectedRequest(req, env) {
     platform: PLATFORM,
     install_id: payload.install_id,
     app_version: "",
-    device_label: deviceLabel(req)
+    device_label: cleanText(payload.device_label, 160) || deviceLabel(req)
   });
 
   if (api.status !== "active") return { ok: false };
   return {
     ok: true,
-    setCookie: await makeSignedCookie(req, env.SIGNING_KEY, payload.install_id, api)
+    setCookie: await makeSignedCookie(req, env.SIGNING_KEY, payload.install_id, api, payload.device_label || "")
   };
 }
 
@@ -256,11 +260,11 @@ async function debugConfig(env) {
   }, 200);
 }
 
-async function responseWithSessionCookie(req, env, api, installId) {
+async function responseWithSessionCookie(req, env, api, installId, deviceLabelForSession = "") {
   const body = normalizeGateApiForTest(api);
   const headers = {};
   if (body.status === "active") {
-    headers["Set-Cookie"] = await makeSignedCookie(req, env.SIGNING_KEY, installId, body);
+    headers["Set-Cookie"] = await makeSignedCookie(req, env.SIGNING_KEY, installId, body, deviceLabelForSession);
   } else if (body.status === "locked" || body.status === "revoked" || body.status === "not_found" || body.status === "error") {
     headers["Set-Cookie"] = clearCookie(req);
   }
@@ -281,7 +285,7 @@ function normalizeGateApiForTest(api) {
   };
 }
 
-async function makeSignedCookie(req, signingKey, installId, api) {
+async function makeSignedCookie(req, signingKey, installId, api, deviceLabelForSession = "") {
   const ttl = COOKIE_TTL_SECONDS;
   const exp = nowSec() + ttl;
   const checkTtl = clampTtl(Number(api.cache_ttl_sec || api.retry_after_seconds || 3600));
@@ -291,6 +295,7 @@ async function makeSignedCookie(req, signingKey, installId, api) {
     status: api.status || "active",
     access_type: cleanText(api.access_type || "non_ambulance_staff", 60),
     first_name: cleanText(api.first_name || "", 80),
+    device_label: cleanText(api.device_label || deviceLabelForSession, 160),
     reason_code: cleanText(api.reason_code || "", 80),
     check_exp: nowSec() + checkTtl,
     exp
@@ -509,6 +514,7 @@ function gatePageHtml() {
   const INSTALL_ID_KEY = "ambulance_ios_install_id";
   const FIRST_NAME_KEY = "ambulance_ios_first_name";
   const FINGERPRINT_KEY = "ambulance_ios_fp_v1";
+  const DEVICE_LABEL_KEY = "ambulance_ios_device_label";
   const LOCK_RETRY_UNTIL_KEY = "ambulance_ios_lock_retry_until";
   const LOCK_RETRY_SIG_KEY = "ambulance_ios_lock_retry_sig";
   const views = ["loadingView", "choiceView", "staffView", "otherView", "confirmView", "grantedView", "lockedView", "supportView"];
@@ -562,6 +568,11 @@ function gatePageHtml() {
     return id;
   };
   const deviceLabel = () => /iPad/i.test(navigator.userAgent) ? "iPad Ambulance App" : /iPhone/i.test(navigator.userAgent) ? "iPhone Ambulance App" : "iOS Ambulance App";
+  const storedDeviceLabel = () => localStorage.getItem(DEVICE_LABEL_KEY) || "";
+  function setStoredDeviceLabel(value) {
+    const label = String(value || "").trim();
+    if (label) localStorage.setItem(DEVICE_LABEL_KEY, label);
+  }
   async function sha256Hex(text) {
     const bytes = new TextEncoder().encode(text);
     const hash = await crypto.subtle.digest("SHA-256", bytes);
@@ -588,7 +599,7 @@ function gatePageHtml() {
     return hash;
   }
   async function payload(extra = {}) {
-    return { platform: "ios", install_id: installId(), app_version: APP_VERSION, device_label: deviceLabel(), ...extra, device_fingerprint_hash: await deviceFingerprintHash() };
+    return { platform: "ios", install_id: installId(), app_version: APP_VERSION, device_label: storedDeviceLabel() || deviceLabel(), ...extra, device_fingerprint_hash: await deviceFingerprintHash() };
   }
   const validEmail = (email) => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) && email.length <= 254;
   const cleanName = (value) => String(value || "").replace(/[\\x00-\\x1f\\x7f]+/g, " ").replace(/\\s+/g, " ").replace(/[^\\p{L}\\p{M} .'-]/gu, "").replace(/\\s+/g, " ").trim().slice(0, 60).trim();
@@ -738,6 +749,7 @@ function gatePageHtml() {
     try {
       const session = await fetch("/gate/session-info", { credentials: "include", cache: "no-store" }).then((r) => r.json());
       if (session.first_name) localStorage.setItem(FIRST_NAME_KEY, session.first_name);
+      if (session.device_label) setStoredDeviceLabel(session.device_label);
       if (session.status === "active" && session.authenticated) return launchApp();
     } catch (_) {}
     try {
@@ -847,6 +859,7 @@ function gatePageHtml() {
     setButtonBusy(btn, true);
     try {
       const data = await postJson(pendingRegistration.endpoint, await payload(pendingRegistration.body));
+      setStoredDeviceLabel(pendingRegistration.body?.device_label);
       if (["active","locked","revoked"].includes(data.status)) handle(data);
       else error(confirmError, friendly(data));
     } catch (_) {
