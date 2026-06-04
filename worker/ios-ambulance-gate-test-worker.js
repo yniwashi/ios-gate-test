@@ -1,5 +1,6 @@
 // ios-ambulance-gate-test-worker.js
 // CHANGELOG (2026-06-04):
+// - Strip raw GitHub CSP headers from proxied static files so app scripts can run on the test domain.
 // - Prefer ACCESS_GATE_WORKER service binding for Access Gate calls, with public API URL fallback.
 // - Add safe debug-config endpoint to verify test Worker API/static origin settings.
 // - Serve the testing gate page directly from the Worker root so production root files stay untouched.
@@ -329,7 +330,9 @@ async function fetchStatic(req, env) {
   const headers = new Headers(originResp.headers);
   const contentType = contentTypeForPath(new URL(target).pathname);
   if (contentType) headers.set("content-type", contentType);
+  headers.delete("content-security-policy");
   headers.delete("x-frame-options");
+  headers.delete("x-content-type-options");
   return new Response(originResp.body, {
     status: originResp.status,
     statusText: originResp.statusText,
