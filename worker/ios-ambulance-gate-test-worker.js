@@ -1,5 +1,6 @@
 // ios-ambulance-gate-test-worker.js
 // CHANGELOG (2026-06-04):
+// - Persist locked retry countdown across webclip closes and override locked retry TTL to two minutes for testing.
 // - Restore approved registration helper wording and match phone country-code text sizing to phone inputs.
 // - Simplify gate titles, split device type/model selection, and remove the gate reset test button.
 // - Add required registration device model selector and use the selected model as device_label.
@@ -19,6 +20,7 @@ const DEFAULT_STATIC_ORIGIN = "https://raw.githubusercontent.com/yniwashi/ios/ma
 const COOKIE_NAME = "wc";
 const COOKIE_TTL_SECONDS = 30 * 24 * 60 * 60;
 const PLATFORM = "ios";
+const TEST_LOCK_TTL_SECONDS = 120;
 
 const PROTECTED_PREFIXES = [
   "/ambulance/",
@@ -255,17 +257,28 @@ async function debugConfig(env) {
 }
 
 async function responseWithSessionCookie(req, env, api, installId) {
+  const body = normalizeGateApiForTest(api);
   const headers = {};
-  if (api.status === "active") {
-    headers["Set-Cookie"] = await makeSignedCookie(req, env.SIGNING_KEY, installId, api);
-  } else if (api.status === "locked" || api.status === "revoked" || api.status === "not_found" || api.status === "error") {
+  if (body.status === "active") {
+    headers["Set-Cookie"] = await makeSignedCookie(req, env.SIGNING_KEY, installId, body);
+  } else if (body.status === "locked" || body.status === "revoked" || body.status === "not_found" || body.status === "error") {
     headers["Set-Cookie"] = clearCookie(req);
   }
 
   return json({
+    ...body,
+    session_active: body.status === "active"
+  }, body.http_status && body.http_status >= 400 ? body.http_status : 200, headers);
+}
+
+function normalizeGateApiForTest(api) {
+  if (!api || api.status !== "locked") return api || {};
+  return {
     ...api,
-    session_active: api.status === "active"
-  }, api.http_status && api.http_status >= 400 ? api.http_status : 200, headers);
+    cache_ttl_sec: TEST_LOCK_TTL_SECONDS,
+    retry_after_seconds: TEST_LOCK_TTL_SECONDS,
+    test_lock_ttl_override_sec: TEST_LOCK_TTL_SECONDS
+  };
 }
 
 async function makeSignedCookie(req, signingKey, installId, api) {
@@ -496,6 +509,8 @@ function gatePageHtml() {
   const INSTALL_ID_KEY = "ambulance_ios_install_id";
   const FIRST_NAME_KEY = "ambulance_ios_first_name";
   const FINGERPRINT_KEY = "ambulance_ios_fp_v1";
+  const LOCK_RETRY_UNTIL_KEY = "ambulance_ios_lock_retry_until";
+  const LOCK_RETRY_SIG_KEY = "ambulance_ios_lock_retry_sig";
   const views = ["loadingView", "choiceView", "staffView", "otherView", "confirmView", "grantedView", "lockedView", "supportView"];
   const launchMessages = ["Preparing Ambulance...", "Checking access...", "Loading your dashboard...", "Getting things ready..."];
   const roles = ["AP", "CCA", "CCP", "Supervisor", "Other"];
@@ -620,6 +635,7 @@ function gatePageHtml() {
   }
   function launchApp() { stopLaunchMessages(); setTitle("Opening the Ambulance App"); show("loadingView"); loadingText.textContent = "Opening app..."; setTimeout(() => location.replace("/ambulance/"), 320); }
   function showGranted(data) {
+    clearLockedRetry();
     const firstName = String(data?.first_name || "").trim();
     if (firstName) localStorage.setItem(FIRST_NAME_KEY, firstName);
     const limited = data?.access_type === "non_ambulance_staff";
@@ -629,7 +645,7 @@ function gatePageHtml() {
     setTitle("Access Granted");
     show("grantedView");
   }
-  function showChoice() { setTitle("Choose Access Type"); show("choiceView"); }
+  function showChoice() { clearLockedRetry(); setTitle("Choose Access Type"); show("choiceView"); }
   function showRegistrationView(view) {
     if (view === "staffView") setTitle("Ambulance Staff Registration");
     else if (view === "otherView") setTitle("Other User Registration");
@@ -651,13 +667,32 @@ function gatePageHtml() {
     document.getElementById("lockedMessage").textContent = reasonMessage(reason);
     tryAgainBtn.classList.toggle("hidden", revoked);
     document.getElementById("retryPanel").classList.toggle("hidden", revoked);
-    if (!revoked) startRetryCountdown(Number(data?.retry_after_seconds || data?.cache_ttl_sec || 0));
+    if (revoked) clearLockedRetry();
+    else startRetryCountdown(data);
     show("lockedView");
   }
-  function startRetryCountdown(retryAfterSeconds) {
-    stopRetryCountdown();
-    const cooldown = Math.max(0, Math.floor(Number(retryAfterSeconds || 0) / 2));
+  function lockedRetrySignature(data) {
+    return [installId(), data?.status || "", data?.reason_code || ""].join("|");
+  }
+  function lockedRetryAvailableAt(data) {
+    const signature = lockedRetrySignature(data);
+    const savedSignature = localStorage.getItem(LOCK_RETRY_SIG_KEY) || "";
+    const savedUntil = Number(localStorage.getItem(LOCK_RETRY_UNTIL_KEY) || 0);
+    if (savedSignature === signature && savedUntil > Date.now()) return savedUntil;
+    const retryAfterSeconds = Number(data?.retry_after_seconds || data?.cache_ttl_sec || 0);
+    const cooldown = Math.max(0, Math.floor(retryAfterSeconds / 2));
     const availableAt = Date.now() + cooldown * 1000;
+    localStorage.setItem(LOCK_RETRY_SIG_KEY, signature);
+    localStorage.setItem(LOCK_RETRY_UNTIL_KEY, String(availableAt));
+    return availableAt;
+  }
+  function clearLockedRetry() {
+    localStorage.removeItem(LOCK_RETRY_SIG_KEY);
+    localStorage.removeItem(LOCK_RETRY_UNTIL_KEY);
+  }
+  function startRetryCountdown(data) {
+    stopRetryCountdown();
+    const availableAt = lockedRetryAvailableAt(data);
     const label = document.getElementById("retryLabel");
     const value = document.getElementById("retryValue");
     function tick() {
