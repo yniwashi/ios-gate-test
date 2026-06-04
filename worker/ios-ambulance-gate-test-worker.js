@@ -1,5 +1,6 @@
 // ios-ambulance-gate-test-worker.js
 // CHANGELOG (2026-06-04):
+// - Improve gate API error handling so validation responses show clear messages instead of connection errors.
 // - Add first-name session storage, weak iOS fingerprint hash, support view, access-granted view, and locked retry countdown.
 // - Upgrade testing gate UI, add Android-aligned client validation, confirmation step, and clearer wording.
 // - Strip raw GitHub CSP headers from proxied static files so app scripts can run on the test domain.
@@ -570,7 +571,16 @@ function gatePageHtml() {
   };
   async function postJson(url, body) {
     const res = await fetch(url, { method: "POST", credentials: "include", cache: "no-store", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-    return res.json().catch(() => ({}));
+    const text = await res.text().catch(() => "");
+    let data = {};
+    try { data = text ? JSON.parse(text) : {}; } catch (_) {
+      data = { ok: false, status: "error", reason_code: "invalid_server_response" };
+    }
+    if (!res.ok && !data.reason_code && !data.error_code && !data.error) {
+      data.reason_code = "http_" + res.status;
+    }
+    data.http_status = res.status;
+    return data;
   }
   function startLaunchMessages() {
     stopLaunchMessages();
@@ -667,7 +677,20 @@ function gatePageHtml() {
       if (session.first_name) localStorage.setItem(FIRST_NAME_KEY, session.first_name);
       if (session.status === "active" && session.authenticated) return launchApp();
     } catch (_) {}
-    try { handle(await postJson("/gate/check", await payload()), { directOpen: true }); } catch (_) { stopLaunchMessages(); subtitle.textContent = "Could not check access"; loadingText.textContent = "Check your connection and try again."; }
+    try {
+      const data = await postJson("/gate/check", await payload());
+      if (data?.status === "error" || data?.ok === false) {
+        stopLaunchMessages();
+        subtitle.textContent = "Could not check access";
+        loadingText.textContent = friendly(data);
+        return;
+      }
+      handle(data, { directOpen: true });
+    } catch (_) {
+      stopLaunchMessages();
+      subtitle.textContent = "Could not check access";
+      loadingText.textContent = "Check your connection and try again.";
+    }
   }
   function formObject(form) { return Object.fromEntries(new FormData(form).entries()); }
   function error(el, message) { el.textContent = message; el.classList.add("show"); }
@@ -686,6 +709,12 @@ function gatePageHtml() {
     if (r === "missing_required_fields") return "Complete the required registration details.";
     if (r === "missing_device") return "Device registration could not be prepared. Restart the App and try again.";
     if (r === "invalid_email") return "Enter a valid email address.";
+    if (r === "registration_required" || r === "not_found") return "This device is not registered yet. Choose an access type to continue.";
+    if (r === "invalid_server_response") return "The access server returned an unreadable response. Try again in a moment.";
+    if (r === "endpoint_not_found" || r === "http_404") return "The access service endpoint is not available. Contact app support if this continues.";
+    if (r === "rate_limited" || r === "http_429") return "Too many attempts. Wait a moment, then try again.";
+    if (r === "unauthorized" || r === "http_401" || r === "http_403") return "The access request was not authorized. Contact app support if this continues.";
+    if (r === "http_500" || r === "http_502" || r === "http_503" || r === "http_504") return "The access service is temporarily unavailable. Try again in a moment.";
     return "Access could not be completed. Check your details and try again.";
   }
   function confirmRows(rows) {
