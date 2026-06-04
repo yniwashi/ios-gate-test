@@ -1,5 +1,6 @@
 <!--
   CHANGELOG (2026-06-04):
+  - Add temporary test reset button to clear gate/app storage and return to registration.
   - Expose gate access type globally for tool modules and bump test assets for CCP limited-access fix.
   - Hide global search for Other User and pass gate access type to tool modules.
   - Add iOS gate access policy to hide/block protected document/internal tools for Other User access.
@@ -379,6 +380,8 @@
     .updates-btn:hover{background:color-mix(in oklab,var(--accent) 18%,var(--surface));}
     .charlie-btn{color:#C8935A;border-color:color-mix(in oklab,#C8935A 40%,transparent);background:color-mix(in oklab,#C8935A 12%,var(--surface))}
     .charlie-btn:hover{background:color-mix(in oklab,#C8935A 18%,var(--surface))}
+    .gate-reset-btn{color:#c0392b;border-color:color-mix(in oklab,#c0392b 40%,transparent);background:color-mix(in oklab,#c0392b 10%,var(--surface))}
+    .gate-reset-btn:hover{background:color-mix(in oklab,#c0392b 16%,var(--surface))}
 
     /* What's New modal */
     .wn-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:color-mix(in oklab,var(--bg) 55%,#02050bed);backdrop-filter:blur(10px);z-index:99998}
@@ -484,6 +487,7 @@
   <div class="updates-cta">
     <button id="wnShowAgain" class="updates-btn" type="button">Updates</button>
     <button id="charlieBtn" class="updates-btn charlie-btn" type="button">Charlie</button>
+    <button id="gateResetBtn" class="updates-btn gate-reset-btn" type="button">Reset Test</button>
   </div>
 
   <!-- Global Search -->
@@ -578,7 +582,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260604-gate-test-3";
+  const ASSET_VERSION = "asset-20260604-gate-test-4";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -663,6 +667,22 @@
 
   function showProtectedContentDialog() {
     alert("Protected Content\n\nThis section is available to ambulance staff only. Other app tools remain available.");
+  }
+
+  async function resetGateTestState() {
+    if (!confirm("Reset this test App and return to registration?")) return;
+    try {
+      await fetch("/gate/logout", { method: "POST", credentials: "include", cache: "no-store" });
+    } catch (_) {}
+    try { localStorage.clear(); } catch (_) {}
+    try { sessionStorage.clear(); } catch (_) {}
+    try {
+      if (window.caches?.keys) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((key) => caches.delete(key)));
+      }
+    } catch (_) {}
+    location.replace("/");
   }
   /* =========================
        CONFIG (production)
@@ -1489,6 +1509,7 @@
     if (scDownloadEl) scDownloadEl.href = SHORTCUT_DOWNLOAD_URL || "#";
     wireWhatsNewControls();
     wireCharlieModal();
+    document.getElementById("gateResetBtn")?.addEventListener("click", resetGateTestState);
     function applyUpdatesButtonVisibility(useShortcuts){
       const trigger = document.querySelector(".updates-cta");
       if (!trigger) return;
