@@ -1,5 +1,6 @@
 // ios-ambulance-gate-test-worker.js
 // CHANGELOG (2026-06-04):
+// - Prefer ACCESS_GATE_WORKER service binding for Access Gate calls, with public API URL fallback.
 // - Add safe debug-config endpoint to verify test Worker API/static origin settings.
 // - Serve the testing gate page directly from the Worker root so production root files stay untouched.
 // - Add testing-only iOS Access Gate Worker draft that proxies the shared Ambulance Access Gate API.
@@ -185,6 +186,21 @@ async function authorizeProtectedRequest(req, env) {
 }
 
 async function callAccessApi(env, endpoint, body) {
+  if (env.ACCESS_GATE_WORKER?.fetch) {
+    const upstreamReq = new Request(`https://access-gate.internal/${endpoint}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const res = await env.ACCESS_GATE_WORKER.fetch(upstreamReq);
+    const data = await res.json().catch(() => ({}));
+    return {
+      ok: res.ok,
+      http_status: res.status,
+      ...data
+    };
+  }
+
   const base = String(env.ACCESS_GATE_API_BASE || DEFAULT_ACCESS_GATE_API_BASE).replace(/\/+$/, "");
   const res = await fetch(`${base}/${endpoint}`, {
     method: "POST",
@@ -204,7 +220,9 @@ async function debugConfig(env) {
   const staticOrigin = String(env.STATIC_ORIGIN || DEFAULT_STATIC_ORIGIN).replace(/\/+$/, "");
   let ping = { ok: false };
   try {
-    const res = await fetch(`${apiBase}/ping`, { method: "GET" });
+    const res = env.ACCESS_GATE_WORKER?.fetch
+      ? await env.ACCESS_GATE_WORKER.fetch(new Request("https://access-gate.internal/ping", { method: "GET" }))
+      : await fetch(`${apiBase}/ping`, { method: "GET" });
     ping = {
       ok: res.ok,
       status: res.status,
@@ -222,6 +240,7 @@ async function debugConfig(env) {
     access_gate_api_base: apiBase,
     static_origin: staticOrigin,
     has_signing_key: Boolean(env.SIGNING_KEY),
+    has_access_gate_worker_binding: Boolean(env.ACCESS_GATE_WORKER?.fetch),
     ping
   }, 200);
 }
