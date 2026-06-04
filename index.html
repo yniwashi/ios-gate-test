@@ -1,0 +1,417 @@
+<!--
+  CHANGELOG (2026-06-04):
+  - Replace blind webclip session mint with testing Access Gate UI for Staff and Other User registration.
+  - Add active check, locked/revoked support UI, and testing-only reset control for ios-gate-test.niwashibase.com.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Ambulance Access</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f7f9fc">
+
+  <style>
+    :root{
+      color-scheme:light dark;
+      --bg:#f7f9fc;
+      --card:#ffffff;
+      --text:#0c1230;
+      --muted:#647089;
+      --border:#e1e7f0;
+      --accent:#0d5bb5;
+      --accent-2:#19b36b;
+      --danger:#b42318;
+      --shadow:0 16px 44px rgba(15,23,42,.14);
+    }
+    @media (prefers-color-scheme:dark){
+      :root{
+        --bg:#0f1115;
+        --card:#171a21;
+        --text:#eef2ff;
+        --muted:#9aa6c3;
+        --border:#232a37;
+        --accent:#2f81f7;
+        --accent-2:#20c385;
+        --danger:#f87171;
+        --shadow:0 18px 48px rgba(0,0,0,.36);
+      }
+    }
+    *{box-sizing:border-box}
+    html,body{min-height:100%;margin:0}
+    body{
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at top left,rgba(31,111,255,.14),transparent 34rem),
+        linear-gradient(180deg,var(--bg),color-mix(in oklab,var(--bg) 88%,#0d5bb5));
+      color:var(--text);
+      padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 18px);
+    }
+    .shell{width:min(560px,100%);min-height:calc(100vh - 34px);margin:0 auto;display:flex;align-items:center;justify-content:center}
+    .card{
+      width:100%;background:var(--card);border:1px solid var(--border);border-radius:22px;
+      box-shadow:var(--shadow);padding:22px;display:flex;flex-direction:column;gap:16px;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:54px;height:54px;border-radius:16px;object-fit:cover;border:1px solid var(--border);background:#fff}
+    h1{margin:0;font-size:25px;line-height:1.08;letter-spacing:0;font-weight:950}
+    h2{margin:0;font-size:19px;line-height:1.16;font-weight:950}
+    p{margin:0;color:var(--muted);font-size:14px;line-height:1.45;font-weight:650}
+    .status{display:flex;align-items:center;gap:10px;background:color-mix(in oklab,var(--accent) 10%,var(--card));border:1px solid color-mix(in oklab,var(--accent) 24%,var(--border));border-radius:14px;padding:12px;color:var(--text);font-weight:850}
+    .spinner{width:18px;height:18px;border:3px solid color-mix(in oklab,var(--accent) 25%,transparent);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .choice-grid{display:grid;grid-template-columns:1fr;gap:10px}
+    .choice{appearance:none;border:1px solid var(--border);background:color-mix(in oklab,var(--card) 90%,var(--accent));color:var(--text);border-radius:16px;padding:14px;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer}
+    .choice strong{display:block;font-size:16px;font-weight:950;margin-bottom:2px}
+    .choice span{display:block;font-size:12px;color:var(--muted);font-weight:750;line-height:1.35}
+    .choice.primary{background:linear-gradient(180deg,#0d5bb5,#0d3ab5);border-color:transparent;color:#fff}
+    .choice.primary span{color:rgba(255,255,255,.78)}
+    .choice .arrow{font-size:22px;font-weight:950;opacity:.72}
+    form{display:flex;flex-direction:column;gap:10px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:420px){.row{grid-template-columns:1fr}}
+    label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:900;color:var(--muted)}
+    input,select{
+      width:100%;min-height:46px;border:1px solid var(--border);border-radius:13px;
+      background:color-mix(in oklab,var(--card) 92%,var(--bg));color:var(--text);
+      padding:10px 12px;font:800 16px/1.2 system-ui;outline:none;
+    }
+    input:focus,select:focus{border-color:color-mix(in oklab,var(--accent) 58%,var(--border));box-shadow:0 0 0 3px color-mix(in oklab,var(--accent) 16%,transparent)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+    .btn{appearance:none;border:1px solid var(--border);background:color-mix(in oklab,var(--card) 92%,var(--bg));color:var(--text);border-radius:13px;padding:11px 13px;font:950 14px/1 system-ui;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px}
+    .btn.primary{background:linear-gradient(180deg,var(--accent),#0d3ab5);border-color:transparent;color:#fff;box-shadow:0 12px 24px rgba(13,91,181,.26)}
+    .btn.success{background:linear-gradient(180deg,#16a34a,#15803d);border-color:transparent;color:#fff}
+    .btn.danger{color:var(--danger)}
+    .btn:disabled{opacity:.58;cursor:wait}
+    .error{display:none;border:1px solid color-mix(in oklab,var(--danger) 35%,var(--border));background:color-mix(in oklab,var(--danger) 10%,var(--card));color:var(--danger);border-radius:13px;padding:11px;font-size:13px;font-weight:850;line-height:1.35}
+    .error.show{display:block}
+    .support{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .support a{border-radius:13px;padding:10px;text-align:center;text-decoration:none;color:#fff;font-size:12px;font-weight:950}
+    .discord{background:#5865f2}.telegram{background:#24a1de}.whatsapp{background:#128c7e}
+    .hidden{display:none!important}
+    .test-reset{display:none;margin-top:2px}
+    body.is-test .test-reset{display:inline-flex}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="card" id="gateCard">
+      <div class="brand">
+        <img class="logo" src="/ambulance/images/logo.png" alt="Ambulance">
+        <div>
+          <h1>Ambulance Access</h1>
+          <p id="subtitle">Checking your access...</p>
+        </div>
+      </div>
+
+      <div id="loadingView" class="status">
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="loadingText">Checking access...</span>
+      </div>
+
+      <section id="choiceView" class="hidden">
+        <h2>Choose access type</h2>
+        <p>Register this iPhone to continue to the Ambulance App.</p>
+        <div class="choice-grid" style="margin-top:12px">
+          <button class="choice primary" id="staffChoice" type="button">
+            <span><strong>Ambulance Staff</strong><span>Use your Hamad email and corporation number.</span></span>
+            <span class="arrow">›</span>
+          </button>
+          <button class="choice" id="otherChoice" type="button">
+            <span><strong>Other User</strong><span>Limited access without protected ambulance documents.</span></span>
+            <span class="arrow">›</span>
+          </button>
+        </div>
+      </section>
+
+      <section id="staffView" class="hidden">
+        <h2>Ambulance Staff</h2>
+        <p>Use your Hamad email. Only the username is stored by the Access Gate.</p>
+        <form id="staffForm" autocomplete="on">
+          <div class="row">
+            <label>First name<input name="first_name" autocomplete="given-name" required></label>
+            <label>Last name<input name="last_name" autocomplete="family-name" required></label>
+          </div>
+          <label>Hamad email<input name="email" type="email" inputmode="email" autocomplete="email" placeholder="name@hamad.qa" required></label>
+          <div class="row">
+            <label>Corporation number<input name="corp_number" inputmode="numeric" required></label>
+            <label>Role
+              <select name="role" required>
+                <option value="">Select role</option>
+                <option>AP</option>
+                <option>CCA</option>
+                <option>CCP</option>
+                <option>Supervisor</option>
+                <option>Other</option>
+              </select>
+            </label>
+          </div>
+          <label>Phone optional<input name="phone" inputmode="tel" autocomplete="tel"></label>
+          <div class="error" id="staffError"></div>
+          <div class="actions">
+            <button class="btn primary" type="submit">Continue</button>
+            <button class="btn" type="button" data-back>Back</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="otherView" class="hidden">
+        <h2>Other User</h2>
+        <p>Other User access can use general tools but cannot open protected ambulance documents or internal resources.</p>
+        <form id="otherForm" autocomplete="on">
+          <div class="row">
+            <label>First name<input name="first_name" autocomplete="given-name" required></label>
+            <label>Last name<input name="last_name" autocomplete="family-name" required></label>
+          </div>
+          <label>Email<input name="email" type="email" inputmode="email" autocomplete="email" required></label>
+          <label>Profession / background<input name="profession" required></label>
+          <label>Phone optional<input name="phone" inputmode="tel" autocomplete="tel"></label>
+          <div class="error" id="otherError"></div>
+          <div class="actions">
+            <button class="btn primary" type="submit">Continue</button>
+            <button class="btn" type="button" data-back>Back</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="lockedView" class="hidden">
+        <h2 id="lockedTitle">Access Locked</h2>
+        <p id="lockedMessage">Access for this device is currently locked.</p>
+        <div class="support" style="margin-top:12px">
+          <a class="discord" href="https://discord.gg/qc8fK3yd92" target="_blank" rel="noopener">Discord</a>
+          <a class="telegram" href="https://t.me/+EAcWKnoaRq05YzY0" target="_blank" rel="noopener">Telegram</a>
+          <a class="whatsapp" href="https://whatsapp.com/channel/0029VadgCTH0QeamMlpEvX0x" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="tryAgainBtn" type="button">Try Again</button>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button class="btn danger test-reset" id="resetBtn" type="button">Reset Test Registration</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  (() => {
+    const APP_VERSION = "v0.3";
+    const INSTALL_ID_KEY = "ambulance_ios_install_id";
+    const TEST_HOST = "ios-gate-test.niwashibase.com";
+    const isTestHost = location.hostname === TEST_HOST || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+    if (isTestHost) document.body.classList.add("is-test");
+
+    const views = ["loadingView", "choiceView", "staffView", "otherView", "lockedView"];
+    const subtitle = document.getElementById("subtitle");
+    const loadingText = document.getElementById("loadingText");
+    const staffError = document.getElementById("staffError");
+    const otherError = document.getElementById("otherError");
+    const tryAgainBtn = document.getElementById("tryAgainBtn");
+
+    function show(id) {
+      views.forEach((viewId) => document.getElementById(viewId).classList.toggle("hidden", viewId !== id));
+    }
+
+    function showError(el, message) {
+      el.textContent = message || "Something went wrong. Please try again.";
+      el.classList.add("show");
+    }
+
+    function clearError(el) {
+      el.textContent = "";
+      el.classList.remove("show");
+    }
+
+    function installId() {
+      let id = localStorage.getItem(INSTALL_ID_KEY);
+      if (!id) {
+        id = crypto.randomUUID ? crypto.randomUUID() : `ios-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        localStorage.setItem(INSTALL_ID_KEY, id);
+      }
+      return id;
+    }
+
+    function deviceLabel() {
+      const ua = navigator.userAgent || "";
+      if (/iPad/i.test(ua)) return "iPad Ambulance App";
+      if (/iPhone/i.test(ua)) return "iPhone Ambulance App";
+      return "iOS Ambulance App";
+    }
+
+    function payload(extra = {}) {
+      return {
+        ...extra,
+        platform: "ios",
+        install_id: installId(),
+        app_version: APP_VERSION,
+        device_label: deviceLabel()
+      };
+    }
+
+    async function postJson(url, body) {
+      const res = await fetch(url, {
+        method: "POST",
+        credentials: "include",
+        cache: "no-store",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok && !data.reason_code) data.reason_code = `http_${res.status}`;
+      return data;
+    }
+
+    function launchApp() {
+      subtitle.textContent = "Opening the Ambulance App...";
+      show("loadingView");
+      loadingText.textContent = "Opening app...";
+      setTimeout(() => location.replace("/ambulance/"), 220);
+    }
+
+    function reasonMessage(reasonCode) {
+      switch (reasonCode) {
+        case "multiple_email_attempts":
+          return "Access is temporarily locked because multiple work emails were used on this device.\n\nPlease contact app support for assistance.";
+        case "access_revoked":
+        case "revoked":
+          return "Access for this device has been revoked by app support.\n\nPlease contact app support if you believe this needs review.";
+        case "locked_by_support":
+          return "Access is currently locked by app support.\n\nPlease contact app support for assistance.";
+        default:
+          return "Access for this device is currently locked.\n\nPlease contact app support for assistance.";
+      }
+    }
+
+    function showLocked(data) {
+      const reason = data?.reason_code || "";
+      const revoked = reason === "access_revoked" || reason === "revoked" || data?.status === "revoked";
+      document.getElementById("lockedTitle").textContent = revoked ? "Access Revoked" : "Access Locked";
+      document.getElementById("lockedMessage").textContent = reasonMessage(reason);
+      tryAgainBtn.classList.toggle("hidden", revoked);
+      subtitle.textContent = revoked ? "Access revoked" : "Access locked";
+      show("lockedView");
+    }
+
+    function showChoice() {
+      subtitle.textContent = "Registration required";
+      show("choiceView");
+    }
+
+    function handleGateResult(data) {
+      if (data?.status === "active") {
+        launchApp();
+        return;
+      }
+      if (data?.status === "locked" || data?.status === "revoked") {
+        showLocked(data);
+        return;
+      }
+      showChoice();
+    }
+
+    async function checkAccess() {
+      subtitle.textContent = "Checking your access...";
+      loadingText.textContent = "Checking access...";
+      show("loadingView");
+
+      try {
+        const session = await fetch("/gate/session-info", { credentials: "include", cache: "no-store" }).then((r) => r.json());
+        if (session.status === "active" && session.authenticated) {
+          launchApp();
+          return;
+        }
+      } catch (_) {}
+
+      try {
+        handleGateResult(await postJson("/gate/check", payload()));
+      } catch (_) {
+        subtitle.textContent = "Could not check access";
+        loadingText.textContent = "Check your connection and try again.";
+      }
+    }
+
+    function formObject(form) {
+      return Object.fromEntries(new FormData(form).entries());
+    }
+
+    document.getElementById("staffChoice").addEventListener("click", () => {
+      clearError(staffError);
+      subtitle.textContent = "Ambulance Staff registration";
+      show("staffView");
+    });
+
+    document.getElementById("otherChoice").addEventListener("click", () => {
+      clearError(otherError);
+      subtitle.textContent = "Other User registration";
+      show("otherView");
+    });
+
+    document.querySelectorAll("[data-back]").forEach((button) => {
+      button.addEventListener("click", showChoice);
+    });
+
+    document.getElementById("staffForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearError(staffError);
+      const btn = e.submitter;
+      btn.disabled = true;
+      try {
+        const data = await postJson("/gate/register-staff", payload(formObject(e.currentTarget)));
+        if (data.status === "active" || data.status === "locked" || data.status === "revoked") handleGateResult(data);
+        else showError(staffError, friendlyError(data));
+      } catch (_) {
+        showError(staffError, "Could not register. Check your connection and try again.");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("otherForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearError(otherError);
+      const btn = e.submitter;
+      btn.disabled = true;
+      try {
+        const data = await postJson("/gate/register-other", payload(formObject(e.currentTarget)));
+        if (data.status === "active" || data.status === "locked" || data.status === "revoked") handleGateResult(data);
+        else showError(otherError, friendlyError(data));
+      } catch (_) {
+        showError(otherError, "Could not register. Check your connection and try again.");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    function friendlyError(data) {
+      switch (data?.reason_code || data?.error_code || data?.error) {
+        case "invalid_email_domain":
+          return "Use your Hamad email address ending in @hamad.qa.";
+        case "invalid_email_username":
+          return "Use your personal Hamad email username, not a numeric-only email.";
+        case "invalid_role":
+          return "Select a valid role.";
+        case "missing_required_fields":
+          return "Fill in all required fields.";
+        case "invalid_email":
+          return "Enter a valid email address.";
+        default:
+          return "Registration could not be completed. Please check the details and try again.";
+      }
+    }
+
+    tryAgainBtn.addEventListener("click", checkAccess);
+
+    document.getElementById("resetBtn").addEventListener("click", async () => {
+      if (!isTestHost) return;
+      localStorage.removeItem(INSTALL_ID_KEY);
+      await fetch("/gate/logout", { method: "POST", credentials: "include", cache: "no-store" }).catch(() => {});
+      showChoice();
+    });
+
+    checkAccess();
+  })();
+  </script>
+</body>
+</html>

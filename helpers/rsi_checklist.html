@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<!--
+THIS FILE IS FOR THE AMBULANCE SHORTCUT USE ONLY - THE SHORTCUT WILL FETCH THIS FILE TO VIEW THE CHECKLIST.
+  CHANGELOG (2026-05-02):
+  - Updated the RSI checklist to v4.0.
+  - Added green highlighting for checked checkbox cells and their related checklist text cells.
+-->
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SOAPPPME</title>
+
+<style>
+#soapmetable {
+  font-family: Tahoma, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#soapmetable td, #soapmetable th {
+  border: 1px solid #000000;
+  padding: 8px;
+}
+
+#soapmetable tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#soapmetable th {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  text-align: center;
+  background-color: #A1A1A1;
+  color: black;
+}
+
+input[type="checkbox"] {
+  transform: scale(1.5);
+}
+
+#soapmetable .right-align {
+  text-align: right;
+  font-size: 23px;
+  font-weight:bold;
+}
+
+#soapmetable .left-align {
+  text-align: left;
+  font-size: 23px;
+  font-weight:bold;
+}
+
+#soapmetable2 {
+  font-family: Tahoma, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 50px;
+}
+
+#soapmetable2 td, #soapmetable2 th {
+  border: 1px solid #000000;
+  padding: 8px;
+}
+
+#soapmetable2 tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#soapmetable2 th {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  font-size: 25px;
+  text-align: center;
+  background-color: #A1A1A1;
+  color: black;
+}
+
+#soapmetable2 .right-align {
+  text-align: right;
+  font-size: 18px;
+}
+
+#soapmetable2 .left-align {
+  text-align: left;
+  font-size: 18px;
+}
+
+    /* Screenshot-style RSI checklist update: keep checkboxes, add cleaner numbered badges */
+    .rsi-checklist-title{
+      font-family: Tahoma, sans-serif;
+      text-align:center;
+      font-size:36px;
+      font-weight:900;
+      color:#263247;
+      margin: 10px 0 22px 0;
+      letter-spacing:.5px;
+    }
+
+    #soapmetable.rsi-checklist{
+      table-layout: fixed;
+      border: 2px solid #4c4c4c;
+    }
+    #soapmetable.rsi-checklist col.text-col-left{ width:47%; }
+    #soapmetable.rsi-checklist col.check-col{ width:3%; }
+    #soapmetable.rsi-checklist col.text-col-right{ width:47%; }
+
+
+    #soapmetable.rsi-checklist td,
+    #soapmetable.rsi-checklist th{
+      padding: 5px 6px;
+      border: 1px solid #4f4f4f;
+      line-height: 1.15;
+    }
+
+    #soapmetable.rsi-checklist .main-check-title{
+      font-size: 30px;
+      text-align:center;
+      background-color:#879bb8;
+      padding-top:8px;
+      padding-bottom:8px;
+      color:#111;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+
+    #soapmetable.rsi-checklist .section-check-title{
+      font-size: 18px;
+      text-align:center;
+      background-color:#bfbfbf;
+      color:#000;
+      font-weight:900;
+      padding-top:3px;
+      padding-bottom:3px;
+    }
+
+    #soapmetable.rsi-checklist .right-align,
+    #soapmetable.rsi-checklist .left-align{
+      font-size: 22px;
+      font-weight:700;
+      background-color:#eeeeee;
+    }
+
+    #soapmetable.rsi-checklist .right-align{ text-align:right; }
+    #soapmetable.rsi-checklist .left-align{ text-align:left; }
+
+    #soapmetable.rsi-checklist .check-cell{
+      width: 34px;
+      min-width:34px;
+      max-width:34px;
+      background:#ffffff !important;
+      text-align:center;
+      vertical-align:middle;
+      white-space:nowrap;
+      padding:2px 3px !important;
+    }
+
+    #soapmetable.rsi-checklist .check-number{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:2px;
+      cursor:pointer;
+      min-height:30px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #soapmetable.rsi-checklist .num-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:23px;
+      height:23px;
+      min-width:23px;
+      border-radius:50%;
+      background:linear-gradient(180deg,#7ed9ff,#10a7e5);
+      color:#071321;
+      border:1.5px solid #057eab;
+      font-size:13px;
+      font-weight:900;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 1px 2px rgba(0,0,0,.18);
+    }
+
+    #soapmetable.rsi-checklist .text-badge{
+      vertical-align:middle;
+      flex:0 0 auto;
+    }
+
+    #soapmetable.rsi-checklist .right-align .text-badge{
+      margin-left:6px;
+    }
+
+    #soapmetable.rsi-checklist .left-align .text-badge{
+      margin-right:6px;
+    }
+
+    #soapmetable.rsi-checklist .num-badge.orange{
+      background:linear-gradient(180deg,#ffb15c,#ff7a1a);
+      border-color:#bd4d00;
+      color:#111;
+      font-size:21px;
+      width:36px;
+      height:36px;
+      min-width:36px;
+      vertical-align:middle;
+    }
+
+    /* iPhone/WebApp-safe custom checkbox: native checkbox hidden, visual box drawn with CSS */
+    #soapmetable.rsi-checklist .check-number input[type="checkbox"]{
+      position:absolute;
+      opacity:0;
+      width:1px;
+      height:1px;
+      margin:0;
+      padding:0;
+      pointer-events:none;
+    }
+
+    #soapmetable.rsi-checklist .check-box{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:18px;
+      height:18px;
+      min-width:18px;
+      border:1.6px solid #304050;
+      border-radius:4px;
+      background:#ffffff;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.16), 0 1px 1px rgba(255,255,255,.65);
+      position:relative;
+      box-sizing:border-box;
+    }
+
+    #soapmetable.rsi-checklist .check-number input[type="checkbox"]:checked + .check-box{
+      background:#16a34a;
+      border-color:#087b31;
+    }
+
+    #soapmetable.rsi-checklist .check-number input[type="checkbox"]:checked + .check-box::after{
+      content:"";
+      position:absolute;
+      left:5px;
+      top:2px;
+      width:5px;
+      height:9px;
+      border:solid #ffffff;
+      border-width:0 2px 2px 0;
+      transform:rotate(45deg);
+    }
+
+    /* Done state: the checked box cell + its related text cell turn green.
+       JS below adds .is-done for iPhone/WebView compatibility. */
+    #soapmetable.rsi-checklist .check-cell.is-done,
+    #soapmetable.rsi-checklist .text-cell.is-done{
+      background:#bff3c7 !important;
+      color:#064d1f !important;
+    }
+
+    #soapmetable.rsi-checklist .check-cell.is-done{
+      box-shadow: inset 0 0 0 9999px rgba(20, 150, 60, .08);
+    }
+
+    #soapmetable.rsi-checklist .text-cell.is-done{
+      font-weight:900;
+    }
+
+    #soapmetable.rsi-checklist .check-number input[type="checkbox"]:checked + .check-box{
+      background:#16a34a;
+      border-color:#087b31;
+    }
+
+    #soapmetable.rsi-checklist .countdown-title,
+    #soapmetable.rsi-checklist .post-title{
+      background-color:#879bb8;
+      font-size:30px;
+    }
+
+    #soapmetable.rsi-checklist .countdown-row td.text-cell{
+      background-color:#b8cdec !important;
+    }
+
+    #soapmetable.rsi-checklist .post-row td.text-cell{
+      background-color:#92dff3 !important;
+    }
+
+    /* Keep long Checklist 2 and 3 items on one line without shrinking the rest of the checklist */
+    #soapmetable.rsi-checklist .countdown-row td.text-cell,
+    #soapmetable.rsi-checklist .post-row td.text-cell{
+      font-size:16px;
+      white-space:nowrap;
+      letter-spacing:-0.2px;
+    }
+
+    @media (max-width: 760px){
+      #soapmetable.rsi-checklist .right-align,
+      #soapmetable.rsi-checklist .left-align{ font-size:18px; }
+      #soapmetable.rsi-checklist .main-check-title{ font-size:22px; }
+      #soapmetable.rsi-checklist .section-check-title{ font-size:15px; }
+      #soapmetable.rsi-checklist .check-cell{ width:32px; min-width:32px; max-width:32px; padding:1px !important; }
+      #soapmetable.rsi-checklist .num-badge{ width:21px; height:21px; min-width:21px; font-size:12px; }
+      #soapmetable.rsi-checklist .num-badge.orange{ width:30px; height:30px; min-width:30px; font-size:18px; }
+      #soapmetable.rsi-checklist .check-number{ gap:2px; min-height:32px; }
+      #soapmetable.rsi-checklist .check-box{ width:17px; height:17px; min-width:17px; border-radius:4px; }
+      #soapmetable.rsi-checklist .countdown-row td.text-cell,
+      #soapmetable.rsi-checklist .post-row td.text-cell{ font-size:14px; white-space:nowrap; letter-spacing:-0.35px; }
+    }
+
+  
+
+    /* Final override: checked step must always show green, even over original row colors.
+       When unchecked, JS removes .is-done and the original colors return automatically. */
+    #soapmetable.rsi-checklist td.check-cell.is-done,
+    #soapmetable.rsi-checklist td.text-cell.is-done,
+    #soapmetable.rsi-checklist tr.countdown-row td.text-cell.is-done,
+    #soapmetable.rsi-checklist tr.post-row td.text-cell.is-done{
+      background-color:#bff3c7 !important;
+      background:#bff3c7 !important;
+      color:#064d1f !important;
+    }
+
+    #soapmetable.rsi-checklist td.check-cell.is-done{
+      background-color:#bff3c7 !important;
+      background:#bff3c7 !important;
+    }
+
+</style>
+
+</head>
+<body>
+<h1 style="color: black; background-color: #FFFFFF; text-align: center; font-size: 30px; font-family: Tahoma, sans-serif; font-weight: bold;padding: 18px;">RSI Checklist</h1>
+
+<div class="rsi-checklist-title">RSI CHECKLISTS</div>
+<table id="soapmetable" class="rsi-checklist">
+  <colgroup>
+    <col class="text-col-left">
+    <col class="check-col">
+    <col class="check-col">
+    <col class="text-col-right">
+  </colgroup>
+  <tr>
+    <th colspan="4" class="main-check-title">CHECKLIST <span class="num-badge orange">1</span> : Pre RSI - SOAPPPME</th>
+  </tr>
+  <tr><th colspan="4" class="section-check-title">SUCTIONING √</th></tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">Tubing attached <span class="num-badge text-badge">1</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">3</span> Yankaeur placed under (R) shoulder</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">System tested <span class="num-badge text-badge">2</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">4</span> Consider multiple suction units</td>
+  </tr>
+  <tr><th colspan="4" class="section-check-title">OXYGENATION √</th></tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">Nasal Oxygen <span class="num-badge text-badge">1</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">4</span> BVM & OPA</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">NRM <span class="num-badge text-badge">2</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">5</span> Inline EtCO₂</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">CPAP/BiPAP <span class="num-badge text-badge">3</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">6</span> O₂ cylinders open</td>
+  </tr>
+  <tr><th colspan="4" class="section-check-title">AIRWAY √</th></tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">Standard Laryngoscope & Blades <span class="num-badge text-badge">1</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">6</span> Gastric tube</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">McGrath & Blades <span class="num-badge text-badge">2</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">7</span> Front Of Neck Airway Kit</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">Gliderite & Bougie <span class="num-badge text-badge">3</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">8</span> Syringes attached</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">Primary & Alternate ETT sizes <span class="num-badge text-badge">4</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">9</span> Tube holder</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">Supraglottic Airway sized <span class="num-badge text-badge">5</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">10</span> Laryngoscopy plans A, B & C</td>
+  </tr>
+  <tr><th colspan="4" class="section-check-title">POSITION √</th></tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">Preoxygenation position optimized <span class="num-badge text-badge">1</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">2</span> Intubation position optimized</td>
+  </tr>
+  <tr><th colspan="4" class="section-check-title">PHYSIOLOGY √</th></tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">Preoxygenation optimized <span class="num-badge text-badge">1</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">3</span> Saturation end point</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">Hemodynamics optimized <span class="num-badge text-badge">2</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">4</span> MAP range</td>
+  </tr>
+  <tr><th colspan="4" class="section-check-title">PHARMACY √</th></tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">Bilateral IVs <span class="num-badge text-badge">1</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">5</span> Ketamine dose</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">IVs patent <span class="num-badge text-badge">2</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">6</span> Rocuronium dose</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">IV fluid preload <span class="num-badge text-badge">3</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">7</span> Phenylephrine dose</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">Fentanyl dose <span class="num-badge text-badge">4</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">8</span> Adrenaline dose IV & IM</td>
+  </tr>
+  <tr><th colspan="4" class="section-check-title">MONITORING √</th></tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">ETCO₂ <span class="num-badge text-badge">1</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">4</span> Manual BP cuff</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">SpO₂ <span class="num-badge text-badge">2</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">5</span> 4/12 Leads</td>
+  </tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">NIBP <span class="num-badge text-badge">3</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">6</span> Pads</td>
+  </tr>
+  <tr><th colspan="4" class="section-check-title">EMERGENCY OTHER √</th></tr>
+  <tr>
+    <td style="width:45%;" class="right-align text-cell">Ventilator system tested <span class="num-badge text-badge">1</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">2</span> Ventilation parameters optimized</td>
+  </tr>
+  <tr>
+    <th colspan="4" class="main-check-title countdown-title">CHECKLIST <span class="num-badge orange">2</span> : Per RSI - 60 SECONDS COUNTDOWN</th>
+  </tr>
+  <tr class="countdown-row">
+    <td style="width:45%;" class="right-align text-cell">Nasal Cannula @ 15l/min <span class="num-badge text-badge">1</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">5</span> Commence progressive laryngoscopy & intubation</td>
+  </tr>
+  <tr class="countdown-row">
+    <td style="width:45%;" class="right-align text-cell">Ensure pharyngeal patency <span class="num-badge text-badge">2</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">6</span> Call out O₂ Sats, HR, Pulse Character, MAP, ECG</td>
+  </tr>
+  <tr class="countdown-row">
+    <td style="width:45%;" class="right-align text-cell">Acknowledge ETCO₂ change & Apnea Alarm <span class="num-badge text-badge">3</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">7</span> Cycle NIBP after 60 secs , call out SBP, DP & MAP</td>
+  </tr>
+  <tr class="countdown-row">
+    <td style="width:45%;" class="right-align text-cell">Connect Inline ETCO₂ once apnea is confirmed <span class="num-badge text-badge">4</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">8</span> ETT placement: Direct visual, ETCO₂ waves X 5, A/E</td>
+  </tr>
+  <tr>
+    <th colspan="4" class="main-check-title post-title">CHECKLIST <span class="num-badge orange">3</span> : POST INTUBATION</th>
+  </tr>
+  <tr class="post-row">
+    <td style="width:45%;" class="right-align text-cell">20-30 degree head up stretcher position <span class="num-badge text-badge">1</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">6</span> Inline nebulizer attached if applicable</td>
+  </tr>
+  <tr class="post-row">
+    <td style="width:45%;" class="right-align text-cell">Continuous waveform capnography <span class="num-badge text-badge">2</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">7</span> Inline Suction catheter attached</td>
+  </tr>
+  <tr class="post-row">
+    <td style="width:45%;" class="right-align text-cell">ETT depth, secured well but not kinked <span class="num-badge text-badge">3</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">8</span> Naso/Orogastric tube inserted</td>
+  </tr>
+  <tr class="post-row">
+    <td style="width:45%;" class="right-align text-cell">ETT cuff pressure optimal <span class="num-badge text-badge">4</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">9</span> Plan for High & Low-pressure ventilator alarms</td>
+  </tr>
+  <tr class="post-row">
+    <td style="width:45%;" class="right-align text-cell">Post RSI sedation/Paralysis <span class="num-badge text-badge">5</span></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td class="check-cell"><label class="check-number"><input type="checkbox"><span class="check-box" aria-hidden="true"></span></label></td>
+    <td style="width:45%;" class="left-align text-cell"><span class="num-badge text-badge">10</span> Plan for ventilator failure</td>
+  </tr>
+</table>
+
+<table id="soapmetable2">
+<tr>
+    <th colspan="5" style="font-size: 20px; text-align:center;background-color: #8ED34E;  padding-top: 10px; padding-bottom: 10px;"> Medication Dosing : Adjust doses according to hemodynamic stability, Shock Index, Age & Co-morbidities
+    </th>
+  </tr>
+
+  <tr>
+    <td rowspan="2" style="width:25%;background-color: #CADFB7; font-size:21px;font-weight:bold"> SHOCK INDEX (SI)</td>
+    <td rowspan="2" style="width:10%; font-size:21px;font-weight:bold">MEDICATION</td>
+    <td style="width:25%; font-size:21px;font-weight:bold"> PRIMARY DOSE REGIMEN</td>
+    <td colspan="2" style="width:40%; font-size:21px;font-weight:bold"> SECONDARY DOSE REGIMEN </td>
+  </tr>
+
+  <tr>
+    <td style="width:25%; font-size:16px;font-weight:bold"> Intravenous Push (IVP) <br> Intra-venous/osseous Infusion (IV/IO INF) </td>
+    <td style="width:20%; font-size:16px;font-weight:bold"> Intravenous Push (IVP) </td>
+    <td style="width:20%; font-size:16px;font-weight:bold">Intra-venous/osseous Infusion (IV/IO INF) </td>
+  </tr>
+
+  <tr>
+    <td rowspan="3" style="width:25%;background-color: #CADFB7;font-size:16px;font-weight:bold"> HR/SBP = SI <br>Normal SI = &lt; 0.7 <br> SI > 0.8 Predicts Post RSI Crash <br> Optimize Resuscitation </td>
+    <td style="width:10%;background-color: #A7C6ED;font-size:18px;font-weight:bold">Fentanyl</td>
+    <td style="width:25%;background-color: #A7C6ED;font-size:18px;font-weight:bold"> INF: 1 mcg/kg Ideal Body Weight </td>
+    <td style="width:20%;background-color: #A7C6ED;font-size:18px;font-weight:bold"> IVP: 0.5mcg/kg </td>
+    <td style="width:20%;background-color: #A7C6ED;font-size:18px;font-weight:bold"> IV/IO INF: 1-10 mcg/kg/hr </td>
+  </tr>
+
+  <tr>
+    <td style="width:10%;background-color: #FFFF54;font-size:18px;font-weight:bold">Ketamine</td>
+    <td style="width:25%;background-color: #FFFF54;font-size:18px;font-weight:bold"> IVP: 1 to 2 mg/kg Ideal Body Weight </td>
+    <td style="width:20%;background-color: #FFFF54;font-size:18px;font-weight:bold"> IVP: 0.5 mg/kg </td>
+    <td style="width:20%;background-color: #FFFF54;font-size:18px;font-weight:bold"> IV/IO INF: 0.01-0.05mg/kg/min </td>
+  </tr>
+
+  <tr>
+    <td style="width:10%;background-color: #E5757B;font-size:18px;font-weight:bold">Rocuronium</td>
+    <td style="width:25%;background-color: #E5757B;font-size:18px;font-weight:bold"> IVP: 1.5 mg/kg Total Body Weight </td>
+    <td style="width:20%;background-color: #E5757B;font-size:18px;font-weight:bold"> IVP: 0.25 mg/kg </td>
+    <td style="width:20%;background-color: #E5757B;font-size:18px;font-weight:bold"> NOT for continuous infusion </td>
+  </tr>
+
+</table>
+
+<h6 style="color: black; text-align: right; font-size: 18px; font-family: Tahoma, sans-serif; font-weight: bold;margin-right:15px;margin-top:10px">Version 4.0</h6>
+
+
+<script>
+  // Done highlighting.
+  // Left checkbox highlights the text cell on its left.
+  // Right checkbox highlights the text cell on its right.
+  (function(){
+    function relatedTextCell(checkCell){
+      if (!checkCell || !checkCell.parentElement) return null;
+      if (checkCell.cellIndex === 1) return checkCell.previousElementSibling;
+      if (checkCell.cellIndex === 2) return checkCell.nextElementSibling;
+      return null;
+    }
+
+    function syncCheckCell(input){
+      const checkCell = input.closest('.check-cell');
+      const textCell = relatedTextCell(checkCell);
+      if (!checkCell || !textCell) return;
+      checkCell.classList.toggle('is-done', input.checked);
+      textCell.classList.toggle('is-done', input.checked);
+    }
+
+    const inputs = document.querySelectorAll('#soapmetable.rsi-checklist .check-cell input[type="checkbox"]');
+
+    inputs.forEach(function(input){
+      syncCheckCell(input);
+      input.addEventListener('change', function(){ syncCheckCell(input); });
+    });  })();
+</script>
+
+<script>
+(function() {
+  function updateDoneState(input) {
+    var checkCell = input.closest('td.check-cell');
+    if (!checkCell) return;
+
+    var row = checkCell.parentElement;
+    var cells = Array.prototype.slice.call(row.children);
+    var index = cells.indexOf(checkCell);
+    var relatedTextCell = null;
+
+    if (index === 1) relatedTextCell = cells[0];
+    if (index === 2) relatedTextCell = cells[3];
+
+    checkCell.classList.toggle('is-done', input.checked);
+    if (relatedTextCell) relatedTextCell.classList.toggle('is-done', input.checked);
+  }
+
+  document.querySelectorAll('#soapmetable.rsi-checklist input[type="checkbox"]').forEach(function(input) {
+    updateDoneState(input);
+    input.addEventListener('change', function() { updateDoneState(input); });
+  });
+})();
+</script>
+
+</body>
+</html>

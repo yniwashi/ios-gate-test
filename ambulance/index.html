@@ -1,0 +1,1796 @@
+<!--
+  CHANGELOG (2026-05-29):
+  - Add Charlie modal with introduction video, description, and Discord/Telegram links.
+  - Add Charlie pill button on the home screen next to Updates to reopen the modal anytime.
+  - Add "Meet Charlie" button to the What's New modal so users flow directly to the Charlie modal on first open.
+  - Bump WHATS_NEW_KEY to amb_whats_new_v04 to re-show the updated modal to all users.
+
+  CHANGELOG (2026-05-18):
+  - Make Stay Connected App-mode only and keep CPG sending CPG Wizard to Shortcuts.
+  - Add AS-Call to App mode using the shared docs helper and preload it when the app opens.
+  - Add a home-screen pull-down refresh gesture for the Ambulance App.
+  - Use the SOP manage_search icon for the CPG home button.
+  - Use the same home button icon for SOP and CPG.
+  - Rename the home CPG Wizard button to CPG while keeping CPG Wizard as a search alias.
+  - Fix main search keyboard dismissal so typing does not blur the input.
+  - Enlarge main search icon/text, dismiss the keyboard on page scroll, and bump assets for CPG/SOP search icons.
+  - Bump ASSET_VERSION for CPG/SOP Clear button placement update.
+  - Set main search placeholder to "Search..." and move the longer search hint below the box.
+  - Bump ASSET_VERSION for CPG/SOP hint placement and version-pill color updates.
+
+  CHANGELOG (2026-05-17):
+  - Bump ASSET_VERSION for CPG Wizard and SOP search UI updates.
+  - Make ASSET_VERSION shared-module loading lazy so the home tool grid renders even if helper modules are slow or unavailable.
+  - Add hidden ASSET_VERSION cache key for app-owned JavaScript updates.
+  - Load shared search/websites modules with ASSET_VERSION and expose them to tools.
+  - Warm shared Websites helper and remote website icons when the app opens.
+
+  CHANGELOG (2026-05-16):
+  - Add shared weighted search modules for global, CPG, and SOP search.
+  - Add CPM index and CPM PDF support to main/global search.
+  - Preload and cache CPG/SOP/CPM/formulary/flowchart helper data when the app opens.
+  - Update main search placeholder copy and keep placeholder text compact.
+
+  CHANGELOG (2026-05-02):
+  - Update What's New modal copy for CPG v2.5, SOP v4.4, and Global Search.
+  - Add APP_VERSION placeholder for release updates.
+  - Show APP_VERSION beside the app title.
+  - Warm helper JSON, document modules, and CPG/SOP PDF viewers after startup.
+  - Add RSI Checklist v4.0 note to What's New.
+
+  CHANGELOG (2026-05-01):
+  - Add home-screen global search below Updates.
+  - Search app tools, CPG index, flowcharts, and formulary helper JSONs.
+  - Open CPG/formulary/flowchart results directly in an in-app PDF modal.
+  - Keep search results active behind opened tools/PDFs so Back returns to results.
+  - Include every home-screen button in global search results.
+  - Hide global search while Shortcuts Mode is enabled.
+  - Make Enter and result scrolling dismiss the keyboard instead of opening a result.
+  - Add SOP module and include SOP index results in global search.
+
+  CHANGELOG (2026-01-15):
+  - Fix tool history to ensure home -> tool uses a real history entry.
+  - Remove stray modal flag text accidentally rendered after </html>.
+
+  CHANGELOG (2026-01-05):
+  Messaging overview / mini-readme:
+  1. Terms & Conditions Gate
+     - HTML block near the top (#tacGate) that remains hidden until JS shows it.
+       JS wires Agree/Cancel; consent lives in localStorage key TAC_KEY ("amb_tac_v2").
+       Bump TAC_KEY and update the gate copy whenever Terms change. Cancel replaces the
+       entire body with a reminder and closes the app a moment later.
+
+  2. Shortcuts Mode block
+     - Static header + description + toggle. The JS `toggle` element determines whether
+       Shortcuts Mode is active; this drives button behavior, the News card visibility,
+       the Shortcuts banner, and can be read elsewhere (render()) to branch per mode.
+
+  3. Shortcuts download banner
+     - `#scBanner` remains hidden until render() decides to show it (current logic:
+       only when Shortcuts Mode is enabled and SHOW_SHORTCUTS_BANNER isn’t false).
+       Update the CTA by changing SHORTCUT_DOWNLOAD_URL (links the Download button)
+       and the copy inside the HTML block as needed.
+
+  4. News card (`NEWS_MESSAGE`)
+     - Inline card that lives under Shortcuts Mode. Controlled by:
+         SHOW_NEWS: master toggle.
+         NEWS_DISMISSED_KEY: bump string to re-show after users dismiss.
+         NEWS_MESSAGE: template HTML-keep IDs for download/settings/close if you want
+           the existing event handlers. Card only appears when Shortcuts Mode is on,
+           SHOW_NEWS is true, message isn’t empty, and the dismissal key hasn’t been set.
+
+  5. What’s New modal
+     - Centered overlay defined near the bottom of the HTML. Controlled by:
+         WHATS_NEW_ENABLED: disable in emergencies without removing markup.
+         WHATS_NEW_KEY: bump whenever you change release notes to force a re-show.
+         WHATS_NEW_TARGET: "default", "shortcuts", or "both" to limit which mode sees it.
+         WHATS_NEW_MESSAGE: HTML body inserted into the modal.
+       The overlay locks scroll and tracks dismissals in localStorage; clicking outside,
+       pressing ESC, or tapping Close stores the key so it stays hidden until you bump it.
+       The “Updates” pill under Shortcuts Mode simply clears that key so you can preview
+       the latest message on demand.
+
+  Keep the comment blocks near each config in sync when adding or revising announcements.
+-->
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Ambulance</title>
+
+  <!-- Webclip / PWA friendliness -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Theme color for light/dark -->
+  <meta id="theme-color" name="theme-color" content="#0f1115" />
+  <script>
+    (function () {
+      var prefersDark = matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+      var el = document.querySelector('meta[name="theme-color"]');
+      if (el) el.setAttribute('content', prefersDark ? '#0f1115' : '#f7f9fc');
+    })();
+  </script>
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f9fc">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#0f1115">
+
+  <!-- Material Symbols Rounded (filled) -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0" rel="stylesheet">
+
+  <style>
+    :root{ --radius:12px; --speed:.22s; --shadow:0 8px 18px rgba(0,0,0,.28); --shadow-2:0 12px 28px rgba(0,0,0,.35); --gap:8px }
+    @media (prefers-color-scheme: light){ :root{
+      --bg:#f7f9fc; --surface:#ffffff; --border:#e7ecf3; --text:#0c1230; --muted:#616b86;
+      --accent:#1f6fff; --accent-2:#19b36b; --surface-2:#f1f5fb;
+    }}
+    @media (prefers-color-scheme: dark){ :root{
+      --bg:#0f1115; --surface:#171a21; --border:#232a37; --text:#eef2ff; --muted:#9aa6c3;
+      --accent:#2f81f7; --accent-2:#20c385; --surface-2:#12151c;
+    }}
+    [data-theme="light"]{ --bg:#f7f9fc; --surface:#ffffff; --border:#e7ecf3; --text:#0c1230; --muted:#616b86; --accent:#1f6fff; --accent-2:#19b36b; --surface-2:#f1f5fb }
+    [data-theme="dark"] { --bg:#0f1115; --surface:#171a21; --border:#232a37; --text:#eef2ff; --muted:#9aa6c3; --accent:#2f81f7; --accent-2:#20c385; --surface-2:#12151c }
+
+    html,body{height:100%}
+    body{
+      margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,system-ui,Arial,sans-serif;
+      background:var(--bg); color:var(--text); -webkit-tap-highlight-color:transparent;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+    .wrap{max-width:980px; margin:0 auto; padding:12px clamp(8px,4vw,16px) 18px; display:flex; flex-direction:column; gap:10px}
+
+    /* Topbar */
+    .topbar{display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .brand{display:flex; align-items:center; gap:2px}
+    .logo{ width:50px; height:50px; object-fit:contain; border-radius:6px; transform:scaleX(-1) }
+    .brand-title{display:flex; align-items:baseline; gap:7px; min-width:0}
+    .title{ margin:0; font-size:clamp(20px,3.8vw,26px); font-weight:800; letter-spacing:.25px }
+    .app-version{font-size:11px;font-weight:850;color:var(--muted);letter-spacing:.02em;white-space:nowrap}
+    .theme-toggle{background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:4px 10px; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text)}
+    .theme-toggle select{appearance:none; background:transparent; border:none; color:inherit; font:inherit; outline:none; cursor:pointer}
+
+/* News container */
+.news{
+  display:none;
+  background:linear-gradient(180deg,rgba(47,129,247,.10),rgba(47,129,247,.05));
+  border:1px solid color-mix(in oklab, var(--accent) 35%, transparent);
+  color:color-mix(in oklab, var(--text) 90%, var(--accent));
+  padding:8px 10px;             /* was 10px 12px */
+  border-radius:12px;
+  line-height:1.32;              /* slightly tighter */
+  animation:fadeIn .22s ease-out both;
+  box-shadow:0 4px 12px rgba(0,0,0,.08); /* subtle depth, small */
+}
+
+/* Slightly faster/lighter animation */
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(-3px)}
+  to  {opacity:1; transform:none}
+}
+
+/* Compact card content */
+.news-compact{display:block; font-size:13px}
+
+/* Header row with dismiss */
+.news-row{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  margin-bottom:4px;
+}
+.news-x{
+  appearance:none; border:none; background:transparent;
+  color:var(--muted);
+  font:800 16px/1 system-ui; cursor:pointer;
+  padding:4px 6px; border-radius:8px;
+  transition:background .15s ease, opacity .15s ease;
+}
+.news-x:hover{ background:var(--surface-2); opacity:.9 }
+
+/* Steps list */
+.news-steps{ margin:6px 0; padding-left:18px }
+.news-steps li{ margin:2px 0 }
+
+/* Red alert note */
+.news-note{ margin:6px 0 6px }
+.news-note .warn{ color:#c62828; font-weight:800 }
+
+/* Buttons row */
+.news-actions{
+  display:flex; gap:8px; flex-wrap:wrap; margin-top:4px
+}
+
+/* Make the buttons a touch smaller inside the news card only */
+.news .btn{
+  padding:7px 10px;              /* was 8px 12px globally */
+  font-size:12.5px;              /* slightly smaller */
+  box-shadow:0 3px 10px rgba(0,0,0,.10);
+}
+
+/* Optional: compact <details> help block if you use it */
+.news-help{ margin-top:4px }
+.news-help summary{
+  cursor:pointer; font-weight:700; list-style:none; outline:none;
+}
+.news-help summary::-webkit-details-marker{ display:none }
+.news-help summary::after{
+  content:"›"; font-weight:900; margin-left:6px; display:inline-block; transform:rotate(90deg);
+}
+.news-help[open] summary::after{ transform:rotate(270deg) }
+.news-help ul{ margin:6px 0 0 18px }
+.news-help li{ margin:2px 0 }
+
+/* Tiny-screen tweaks */
+@media (max-width:380px){
+  .news{ padding:8px }                    /* tighter padding */
+  .news-compact{ font-size:12.5px }       /* shrink text slightly */
+  .news .btn{ padding:6px 9px; font-size:12px }
+}
+
+
+    /* Shortcuts mode row */
+    .row{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .copy{display:flex; flex-direction:column; gap:3px}
+    .copy .t{margin:0; font-size:15px; font-weight:600}
+    .copy .s{margin:0; font-size:12px; color:var(--muted)}
+    .toggle{position:relative; width:56px; height:30px; flex:none}
+    .toggle input{opacity:0; width:0; height:0}
+    .rail{position:absolute; inset:0; border-radius:999px; background:var(--surface-2); border:1px solid var(--border); transition:background var(--speed), border var(--speed)}
+    .knob{position:absolute; left:3px; top:3px; width:24px; height:24px; border-radius:50%; background:linear-gradient(180deg,#fff,#e7ecff);
+      box-shadow:0 2px 6px rgba(0,0,0,.28); transition:transform var(--speed)}
+    .toggle input:checked + .rail{background:linear-gradient(180deg,var(--accent-2),#0ea76a); border-color:color-mix(in oklab, var(--accent-2) 60%, var(--border))}
+    .toggle input:checked + .rail .knob{transform:translateX(26px)}
+
+    /* Global search */
+    .global-search{position:relative; display:flex; flex-direction:column; gap:6px}
+    .global-search-box{
+      background:var(--surface); border:1px solid var(--border); border-radius:12px;
+      display:flex; align-items:center; gap:10px; padding:11px 12px;
+      box-shadow:0 4px 12px rgba(0,0,0,.08);
+    }
+    .global-search-box .material-symbols-rounded{font-size:26px; color:var(--muted); flex:none}
+    .global-search-box input{
+      min-width:0; flex:1; border:0; outline:0; background:transparent; color:var(--text);
+      font:700 17px/1.25 system-ui; appearance:none;
+    }
+    .global-search-box input::placeholder{color:var(--muted); font-weight:650; font-size:16px}
+    .global-search-hint{font-size:11px;color:var(--muted);font-weight:750;line-height:1.35;padding:0 4px}
+    .global-search-clear{
+      appearance:none; border:0; background:var(--surface-2); color:var(--muted);
+      width:28px; height:28px; border-radius:999px; font:900 16px/1 system-ui;
+      display:none; align-items:center; justify-content:center; cursor:pointer;
+    }
+    .global-search-clear.show{display:flex}
+    .global-results{
+      display:none; background:var(--surface); border:1px solid var(--border); border-radius:12px;
+      overflow:hidden; box-shadow:0 10px 24px rgba(0,0,0,.18);
+    }
+    .global-results.show{display:block}
+    .gs-result{
+      width:100%; appearance:none; border:0; border-bottom:1px solid var(--border);
+      background:transparent; color:var(--text); padding:10px 12px; text-align:left;
+      display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer;
+    }
+    .gs-result:last-child{border-bottom:0}
+    .gs-result:active{background:var(--surface-2)}
+    .gs-main{min-width:0; display:flex; flex-direction:column; gap:3px}
+    .gs-title{font-size:14px; font-weight:850; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+    .gs-sub{font-size:12px; color:var(--muted); line-height:1.25}
+    .gs-badge{
+      flex:none; color:var(--accent); background:color-mix(in oklab,var(--accent) 12%,var(--surface));
+      border:1px solid color-mix(in oklab,var(--accent) 30%,transparent);
+      border-radius:999px; padding:4px 8px; font-size:11px; font-weight:850;
+    }
+    body.global-search-active #news,
+    body.global-search-active .row,
+    body.global-search-active .updates-cta,
+    body.global-search-active #scBanner,
+    body.global-search-active #sections{display:none!important}
+    body.shortcuts-mode-on #globalSearch{display:none!important}
+
+    /* Sections */
+    .sections{display:flex; flex-direction:column; gap:8px}
+    .section{display:flex; flex-direction:column; gap:4px}
+    .section-head{ display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; padding:4px 2px 0 }
+    .section-head::after{content:""; height:1px; background:var(--border); flex:1}
+
+    /* Grid & buttons */
+    .grid{display:grid; gap:8px; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); grid-auto-flow:dense}
+    @media (orientation:landscape){ .grid{ grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); } }
+    .btn{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-decoration:none; color:var(--btn-fg,#fff); border-radius:12px; padding:10px 10px; min-height:72px; font-size:13px; font-weight:800; letter-spacing:.2px; text-align:center; box-shadow:var(--shadow); transition:transform var(--speed), box-shadow var(--speed), filter var(--speed)}
+    .btn:hover{ transform:translateY(-2px); box-shadow:var(--shadow-2) }
+    .btn:active{ transform:translateY(0) scale(.98) }
+    .label{ opacity:.98; line-height:1.12 }
+    .community-icon{ width:64px; height:64px; display:block; object-fit:contain }
+
+    /* Per-button fg overrides */
+    #cpr,#rsi-checklist,#bwaafelss,#pediatric,#pediatrics,#estimated-weight,#gcs-score,#apgar-score,#flowcharts,#cpg-wizard,#sop-wizard,#hos,#websites{ --btn-fg:#fff }
+    #care-tools,#rbs-converter,#map-calculator,#as-call{ --btn-fg:#000 }
+
+    /* Button gradients */
+    .btn-cpr{background:linear-gradient(180deg,#ff5757,#e23b3b)}
+    .btn-rsi{background:linear-gradient(180deg,#0D5BB5,#0D3AB5)}
+    .btn-waafelss{background:linear-gradient(180deg,#D660C6,#D936BE)}
+    .btn-ccp{background:linear-gradient(180deg,#9F9FB5,#81818F)}
+    .btn-ap{background:linear-gradient(180deg,#4DB3FF,#0A96FA)}
+    .btn-caretools{background:linear-gradient(180deg,#FFB36B,#F78000)}
+    .btn-weight{background:linear-gradient(180deg,#C16FD9,#8E34BF)}
+    .btn-gcs{background:linear-gradient(180deg,#6BE65A,#1CCC0C)}
+    .btn-apgar{background:linear-gradient(180deg,#FF94EB,#FF5CE2)}
+    .btn-sat{background:linear-gradient(180deg,#FFBE82,#FF8A00)}
+    .btn-flowcharts{background:linear-gradient(180deg,#66D9FF,#00B3FF)}
+    .btn-rbs{background:linear-gradient(180deg,#FFF9A6,#FFF200)}
+    .btn-cpg{background:linear-gradient(180deg,#7AEB7A,#02C202)}
+    .btn-sop{background:#FF4040}
+    .btn-map{background:linear-gradient(180deg,#FFAC75,#FF6600)}
+    .btn-ascall{background:linear-gradient(180deg,#FFEA94,#FFDB00)}
+    .btn-hos{background:linear-gradient(180deg,#577CE6,#003DEB)}
+    .btn-websites{background:linear-gradient(180deg,#64748b,#475569)}
+    .btn-westley{background:linear-gradient(180deg,#FFE26D,#FFC107); --btn-fg:#000}
+    .btn-overtime{background:linear-gradient(180deg,#4CAF50,#2E7D32); --btn-fg:#fff}
+    .btn-address{background:linear-gradient(180deg,#2FD7A7,#12A085); --btn-fg:#fff}
+    .btn-shifts{background:linear-gradient(180deg,#9AD9FF,#57B6FF); --btn-fg:#000}
+    .btn-meds{background:linear-gradient(180deg,#8EA4B8,#5E7A92); --btn-fg:#fff}
+    .btn-vent{background:linear-gradient(180deg,#7EC8FF,#3FA9FF); --btn-fg:#fff}
+    .btn-formulary{background:linear-gradient(180deg,#5EB0EF,#2684FF); --btn-fg:#fff}
+    .btn-community{background:linear-gradient(180deg,#24d366,#128c7e); --btn-fg:#fff}
+
+    /* Panel */
+    #panel{ position: fixed; inset: 0; background: transparent; z-index: 9999; }
+    #panel[hidden]{ display:none }
+    #panel-card{ position: relative; width: 100vw; height: 100dvh; overflow: auto; background: var(--bg); border: 0; border-radius: 0; box-shadow: 0 10px 30px rgba(0,0,0,.35); -webkit-overflow-scrolling: touch; transform: translateZ(0) translateX(0); transition: transform 300ms cubic-bezier(.22,.61,.36,1); will-change: transform; }
+    .panel-head{ position: sticky; top: 0; display: flex; align-items: center; gap: 10px; padding: calc(env(safe-area-inset-top) + 6px) 12px 8px 12px; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 1; }
+    .backbtn{ appearance: none; cursor: pointer; padding: 8px 12px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-weight: 800; font-size: 14px; }
+    .panel-title{ margin: 0; font-size: 15px; font-weight: 800 }
+    body.panel-open .wrap{ transition: transform 300ms ease, opacity 300ms ease; }
+
+    /* Shortcuts banner */
+    .sc-banner{display:none;background:linear-gradient(180deg,rgba(47,129,247,.08),rgba(47,129,247,.04));border:1px solid color-mix(in oklab,var(--accent) 30%,transparent);border-radius:12px;padding:10px;margin-top:8px}
+    .sc-row{display:flex;align-items:center;gap:10px}
+    .sc-thumb{ width:54px; height:54px; flex:0 0 54px; border-radius:14px; overflow:hidden; background:var(--surface); display:flex; align-items:center; justify-content:center; border:1px solid var(--border) }
+    .sc-thumb img{ width:100%; height:100%; object-fit:contain; object-position:center }
+    .sc-copy{flex:1 1 auto;min-width:0}
+    .sc-title{margin:0;font:800 14px/1.2 system-ui}
+    .sc-desc{margin:2px 0 0 0;font-size:12px;color:var(--muted)}
+    .sc-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+    .sc-badge{font-size:11px;font-weight:700;color:var(--text);background:color-mix(in oklab,var(--accent) 12%,var(--surface));border:1px dashed color-mix(in oklab,var(--accent) 35%,transparent);padding:4px 6px;border-radius:8px}
+    .sc-cta{flex:0 0 auto}
+    .sc-btn{appearance:none;text-decoration:none;cursor:pointer;padding:8px 12px;font:800 13px/1 system-ui;color:#fff;background:linear-gradient(180deg,var(--accent),#0D5BB5);border:1px solid color-mix(in oklab,var(--accent) 60%,transparent);border-radius:10px;box-shadow:var(--shadow)}
+    @media (max-width:420px){ .sc-desc{display:none} }
+
+    /* News rich content */
+    .news{white-space:normal}
+    .news h3{margin:0 0 6px 0;font-size:16px;font-weight:800}
+    .news p{margin:6px 0;font-size:14px;line-height:1.4}
+    .news a{color:var(--accent);font-weight:700;text-decoration:none;border-bottom:1px dotted color-mix(in oklab,var(--accent) 60%, transparent)}
+    .news a:hover{text-decoration:underline}
+    .news img, .news figure{display:block;max-width:100%;height:auto;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.18);margin:8px 0;border:1px solid var(--border)}
+    .news figure{padding:6px;background:var(--surface)}
+    .news figcaption{margin-top:4px;font-size:12px;color:var(--muted);text-align:center}
+    .news .btn{display:inline-block;padding:8px 12px;border-radius:10px;background:linear-gradient(180deg,var(--accent),#0D5BB5);color:#fff!important;border:1px solid color-mix(in oklab,var(--accent) 60%,transparent);font-weight:800;font-size:13px;text-decoration:none;box-shadow:var(--shadow);margin-top:6px}
+
+    /* What's New trigger */
+    .updates-cta{display:flex;justify-content:flex-start;gap:8px;margin:4px 0 2px}
+    .updates-btn{appearance:none;border:1px solid color-mix(in oklab,var(--accent) 40%,transparent);background:color-mix(in oklab,var(--accent) 12%,var(--surface));color:var(--accent);font:700 12px/1 system-ui;padding:6px 12px;border-radius:999px;cursor:pointer}
+    .updates-btn:hover{background:color-mix(in oklab,var(--accent) 18%,var(--surface));}
+    .charlie-btn{color:#C8935A;border-color:color-mix(in oklab,#C8935A 40%,transparent);background:color-mix(in oklab,#C8935A 12%,var(--surface))}
+    .charlie-btn:hover{background:color-mix(in oklab,#C8935A 18%,var(--surface))}
+
+    /* What's New modal */
+    .wn-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:color-mix(in oklab,var(--bg) 55%,#02050bed);backdrop-filter:blur(10px);z-index:99998}
+    .wn-card{width:min(540px,calc(100vw - 32px));background:var(--surface);color:var(--text);border-radius:20px;padding:24px 24px 20px;border:1px solid var(--border);box-shadow:0 28px 70px rgba(0,0,0,.45);position:relative;animation:wnpop .3s cubic-bezier(.16,.84,.44,1);max-height:92vh;overflow-y:auto}
+    .wn-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}
+    .wn-pill{margin:0;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:color-mix(in oklab,var(--accent) 16%,var(--surface));border:1px solid color-mix(in oklab,var(--accent) 38%,transparent);padding:6px 12px;border-radius:999px}
+    .wn-close{appearance:none;border:none;border-radius:999px;background:color-mix(in oklab,var(--surface-2, var(--surface)) 60%,var(--surface));color:var(--muted);font-size:13px;font-weight:700;padding:6px 12px;cursor:pointer}
+    .wn-close:hover{background:var(--surface-2);color:var(--text)}
+    .wn-title{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em}
+    .wn-body{font-size:14px;line-height:1.6;color:color-mix(in oklab,var(--text) 80%,var(--muted))}
+    .wn-body ul{padding-left:20px;margin:14px 0}
+    .wn-body li{margin:6px 0}
+    .wn-footer{margin:18px 0 0;font-size:13px;color:var(--muted)}
+    .wn-links{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+    .wn-link{flex:1 1 120px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;font:700 12px/1 system-ui;padding:10px;border-radius:12px;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.16)}
+    .wn-link img{width:36px;height:36px;object-fit:contain;margin-bottom:4px}
+    body.wn-open{overflow:hidden}
+    @keyframes wnpop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+
+    /* T&C Gate */
+    #tacGate{ position:fixed; inset:0; z-index:99999; display:none; background: color-mix(in oklab, var(--bg) 90%, #000); backdrop-filter: blur(6px) }
+    #tacCard{ position:absolute; left:50%; top:12vh; transform:translateX(-50%); width:min(640px, calc(100vw - 28px)); background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:14px; box-shadow:0 18px 48px rgba(0,0,0,.35); padding:14px }
+    #tacCard h2{ margin:0 0 6px 0; font-size:18px; font-weight:800 }
+    #tacCard p{ margin:8px 0; font-size:14px; line-height:1.45; color:var(--muted) }
+    #tacActions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px }
+    .tac-btn{ appearance:none; cursor:pointer; padding:10px 12px; border-radius:10px; font-weight:800; font-size:14px; border:1px solid var(--border); background:var(--surface-2); color:var(--text) }
+    .tac-btn.primary{ background:linear-gradient(180deg,var(--accent),#0D5BB5); color:#fff; border:1px solid color-mix(in oklab,var(--accent) 60%,transparent) }
+    .tac-link{ color:var(--accent); font-weight:800; text-decoration:none }
+
+    /* Pull refresh */
+    .pull-refresh{
+      position:fixed; left:50%; top:calc(env(safe-area-inset-top) + 8px);
+      z-index:99997; display:flex; align-items:center; gap:8px;
+      padding:8px 12px; border-radius:999px; border:1px solid var(--border);
+      background:color-mix(in oklab,var(--surface) 94%,transparent);
+      color:var(--text); box-shadow:var(--shadow); font:800 12px/1 system-ui;
+      opacity:0; pointer-events:none; transform:translate(-50%,-18px) scale(.96);
+      transition:opacity .16s ease, transform .16s ease;
+    }
+    .pull-refresh.show{opacity:1; transform:translate(-50%,0) scale(1)}
+    .pull-refresh .material-symbols-rounded{font-size:18px;color:var(--accent)}
+  </style>
+</head>
+<body>
+
+<div id="pullRefresh" class="pull-refresh" aria-hidden="true">
+  <span class="material-symbols-rounded" aria-hidden="true">refresh</span>
+  <span id="pullRefreshText">Pull to refresh</span>
+</div>
+
+<!-- Terms & Conditions Gate -->
+<section id="tacGate" aria-modal="true" role="dialog">
+  <div id="tacCard">
+    <h2>Terms & Conditions</h2>
+    <p>To use the <strong>Ambulance</strong> app, you must agree to our
+      <a class="tac-link" href="https://www.niwashibase.com/terms-conditions" target="_blank" rel="noopener">Terms &amp; Conditions</a>.
+    </p>
+    <div id="tacActions">
+      <button id="tacAgree" class="tac-btn primary">Agree & Continue</button>
+      <button id="tacCancel" class="tac-btn">Cancel</button>
+    </div>
+    <p style="margin-top:8px; font-size:12px; color:var(--muted)">
+      You can review the Terms anytime from the app menu.
+    </p>
+  </div>
+</section>
+
+<div class="wrap">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="brand">
+      <img class="logo" src="images/logo.png" alt="Ambulance Logo">
+      <div class="brand-title">
+        <h1 class="title">Ambulance</h1>
+        <span id="appVersionLabel" class="app-version"></span>
+      </div>
+    </div>
+    <div class="theme-toggle">
+      <span style="font-weight:600">Theme</span>
+      <select id="themeSelect" aria-label="Theme">
+        <option value="auto">Auto</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- News -->
+  <div id="news" class="news"></div>
+
+  <!-- Shortcuts Mode -->
+  <div class="row">
+    <div class="copy">
+      <p class="t">Shortcuts Mode</p>
+      <p class="s">Enable to run actions in the Shortcuts app. When off, items open in the Ambulance app and some features may be limited.</p>
+    </div>
+    <label class="toggle" aria-label="Toggle Shortcuts Mode">
+      <input id="mode" type="checkbox" />
+      <div class="rail"><div class="knob"></div></div>
+    </label>
+  </div>
+
+  <div class="updates-cta">
+    <button id="wnShowAgain" class="updates-btn" type="button">Updates</button>
+    <button id="charlieBtn" class="updates-btn charlie-btn" type="button">Charlie</button>
+  </div>
+
+  <!-- Global Search -->
+  <div class="global-search" id="globalSearch">
+    <div class="global-search-box">
+      <span class="material-symbols-rounded" aria-hidden="true">search</span>
+      <input id="globalSearchInput" type="search" inputmode="search" placeholder="Search..." autocomplete="off" />
+      <button id="globalSearchClear" class="global-search-clear" type="button" aria-label="Clear search">x</button>
+    </div>
+    <div class="global-search-hint">Search symptoms, medications, guidelines and tools</div>
+    <div id="globalSearchResults" class="global-results" role="listbox" aria-label="Search results"></div>
+  </div>
+
+  <!-- Shortcuts banner -->
+  <div id="scBanner" class="sc-banner" hidden>
+    <div class="sc-row">
+      <div class="sc-thumb" aria-hidden="true">
+        <img src="images/shortcuts.png" alt="Ambulance Shortcut" onerror="this.src='images/logo.png'">
+      </div>
+      <div class="sc-copy">
+        <p class="sc-title">Download the “Ambulance” Shortcut</p>
+        <p class="sc-desc">Required for Shortcuts Mode.</p>
+        <div class="sc-badges">
+          <span class="sc-badge">Tap <strong>Replace</strong> if asked</span>
+          <span class="sc-badge"><strong>Allow</strong> permissions on first use</span>
+        </div>
+      </div>
+      <div class="sc-cta">
+        <a id="scDownload" class="sc-btn" href="#" rel="noopener">Download</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sections container -->
+  <div id="sections" class="sections"></div>
+</div>
+
+<!-- Results Panel -->
+<section id="panel" hidden>
+  <div id="panel-card">
+    <div class="panel-head">
+      <button id="panel-back" class="backbtn">Back</button>
+      <h3 id="panel-title" class="panel-title">Tool</h3>
+    </div>
+    <div id="panel-body"></div>
+  </div>
+</section>
+
+<!-- What’s New Modal -->
+<section id="whatsNewOverlay" class="wn-overlay" hidden aria-modal="true" role="dialog">
+  <article class="wn-card" role="document">
+    <div class="wn-header">
+      <p class="wn-pill" id="wnVersionPill">🚑 New update</p>
+      <button id="wnClose" class="wn-close" aria-label="Dismiss What’s New">Close</button>
+    </div>
+    <h2 class="wn-title">What’s New</h2>
+    <div id="whatsNewBody" class="wn-body"></div>
+  </article>
+</section>
+
+<!-- Charlie Modal -->
+<section id="charlieOverlay" class="wn-overlay" hidden aria-modal="true" role="dialog">
+  <article class="wn-card" role="document">
+    <div class="wn-header">
+      <p class="wn-pill" style="color:#C8935A;background:color-mix(in oklab,#C8935A 16%,var(--surface));border-color:color-mix(in oklab,#C8935A 38%,transparent)"><img src="images/charlie.png" alt="" style="width:28px;height:28px;border-radius:6px;object-fit:contain;vertical-align:middle;margin-right:6px"> Charlie</p>
+      <button id="charlieClose" class="wn-close" aria-label="Close Charlie">Close</button>
+    </div>
+    <h2 class="wn-title">Meet Charlie</h2>
+    <div class="wn-body">
+      <p style="margin:0 0 6px;font-size:14px;line-height:1.5">He knows the Ambulance app inside-out, never off duty, never low on battery, and strongly believes <strong style="color:#C8935A;font-size:16px">SHAWARMA</strong> is a vital sign. Ask him anything about the app - just don’t ask him for clinical advice, he’s not that kind of paramedic.</p>
+      <p style="margin:0 0 10px;font-size:13px;color:var(--muted)">🌐 I can speak English and Arabic &nbsp;·&nbsp; أتحدث العربية والإنجليزية</p>
+      <video src="images/charlie_introduction.mp4" autoplay loop playsinline controls style="width:100%;border-radius:12px;margin-bottom:10px;display:block"></video>
+      <p style="margin:0 0 8px;font-size:13px;color:var(--muted)">Tap <strong>Discord</strong> or <strong>Telegram</strong> below to find Charlie and ask him anything about the app.</p>
+      <div class="wn-links">
+        <a class="wn-link" style="background:linear-gradient(180deg,#5c64f4,#3b42c9)" href="https://discord.gg/qc8fK3yd92" target="_blank" rel="noopener">
+          <img src="images/discord.png" alt="Discord">
+          <span>Discord</span>
+        </a>
+        <a class="wn-link" style="background:linear-gradient(180deg,#24b4e3,#1186b3)" href="https://t.me/+EAcWKnoaRq05YzY0" target="_blank" rel="noopener">
+          <img src="images/telegram.png" alt="Telegram">
+          <span>Telegram</span>
+        </a>
+      </div>
+    </div>
+  </article>
+</section>
+
+<script type="module">
+  // =========================
+  // APP + ASSET VERSIONS
+  // APP_VERSION is visible to users. ASSET_VERSION is the hidden cache refresh key.
+  // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
+  // =========================
+  const APP_VERSION = "v0.3";
+  const ASSET_VERSION = "asset-20260518-4";
+  const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
+  const TOOL_MODULE_VERSION = ASSET_VERSION;
+  window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
+
+  let sharedModulesPromise = null;
+  function loadSharedModules() {
+    if (window.__AMBULANCE_SHARED_MODULES?.assetVersion === ASSET_VERSION) {
+      return Promise.resolve(window.__AMBULANCE_SHARED_MODULES);
+    }
+    if (!sharedModulesPromise) {
+      sharedModulesPromise = Promise.all([
+        import(`./search_core.js${ASSET_QUERY}`),
+        import(`./search_data.js${ASSET_QUERY}`),
+        import(`./websites_data.js${ASSET_QUERY}`),
+        import(`./as_call_data.js${ASSET_QUERY}`)
+      ]).then(([searchCore, searchData, websitesData, asCallData]) => {
+        const shared = { assetVersion: ASSET_VERSION, searchCore, searchData, websitesData, asCallData };
+        window.__AMBULANCE_SHARED_MODULES = shared;
+        return shared;
+      }).finally(() => { sharedModulesPromise = null; });
+    }
+    return sharedModulesPromise;
+  }
+
+  async function getSearchCoreModule() {
+    return (await loadSharedModules()).searchCore;
+  }
+
+  async function getSearchDataModule() {
+    return (await loadSharedModules()).searchData;
+  }
+
+  async function getWebsitesDataModule() {
+    return (await loadSharedModules()).websitesData;
+  }
+
+  async function getAsCallDataModule() {
+    return (await loadSharedModules()).asCallData;
+  }
+  /* =========================
+       CONFIG (production)
+       - HOST/theme + feature toggles
+       - NEWS controls (inline banner under Shortcuts Mode)
+       - WHAT'S NEW modal (center overlay for release notes)
+       Update the versioned keys whenever you introduce new copy so
+       previous dismissals do not hide the latest announcement.
+     ========================= */
+  const HOST = ''; // root-relative on current origin (works with your Worker/CNAME)
+  const SHORTCUT_NAME = "Ambulance";
+  const SEPARATOR     = "::";
+  const USE_RETURN_URL = false;
+  const RETURN_URL    = "https://yourdomain.com/done.html";
+
+  /* =========================
+       Messaging config hub
+       Edit all message copy, toggles, and keys here. The destructured
+       constants keep the rest of the file referencing this block only.
+     ========================= */
+  const MESSAGING_CONFIG = {
+    // -- Terms gate --
+    TAC_KEY: "amb_tac_v2", // bump when Terms copy changes
+
+    // -- Shortcuts download banner --
+    SHOW_SHORTCUTS_BANNER: true,
+    SHORTCUT_DOWNLOAD_URL: "https://ios.niwashibase.com/s/ambulance",
+
+    // -- News card (Shortcuts Mode only) --
+    SHOW_NEWS: true,
+    NEWS_DISMISSED_KEY: "amb_news_shortcuts_v1",
+    NEWS_MESSAGE: `
+  <div class="news-compact">
+    <div class="news-row">
+      <strong>Enable Shortcuts Mode - Quick Guide</strong>
+      <button id="newsClose" class="news-x" aria-label="Dismiss">✕</button>
+    </div>
+
+    <ol class="news-steps">
+      <li>Install the <strong>“Ambulance”</strong> Shortcut, then return here.</li>
+      <li>
+        Turn on <strong>Allow Sharing Large Amounts of Data</strong> -
+        tap <em>Open Settings</em> below or go:
+        <small><em>Settings → Apps → Shortcuts → Advanced</em></small>.
+      </li>
+    </ol>
+
+    <p class="news-note">
+      <span class="warn">⚠️ Privacy Alerts:</span>
+      choose <strong>“Always Allow”</strong> (or <strong>“Allow”</strong> if that’s the only option) to avoid repeated prompts.
+    </p>
+
+    <div class="news-actions">
+      <a id="btnDownloadShortcut" class="btn" href="#" rel="noopener">Download Shortcut</a>
+      <a id="btnOpenSettings"   class="btn" href="#" rel="noopener">Open Settings</a>
+    </div>
+  </div>
+`,
+
+    // -- What's New modal --
+    WHATS_NEW_ENABLED: true,
+    WHATS_NEW_KEY: "amb_whats_new_v04",
+    WHATS_NEW_TARGET: "default", // "default", "shortcuts", "both"
+    WHATS_NEW_MESSAGE: `
+  <ul>
+    <li><strong>CPG updated to v2.5.</strong> The CPG has been updated to the latest version, including the new flowcharts and medications.</li>
+    <li><strong>SOP v4.4 added.</strong> Added SOP access with search, browsing, SOP numbers, and sections.</li>
+    <li><strong>Global Search added.</strong> Search the app, CPG, SOP, Formulary, and Flowcharts from one place.</li>
+    <li><strong>RSI Checklist updated to v4.0.</strong> Checked items now highlight the checkbox cell and related checklist text cell in green.</li>
+    <li><strong>Charlie is live.</strong> Your new AI-powered app support bot is now on Discord and Telegram - ask him anything about the app.</li>
+  </ul>
+  <button id="wnMeetCharlie" type="button" style="width:100%;padding:13px 16px;margin:4px 0 10px;border-radius:12px;border:none;background:linear-gradient(180deg,#D4A574,#C8935A);color:#fff;font:800 15px/1 system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 4px 16px rgba(200,147,90,.40)"><img src="images/charlie.png" alt="" style="width:32px;height:32px;border-radius:6px;object-fit:contain;flex:none"> Meet Charlie →</button>
+  <p><strong>Stay in the loop:</strong> hop into Ambulance app channels for real-time alerts, feature drops, and pro tips.</p>
+  <div class="wn-links">
+    <a class="wn-link" style="background:linear-gradient(180deg,#5c64f4,#3b42c9)" href="https://discord.gg/qc8fK3yd92" target="_blank" rel="noopener">
+      <img src="images/discord.png" alt="Discord">
+      <span>Discord</span>
+    </a>
+    <a class="wn-link" style="background:linear-gradient(180deg,#24b4e3,#1186b3)" href="https://t.me/+EAcWKnoaRq05YzY0" target="_blank" rel="noopener">
+      <img src="images/telegram.png" alt="Telegram">
+      <span>Telegram</span>
+    </a>
+    <a class="wn-link" style="background:linear-gradient(180deg,#24ac04,#1a7a03)" href="https://whatsapp.com/channel/0029VadgCTH0QeamMlpEvX0x" target="_blank" rel="noopener">
+      <img src="images/whatsapp.png" alt="WhatsApp">
+      <span>WhatsApp</span>
+    </a>
+  </div>
+  <p class="wn-footer">Thanks for the ongoing feedback - more upgrades are on the way.</p>
+`
+  };
+
+  const {
+    TAC_KEY,
+    SHOW_SHORTCUTS_BANNER,
+    SHORTCUT_DOWNLOAD_URL,
+    SHOW_NEWS,
+    NEWS_DISMISSED_KEY,
+    NEWS_MESSAGE,
+    WHATS_NEW_ENABLED,
+    WHATS_NEW_KEY,
+    WHATS_NEW_TARGET,
+    WHATS_NEW_MESSAGE
+  } = MESSAGING_CONFIG;
+
+  const BUTTONS = [
+    // Resuscitation & Timers
+    { text:"CPR",              iconType:"material", icon:"monitor_heart", color:"btn-cpr",
+      href: `${HOST}/cpr/`, showDefault:true, showShortcuts:false },
+
+    { text:"RSI Checklist",    iconType:"material", icon:"checklist",     color:"btn-rsi",
+      href: `${HOST}/helpers/rsi_checklist_js.html`, showDefault:true, showShortcuts:true },
+
+    { text:"WAAFELSS",         iconType:"material", icon:"face",          color:"btn-waafelss",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"waafels" },
+
+    // Pediatric Care
+    { text:"CCP Pediatrics",   iconType:"material", icon:"vaccines",      color:"btn-ccp",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"ccp_peds" },
+
+    { text:"AP Pediatrics",    iconType:"material", icon:"medication",    color:"btn-ap",
+      href:"#", showDefault:true, showShortcuts:true },
+
+    { text:"Care Tools",       iconType:"material", icon:"widgets",       color:"btn-caretools",
+      href:"#", showDefault:true, showShortcuts:false, actionId:"caretools" },
+
+    { text:"Estimated Weight", iconType:"material", icon:"monitor_weight",color:"btn-weight",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"estweight" },
+
+    // Assessment Scores
+    { text:"GCS Score",        iconType:"material", icon:"psychology_alt",color:"btn-gcs",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"gcs" },
+
+    { text:"APGAR Score",      iconType:"material", icon:"child_care",    color:"btn-apgar",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"apgar" },
+
+    { text:"SAT Score",        iconType:"material", icon:"syringe",       color:"btn-sat",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"sat" },
+
+    // Calculators · Reference
+    { text:"Flowcharts",       iconType:"material", icon:"apps",          color:"btn-flowcharts",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"flowcharts" },
+
+    { text:"RBS Converter",    iconType:"material", icon:"glucose",       color:"btn-rbs",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"rbs" },
+
+    { text:"CPG",              iconType:"material", icon:"manage_search", color:"btn-cpg",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"cpg_wizard", shortcutLabel:"CPG Wizard" },
+
+    { text:"SOP",              iconType:"material", icon:"manage_search", color:"btn-sop",
+      href:"#", showDefault:true, showShortcuts:false, actionId:"sop" },
+
+    { text:"MAP Calculator",   iconType:"material", icon:"calculate",     color:"btn-map",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"map" },
+
+    // Ops / Links
+    { text:"AS-Call",          iconType:"material", icon:"call",          color:"btn-ascall",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"as_call" },
+
+    { text:"HOS",              iconType:"material", icon:"local_airport", color:"btn-hos",
+      href:"#", showDefault:false, showShortcuts:true },
+
+    { text:"Websites",         iconType:"material", icon:"language",      color:"btn-websites",
+      href:"https://example.com", showDefault:true, showShortcuts:true, actionId:"websites" },
+
+    { text:"Stay Connected",   iconType:"material", icon:"maps_ugc",      color:"btn-community",
+      href:"#", showDefault:true, showShortcuts:false, actionId:"community" },
+
+    // Shortcuts-mode only
+    { text:"Westley Score",    iconType:"material", icon:"stethoscope",   color:"btn-westley",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"westley" },
+
+    { text:"Overtime Calculator", iconType:"material", icon:"schedule",   color:"btn-overtime",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"overtime" },
+
+    { text:"HMC Address Book", iconType:"material", icon:"contacts",      color:"btn-address",
+      href:"#", showDefault:false, showShortcuts:true },
+
+    { text:"Shifts",           iconType:"material", icon:"calendar_month",color:"btn-shifts",
+      href:"#", showDefault:false, showShortcuts:true },
+
+    { text:"Meds Calculator",  iconType:"material", icon:"vaccines",      color:"btn-meds",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"meds_calculator" },
+
+    { text:"Ventilator Settings", iconType:"material", icon:"airwave",    color:"btn-vent",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"ventilator_settings" },
+
+    { text:"Formulary",        iconType:"material", icon:"medication",    color:"btn-formulary",
+      href:"#", showDefault:true, showShortcuts:true, actionId:"formulary" },
+  ];
+
+  const GLOBAL_SEARCH_CONFIG = {
+    urlIndex: "https://docs.niwashibase.com/helpers/cpg_index.json",
+    urlSopIndex: "https://docs.niwashibase.com/helpers/sop_index.json",
+    urlCpmIndex: "https://docs.niwashibase.com/helpers/cpm_index.json",
+    urlFlowcharts: "https://docs.niwashibase.com/helpers/flowcharts.json",
+    urlFormulary: "https://docs.niwashibase.com/helpers/formulary.json",
+    urlWebsites: "https://docs.niwashibase.com/helpers/websites.json",
+    urlAsCall: "https://docs.niwashibase.com/helpers/as_call.json",
+    urlPageBase: "https://docs.niwashibase.com/viewer/web/?file=/docs/cpg-81w9d1f.pdf#page=",
+    urlSopPageBase: "https://docs.niwashibase.com/viewer/web/?file=/docs/sop-101qq9f2w.pdf#page=",
+    urlCpmPageBase: "https://docs.niwashibase.com/viewer/web/?file=/docs/cpm-202e9d33q.pdf#page="
+  };
+
+  /* =========================
+       CORE
+     ========================= */
+  const THEME_KEY = "amb_theme";
+  const themeMeta = document.getElementById("theme-color");
+  let globalSearchItemsPromise = null;
+  let appWarmupStarted = false;
+
+  function gsNorm(value){
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9+%/ .:-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function gsPage(value){
+    const n = Number(String(value || "").replace(/[^\d]/g, ""));
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+
+  function gsEscape(value){
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  async function gsFetchJson(url){
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to load ${url} (${res.status})`);
+    return res.json();
+  }
+
+  function gsMapToItems(data, type){
+    const out = [];
+    if (Array.isArray(data)) {
+      data.forEach((x) => {
+        if (!x) return;
+        const title = x.title || x.name || x.label;
+        const page = gsPage(x.page || x.p || x.pageNumber || x.page_start);
+        if (!title || !page) return;
+        out.push({
+          title: String(title),
+          type,
+          page,
+          sop_number: x.sop_number,
+          sop_section: x.sop_section,
+          terms: [title, x.sop_number, x.sop_section, x.type, ...(x.aliases || []), ...(x.keywords || []), ...(x.domains || []), ...(x.age_groups || [])]
+        });
+      });
+      return out;
+    }
+
+    if (data && typeof data === "object") {
+      const items =
+        (Array.isArray(data.items) && data.items) ||
+        (Array.isArray(data[type]) && data[type]) ||
+        null;
+
+      if (items) return gsMapToItems(items, type);
+
+      Object.keys(data).forEach((key) => {
+        const value = data[key];
+        if (typeof value === "number" || typeof value === "string") {
+          const page = gsPage(value);
+          if (page) out.push({ title: String(key), type, page, terms: [key] });
+          return;
+        }
+        if (value && typeof value === "object" && !Array.isArray(value)) {
+          Object.keys(value).forEach((childKey) => {
+            const page = gsPage(value[childKey]);
+            if (page) out.push({ title: String(childKey), type, page, terms: [key, childKey] });
+          });
+        }
+      });
+    }
+    return out;
+  }
+
+  async function gsToolItems(){
+    const { buildFeatureTargets } = await getSearchCoreModule();
+    const extra = {
+      "CPR": ["cardiac arrest", "resuscitation", "timer", "compressions"],
+      "RSI Checklist": ["rapid sequence induction", "intubation", "airway"],
+      "WAAFELSS": ["paediatric arrest", "pediatric arrest", "defibrillation", "energy"],
+      "CCP Pediatrics": ["paediatric", "pediatric", "drug dose", "medication", "formulary"],
+      "AP Pediatrics": ["paediatric", "pediatric"],
+      "Care Tools": ["tools", "checklists"],
+      "Estimated Weight": ["weight", "paediatric weight", "pediatric weight"],
+      "GCS Score": ["glasgow coma scale", "consciousness", "neuro"],
+      "APGAR Score": ["newborn", "neonate", "delivery"],
+      "SAT Score": ["sedation", "agitation"],
+      "Flowcharts": ["protocol", "algorithm", "cpg"],
+      "RBS Converter": ["blood sugar", "glucose", "mmol", "mg dl"],
+      "CPG": ["cpg wizard", "guideline", "protocol", "smart search"],
+      "SOP": ["sop", "standard operating procedure", "policy", "procedure", "operations"],
+      "MAP Calculator": ["mean arterial pressure", "blood pressure"],
+      "Meds Calculator": ["medication", "drug", "dose"],
+      "Ventilator Settings": ["vent", "respiratory", "airway"],
+      "Formulary": ["drug", "medication", "medicine"],
+      "Westley Score": ["croup"],
+      "Overtime Calculator": ["pay", "hours", "shift"],
+      "Websites": ["links", "resources"],
+      "AS-Call": ["phone", "call", "contacts", "directory", "numbers"],
+      "Stay Connected": ["community", "discord", "telegram", "whatsapp"]
+    };
+    return buildFeatureTargets(BUTTONS.map((btn) => ({
+      ...btn,
+      terms: [btn.text, ...(extra[btn.text] || [])]
+    })), Object.fromEntries(BUTTONS.map((btn) => [btn.text, extra[btn.text] || []])));
+  }
+
+  async function loadGlobalSearchItems(){
+    if (globalSearchItemsPromise) return globalSearchItemsPromise;
+    globalSearchItemsPromise = (async () => {
+      const [{ getGlobalDocumentTargets }, toolItems] = await Promise.all([
+        getSearchDataModule(),
+        gsToolItems()
+      ]);
+      const documentTargets = await getGlobalDocumentTargets(GLOBAL_SEARCH_CONFIG);
+      return [
+        ...toolItems,
+        ...documentTargets
+      ];
+    })();
+    return globalSearchItemsPromise;
+  }
+
+  async function searchGlobalItems(items, query){
+    const { searchTargets } = await getSearchCoreModule();
+    return searchTargets(items, query, { maxResults: 8 });
+  }
+
+  function ensureGlobalPdfModal(){
+    let modal = document.getElementById("gsPvModal");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.id = "gsPvModal";
+    modal.className = "pv-modal";
+    modal.innerHTML = `
+      <div class="pv-sheet" role="dialog" aria-modal="true">
+        <div class="pv-bar">
+          <button class="pv-back" id="gsPvBack" type="button">Back</button>
+          <div class="pv-title" id="gsPvTitle">CPG</div>
+        </div>
+        <iframe class="pv-iframe" id="gsPvFrame" src="about:blank"></iframe>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    if (!document.getElementById("gsPvModalStyle")) {
+      const st = document.createElement("style");
+      st.id = "gsPvModalStyle";
+      st.textContent = `
+        .pv-modal{position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.55);display:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+        .pv-modal.show{display:block}
+        .pv-sheet{position:absolute;inset:0;background:var(--surface);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+        .pv-bar{position:relative;flex:none;height:48px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;padding:0 12px}
+        .pv-back{z-index:2;border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:12px;padding:10px 14px;font-weight:950;cursor:pointer}
+        .pv-title{position:absolute;left:50%;transform:translateX(-50%);font-weight:950;font-size:14px;color:var(--text);max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none}
+        .pv-iframe{flex:1;width:100%;border:none;background:#fff}
+      `;
+      document.head.appendChild(st);
+    }
+
+    const frame = modal.querySelector("#gsPvFrame");
+    const titleEl = modal.querySelector("#gsPvTitle");
+    const backBtn = modal.querySelector("#gsPvBack");
+
+    function closeModal(fromPop = false){
+      modal.classList.remove("show");
+      modal.style.display = "none";
+      frame.src = "about:blank";
+      if (modal.__popHandler) {
+        window.removeEventListener("popstate", modal.__popHandler);
+        modal.__popHandler = null;
+      }
+      if (fromPop) window.__modalPopHandled = true;
+    }
+
+    backBtn.addEventListener("click", () => {
+      closeModal();
+      if (modal.__baseUrl) history.replaceState(modal.__baseState || null, "", modal.__baseUrl);
+    });
+
+    modal.__open = (url, title, overlayToken) => {
+      titleEl.textContent = title || "CPG";
+      frame.src = url;
+      modal.style.display = "block";
+      modal.__baseUrl = `${location.pathname}${location.search}${location.hash || ""}`;
+      modal.__baseState = history.state;
+      if (!modal.__popHandler) {
+        modal.__popHandler = () => closeModal(true);
+        window.addEventListener("popstate", modal.__popHandler);
+      }
+      const hash = new URLSearchParams((location.hash || "").replace(/^#/, ""));
+      hash.set("overlay", "global_search_pdf");
+      if (overlayToken) hash.set("pv", overlayToken);
+      history.pushState({ overlay: "global_search_pdf", overlayToken }, "", `${location.pathname}${location.search}#${hash.toString()}`);
+      requestAnimationFrame(() => modal.classList.add("show"));
+    };
+
+    return modal;
+  }
+
+  function openGlobalPdf(page, title, type){
+    const modal = ensureGlobalPdfModal();
+    const pageBase = type === "sop" ? GLOBAL_SEARCH_CONFIG.urlSopPageBase : type === "cpm" ? GLOBAL_SEARCH_CONFIG.urlCpmPageBase : GLOBAL_SEARCH_CONFIG.urlPageBase;
+    const defaultTitle = type === "sop" ? "SOP" : type === "cpm" ? "CPM" : "CPG";
+    modal.__open(pageBase + String(page), title || defaultTitle, `${type || "cpg"}:${page}`);
+  }
+
+  function initGlobalSearch(){
+    const input = document.getElementById("globalSearchInput");
+    const resultsEl = document.getElementById("globalSearchResults");
+    const clearBtn = document.getElementById("globalSearchClear");
+    if (!input || !resultsEl || !clearBtn) return;
+    let searchTouchStartY = 0;
+    let searchTouchCanDismiss = false;
+
+    function setSearchActive(active){
+      document.body.classList.toggle("global-search-active", active);
+    }
+
+    function dismissSearchKeyboard(){
+      if (document.activeElement === input) input.blur();
+    }
+
+    function hideResults(){
+      resultsEl.classList.remove("show");
+      resultsEl.innerHTML = "";
+      resultsEl.__items = [];
+      setSearchActive(false);
+    }
+
+    function renderResults(results){
+      setSearchActive(true);
+      if (!results.length) {
+        resultsEl.__items = [];
+        resultsEl.innerHTML = `<div class="gs-result"><div class="gs-main"><div class="gs-title">No results</div><div class="gs-sub">Try a drug, flowchart, protocol, SOP, or feature name.</div></div></div>`;
+        resultsEl.classList.add("show");
+        return;
+      }
+      resultsEl.innerHTML = results.map((item, index) => {
+        const label = item.pillLabel || (item.type === "tool" ? "Feature" : item.type === "cpg" ? "CPG" : item.type === "sop" ? "SOP" : item.type === "cpm" ? "CPM" : item.type === "flowchart" ? "Flowchart" : "Formulary");
+        const docName = item.type === "sop" ? "SOP" : item.type === "cpm" ? "CPM" : "CPG";
+        const sub = item.type === "tool"
+          ? (item.subtitle || "Open feature")
+          : item.subtitle || `Open ${docName} page ${item.page || item.pageStart}`;
+        return `
+          <button class="gs-result" type="button" data-index="${index}" role="option">
+            <div class="gs-main">
+              <div class="gs-title">${gsEscape(item.title)}</div>
+              <div class="gs-sub">${gsEscape(sub)}</div>
+            </div>
+            <span class="gs-badge">${label}</span>
+          </button>
+        `;
+      }).join("");
+      resultsEl.__items = results;
+      resultsEl.classList.add("show");
+    }
+
+    async function updateResults(){
+      const q = input.value.trim();
+      clearBtn.classList.toggle("show", !!q);
+      if (!q) {
+        hideResults();
+        return;
+      }
+      setSearchActive(true);
+      resultsEl.innerHTML = `<div class="gs-result"><div class="gs-main"><div class="gs-title">Searching...</div><div class="gs-sub">Loading app and document indexes.</div></div></div>`;
+      resultsEl.__items = [];
+      resultsEl.classList.add("show");
+      try {
+        const items = await loadGlobalSearchItems();
+        renderResults(await searchGlobalItems(items, q));
+      } catch (err) {
+        console.error("Global search failed:", err);
+        resultsEl.innerHTML = `<div class="gs-result"><div class="gs-main"><div class="gs-title">Search is unavailable</div><div class="gs-sub">One of the search modules did not load. Try refreshing the app.</div></div></div>`;
+      }
+    }
+
+    async function openResult(item){
+      if (!item) return;
+      input.blur();
+      setSearchActive(true);
+      if (item.type === "tool") {
+        if (item.actionId) {
+          runAction(item.actionId, { title: item.title }, { pushState: true });
+        } else if (item.href && item.href !== "#") {
+          location.href = item.href;
+        } else {
+          alert("Coming Soon...");
+        }
+      } else {
+        openGlobalPdf(item.page || item.pageStart, item.title, item.type);
+      }
+    }
+
+    input.addEventListener("input", updateResults);
+    input.addEventListener("focus", () => {
+      if (input.value.trim()) updateResults();
+      else loadGlobalSearchItems().catch(() => {});
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        input.blur();
+      } else if (e.key === "Escape") {
+        input.value = "";
+        clearBtn.classList.remove("show");
+        hideResults();
+      }
+    });
+    clearBtn.addEventListener("click", () => {
+      input.value = "";
+      clearBtn.classList.remove("show");
+      hideResults();
+      input.focus();
+    });
+    resultsEl.addEventListener("click", (e) => {
+      const btn = e.target.closest(".gs-result[data-index]");
+      if (!btn) return;
+      const index = Number(btn.dataset.index);
+      openResult(resultsEl.__items && resultsEl.__items[index]);
+    });
+    resultsEl.addEventListener("touchstart", () => input.blur(), { passive: true });
+    resultsEl.addEventListener("wheel", () => input.blur(), { passive: true });
+    document.addEventListener("wheel", (e) => {
+      if (!e.target.closest("#globalSearch")) dismissSearchKeyboard();
+    }, { passive: true });
+    document.addEventListener("touchstart", (e) => {
+      const t = e.touches && e.touches[0];
+      searchTouchStartY = t ? t.clientY : 0;
+      searchTouchCanDismiss = !e.target.closest("#globalSearch");
+    }, { passive: true });
+    document.addEventListener("touchmove", (e) => {
+      const t = e.touches && e.touches[0];
+      if (!t || !searchTouchStartY || !searchTouchCanDismiss) return;
+      if (Math.abs(t.clientY - searchTouchStartY) > 18) {
+        dismissSearchKeyboard();
+        searchTouchCanDismiss = false;
+      }
+    }, { passive: true });
+    document.addEventListener("touchend", () => {
+      searchTouchCanDismiss = false;
+    }, { passive: true });
+    document.addEventListener("touchcancel", () => {
+      searchTouchCanDismiss = false;
+    }, { passive: true });
+
+    return {
+      clear(){
+        input.value = "";
+        clearBtn.classList.remove("show");
+        hideResults();
+      }
+    };
+  }
+
+  function preloadModule(path) {
+    const href = `${HOST}/tools/${path}.js?ver=${encodeURIComponent(TOOL_MODULE_VERSION)}`;
+    if (document.querySelector(`link[rel="modulepreload"][href="${href}"]`)) return;
+    const link = document.createElement("link");
+    link.rel = "modulepreload";
+    link.href = href;
+    document.head.appendChild(link);
+  }
+
+  function warmViewer(url) {
+    const frame = document.createElement("iframe");
+    frame.tabIndex = -1;
+    frame.setAttribute("aria-hidden", "true");
+    frame.src = url;
+    frame.style.cssText = "position:absolute;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none;";
+    document.body.appendChild(frame);
+    setTimeout(() => {
+      try { frame.remove(); } catch (_) {}
+    }, 15000);
+  }
+
+  function scheduleAppWarmup() {
+    if (appWarmupStarted) return;
+    appWarmupStarted = true;
+
+    const runWhenIdle = (fn, delay = 0) => {
+      const start = () => setTimeout(fn, delay);
+      if ("requestIdleCallback" in window) window.requestIdleCallback(start, { timeout: 3000 });
+      else setTimeout(start, 800);
+    };
+
+    runWhenIdle(() => {
+      getSearchDataModule().then(({ preloadSearchData }) => preloadSearchData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
+      getWebsitesDataModule().then(({ preloadWebsitesData }) => preloadWebsitesData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
+      loadGlobalSearchItems().catch(() => {});
+      ["cpg_wizard", "sop", "formulary", "flowcharts", "websites"].forEach(preloadModule);
+    }, 400);
+
+    runWhenIdle(() => {
+      warmViewer(GLOBAL_SEARCH_CONFIG.urlPageBase + "1");
+    }, 1800);
+
+    runWhenIdle(() => {
+      warmViewer(GLOBAL_SEARCH_CONFIG.urlSopPageBase + "1");
+    }, 6500);
+
+    runWhenIdle(() => {
+      warmViewer(GLOBAL_SEARCH_CONFIG.urlCpmPageBase + "1");
+    }, 9500);
+  }
+
+  function setThemeColorFromCSS(){
+    const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#0f1115";
+    themeMeta.setAttribute("content", bg);
+  }
+  function applyTheme(val){
+    document.documentElement.setAttribute("data-theme", val);
+    localStorage.setItem(THEME_KEY, val);
+    setThemeColorFromCSS();
+  }
+  function initTheme(){
+    const saved = localStorage.getItem(THEME_KEY) || "auto";
+    document.getElementById("themeSelect").value = saved;
+    applyTheme(saved);
+    if (saved === "auto"){
+      const mql = window.matchMedia("(prefers-color-scheme: dark)");
+      mql.addEventListener?.("change", setThemeColorFromCSS);
+    }
+  }
+
+  function buildShortcutsUrl(label){
+    const base = `shortcuts://run-shortcut?name=${encodeURIComponent(SHORTCUT_NAME)}&input=text&text=`;
+    const payload = `web${SEPARATOR}${label}`;
+    return base + encodeURIComponent(payload);
+  }
+
+  function openPanel(title){
+    document.getElementById("panel-title").textContent = title || "Tool";
+    document.getElementById("panel").hidden = false;
+    document.body.classList.add("panel-open");
+  }
+  function closePanel(fromHistory=false){
+    const panel = document.getElementById("panel");
+    if (!fromHistory){
+      if (!panel.hidden){
+        history.back();
+      }
+      return;
+    }
+    if (panel.hidden) return;
+    panel.hidden = true;
+    document.getElementById("panel-body").innerHTML = "";
+    document.body.classList.remove("panel-open");
+    currentTool = null;
+    try { sessionStorage.setItem("ambulance_home_url", location.pathname + location.search); } catch (_) {}
+  }
+
+  // ===== T&C Gate ===== (uses TAC_KEY from config block)
+
+  function showTacGate(){ const el = document.getElementById("tacGate"); if (el){ el.style.display = "block"; document.body.style.overflow = "hidden"; } }
+  function hideTacGate(){ const el = document.getElementById("tacGate"); if (el){ el.style.display = "none"; document.body.style.overflow = ""; } }
+
+  function wireTacGate(){
+    const agreeBtn = document.getElementById("tacAgree");
+    const cancelBtn = document.getElementById("tacCancel");
+
+    agreeBtn?.addEventListener("click", async () => {
+      try {
+        localStorage.setItem(TAC_KEY, "1");
+        fetch("/consent?agree=1", { credentials: "include" }).catch(()=>{});
+      } finally {
+        hideTacGate();
+        mount();
+      }
+    });
+
+    cancelBtn?.addEventListener("click", () => {
+      hideTacGate();
+      document.body.innerHTML = `
+        <div style="padding:24px; font:16px system-ui; line-height:1.4">
+          <h1 style="margin:0 0 8px 0">Consent required</h1>
+          <p>To use the Ambulance app, you must agree to the Terms &amp; Conditions.</p>
+          <p style="color:#888">You can re-open the app later and agree if you change your mind.</p>
+        </div>`;
+      setTimeout(() => { location.replace("about:blank"); }, 550);
+    });
+  }
+
+  function initPullRefresh(){
+    const indicator = document.getElementById("pullRefresh");
+    const label = document.getElementById("pullRefreshText");
+    if (!indicator || !label) return;
+
+    const THRESHOLD = 84;
+    let startY = 0;
+    let active = false;
+    let ready = false;
+    let refreshing = false;
+
+    function blocked(target){
+      if (refreshing) return true;
+      if (window.scrollY > 2) return true;
+      if (document.body.classList.contains("panel-open")) return true;
+      if (document.body.classList.contains("wn-open")) return true;
+      if (document.body.classList.contains("global-search-active")) return true;
+      if (document.getElementById("tacGate")?.style.display === "block") return true;
+      if (document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return true;
+      return !!target.closest("input,textarea,select,button,a,#globalSearch,#panel,#tacGate,.wn-overlay");
+    }
+
+    function hide(){
+      active = false;
+      ready = false;
+      startY = 0;
+      indicator.classList.remove("show");
+      indicator.style.transform = "";
+      label.textContent = "Pull to refresh";
+    }
+
+    document.addEventListener("touchstart", (e) => {
+      const t = e.touches && e.touches[0];
+      if (!t || blocked(e.target)) return;
+      startY = t.clientY;
+      active = true;
+      ready = false;
+    }, { passive: true });
+
+    document.addEventListener("touchmove", (e) => {
+      if (!active) return;
+      const t = e.touches && e.touches[0];
+      if (!t) return;
+      const dy = t.clientY - startY;
+      if (dy <= 0) {
+        hide();
+        return;
+      }
+      if (window.scrollY > 2) {
+        hide();
+        return;
+      }
+      if (dy > 12) e.preventDefault();
+      const distance = Math.min(dy, 120);
+      ready = distance >= THRESHOLD;
+      label.textContent = ready ? "Release to refresh" : "Pull to refresh";
+      indicator.classList.add("show");
+      indicator.style.transform = `translate(-50%,${Math.min(28, distance / 4)}px) scale(1)`;
+    }, { passive: false });
+
+    document.addEventListener("touchend", () => {
+      if (!active) return;
+      if (ready) {
+        refreshing = true;
+        label.textContent = "Refreshing...";
+        indicator.classList.add("show");
+        indicator.style.transform = "translate(-50%,28px) scale(1)";
+        setTimeout(() => location.reload(), 120);
+        return;
+      }
+      hide();
+    }, { passive: true });
+
+    document.addEventListener("touchcancel", hide, { passive: true });
+  }
+
+  function initTacOrApp(){
+    const consent = localStorage.getItem(TAC_KEY) === "1";
+    if (consent) mount(); else { wireTacGate(); showTacGate(); }
+    try { sessionStorage.setItem("ambulance_home_url", location.pathname + location.search); } catch (_) {}
+  }
+  document.addEventListener("DOMContentLoaded", initTacOrApp);
+
+  function mount(){
+    initTheme();
+    initPullRefresh();
+    const appVersionLabel = document.getElementById("appVersionLabel");
+    if (appVersionLabel) appVersionLabel.textContent = APP_VERSION;
+    const globalSearch = initGlobalSearch();
+    getSearchDataModule().then(({ preloadSearchData }) => preloadSearchData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
+    getWebsitesDataModule().then(({ preloadWebsitesData }) => preloadWebsitesData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
+    getAsCallDataModule().then(({ preloadAsCallData }) => preloadAsCallData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
+    scheduleAppWarmup();
+    document.getElementById("themeSelect").addEventListener("change",(e)=>applyTheme(e.target.value));
+
+    const newsEl = document.getElementById("news");
+    if (SHOW_NEWS && NEWS_MESSAGE.trim() !== "") {
+  newsEl.innerHTML = NEWS_MESSAGE.trim();
+  newsEl.style.display = "block";
+
+  // 1) Download button → your existing shortcut link
+  const dl = document.getElementById("btnDownloadShortcut");
+  if (dl) dl.href = SHORTCUT_DOWNLOAD_URL || "#";
+
+  // 2) Open Settings button → call your Shortcut with input "Open Settings"
+  const os = document.getElementById("btnOpenSettings");
+  os?.addEventListener("click", (e) => {
+    e.preventDefault();
+    location.href = buildShortcutsUrl("Open Settings");
+  });
+}
+
+
+    const toggle      = document.getElementById("mode");
+    const sectionsEl  = document.getElementById("sections");
+    const scBannerEl  = document.getElementById("scBanner");
+    const scDownloadEl= document.getElementById("scDownload");
+    if (scDownloadEl) scDownloadEl.href = SHORTCUT_DOWNLOAD_URL || "#";
+    wireWhatsNewControls();
+    wireCharlieModal();
+    function applyUpdatesButtonVisibility(useShortcuts){
+      const trigger = document.querySelector(".updates-cta");
+      if (!trigger) return;
+      const matches =
+        WHATS_NEW_TARGET === "both" ||
+        (WHATS_NEW_TARGET === "shortcuts" && useShortcuts) ||
+        (WHATS_NEW_TARGET === "default" && !useShortcuts);
+      trigger.style.display = matches ? "flex" : "none";
+    }
+
+    const whatsNewTrigger = document.getElementById("wnShowAgain");
+    whatsNewTrigger?.addEventListener("click", () => {
+      localStorage.removeItem(WHATS_NEW_KEY);
+      handleWhatsNew(toggle.checked);
+      applyUpdatesButtonVisibility(toggle.checked);
+    });
+
+    // === Hidden tap to reset Shortcuts news card ===
+document.querySelector('.copy .t')?.addEventListener('click', () => {
+  if (confirm('Show Shortcuts setup tip again?')) {
+    localStorage.removeItem('amb_news_shortcuts_v1'); // use your actual NEWS_DISMISSED_KEY
+    render();
+  }
+});
+
+
+    const map = new Map(BUTTONS.map(b => [b.text, b]));
+
+function render(){
+  const useShortcuts = toggle.checked;
+  document.body.classList.toggle("shortcuts-mode-on", useShortcuts);
+  if (useShortcuts) globalSearch?.clear();
+
+  // --- News card tied to Shortcuts Mode ---
+  const newsEl = document.getElementById("news");
+  const dismissed = localStorage.getItem(NEWS_DISMISSED_KEY) === "1";
+
+  if (SHOW_NEWS && useShortcuts && !dismissed && NEWS_MESSAGE.trim() !== "") {
+    newsEl.innerHTML = NEWS_MESSAGE.trim();
+    newsEl.style.display = "block";
+
+    // Buttons inside the card
+    const dl = document.getElementById("btnDownloadShortcut");
+    if (dl) dl.href = SHORTCUT_DOWNLOAD_URL || "#";
+
+    const os = document.getElementById("btnOpenSettings");
+    os?.addEventListener("click", (e) => {
+      e.preventDefault();
+      location.href = buildShortcutsUrl("Open Settings");
+    });
+
+    // Dismiss (remembered)
+    const closeBtn = document.getElementById("newsClose");
+    closeBtn?.addEventListener("click", () => {
+      localStorage.setItem(NEWS_DISMISSED_KEY, "1");
+      newsEl.style.display = "none";
+      newsEl.innerHTML = "";
+    });
+  } else {
+    // Hide when Shortcuts Mode is off or already dismissed
+    newsEl.style.display = "none";
+    newsEl.innerHTML = "";
+  }
+
+  // --- Shortcuts banner (your existing logic) ---
+  if (scBannerEl){
+    const shouldShow = useShortcuts && (typeof SHOW_SHORTCUTS_BANNER !== "undefined" ? SHOW_SHORTCUTS_BANNER : true);
+    scBannerEl.hidden = !shouldShow;
+    scBannerEl.style.display = shouldShow ? "block" : "none";
+  }
+
+  handleWhatsNew(useShortcuts);
+  applyUpdatesButtonVisibility(useShortcuts);
+
+  // --- Sections grid ---
+  sectionsEl.innerHTML = "";
+  const map = new Map(BUTTONS.map(b => [b.text, b]));
+
+  for (const sec of SECTIONS){
+    const items = sec.items
+      .map(name => map.get(name))
+      .filter(Boolean)
+      .filter(btn => useShortcuts ? (btn.showShortcuts !== false) : (btn.showDefault !== false));
+    if (!items.length) continue;
+
+    const secEl = document.createElement("section");
+    secEl.className = "section";
+
+    const head = document.createElement("div");
+    head.className = "section-head";
+    head.textContent = sec.title;
+
+    const grid = document.createElement("div");
+    grid.className = "grid";
+
+    items.forEach((btn, i) => {
+      const id  = (btn.id || btn.text.toLowerCase().replace(/\s+/g,"-")).replace(/[^a-z0-9\-]/gi,"-");
+      const href = useShortcuts ? buildShortcutsUrl(btn.shortcutLabel || btn.text) : (btn.href || "#");
+
+      const a = document.createElement("a");
+      a.className = `btn ${btn.color || "c-blue"}`;
+      a.id = id;
+      a.href = href;
+      a.style.animationDelay = `${i*18}ms`;
+
+      const iconHtml =
+        btn.iconType === "material"
+          ? `<span class="material-symbols-rounded" aria-hidden="true">${btn.icon}</span>`
+          : "";
+
+      a.innerHTML = `${iconHtml}<span class="label">${btn.text}</span>`;
+
+      if (!useShortcuts){
+        if (btn.actionId){
+          a.addEventListener("click", (e) => {
+            e.preventDefault();
+            runAction(btn.actionId, { title: btn.text }, { pushState: true });
+          });
+        } else if (!btn.href || btn.href === "#"){
+          a.addEventListener("click",(e)=>{
+            e.preventDefault();
+            alert("Coming Soon...");
+          });
+        }
+      }
+
+      grid.appendChild(a);
+    });
+
+    secEl.appendChild(head);
+    secEl.appendChild(grid);
+    sectionsEl.appendChild(secEl);
+  }
+}
+
+// Evaluate the What's New modal on each render so it can follow
+// the chosen mode (default-only, Shortcuts-only, or both).
+function handleWhatsNew(useShortcuts){
+  const overlay = document.getElementById("whatsNewOverlay");
+  const body = document.getElementById("whatsNewBody");
+  const versionPill = document.getElementById("wnVersionPill");
+  if (!overlay || !body) return;
+  if (versionPill) versionPill.textContent = `🚑 ${APP_VERSION} released`;
+  const dismissed = localStorage.getItem(WHATS_NEW_KEY) === "1";
+  const message = WHATS_NEW_MESSAGE.trim();
+  const matchesMode =
+    WHATS_NEW_TARGET === "both" ||
+    (WHATS_NEW_TARGET === "shortcuts" && useShortcuts) ||
+    (WHATS_NEW_TARGET === "default" && !useShortcuts);
+
+  const shouldShow = WHATS_NEW_ENABLED && !dismissed && message && matchesMode;
+
+  if (shouldShow){
+    body.innerHTML = message;
+    overlay.hidden = false;
+    overlay.style.display = "flex";
+    document.body.classList.add("wn-open");
+  } else if (!overlay.hidden){
+    overlay.hidden = true;
+    overlay.style.display = "none";
+    document.body.classList.remove("wn-open");
+  }
+}
+
+// Wire close / tap-away / ESC handlers once after mount. Dismissing
+// the dialog stores the versioned key so this announcement never
+// reappears until you bump WHATS_NEW_KEY.
+function wireWhatsNewControls(){
+  const overlay = document.getElementById("whatsNewOverlay");
+  const closeBtn = document.getElementById("wnClose");
+  if (!overlay || !closeBtn) return;
+
+  function dismiss(){
+    overlay.hidden = true;
+    overlay.style.display = "none";
+    document.body.classList.remove("wn-open");
+    localStorage.setItem(WHATS_NEW_KEY, "1");
+  }
+
+  closeBtn.addEventListener("click", dismiss);
+  overlay.addEventListener("click", (e) => {
+    if (e.target.closest?.("#wnMeetCharlie")) { dismiss(); openCharlieModal(); }
+    else if (e.target === overlay) dismiss();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !overlay.hidden){
+      dismiss();
+    }
+  });
+}
+
+function openCharlieModal(){
+  const overlay = document.getElementById("charlieOverlay");
+  if (!overlay) return;
+  overlay.hidden = false;
+  overlay.style.display = "flex";
+  document.body.classList.add("wn-open");
+  const video = overlay.querySelector("video");
+  if (video) video.play().catch(() => {});
+}
+
+function closeCharlieModal(){
+  const overlay = document.getElementById("charlieOverlay");
+  if (!overlay) return;
+  overlay.hidden = true;
+  overlay.style.display = "none";
+  document.body.classList.remove("wn-open");
+  const video = overlay.querySelector("video");
+  if (video) { video.pause(); video.currentTime = 0; }
+}
+
+function wireCharlieModal(){
+  const overlay = document.getElementById("charlieOverlay");
+  const closeBtn = document.getElementById("charlieClose");
+  if (!overlay || !closeBtn) return;
+  closeBtn.addEventListener("click", closeCharlieModal);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeCharlieModal(); });
+  document.getElementById("charlieBtn")?.addEventListener("click", openCharlieModal);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !overlay.hidden) closeCharlieModal(); });
+}
+
+
+    toggle.addEventListener("change", render);
+    document.getElementById("panel-back").addEventListener("click", closePanel);
+    render();
+
+    const { tool, ...params } = parseHash();
+    if (tool) runAction(tool, params, { pushState: true, initialLoad: true });
+  }
+
+  // Sections layout
+  const SECTIONS = [
+    { title: "Resuscitation & Timers", items: ["CPR","WAAFELSS","RSI Checklist","Ventilator Settings"] },
+    { title: "Calculators · Reference", items: ["CPG","SOP","Flowcharts","Formulary","RBS Converter","MAP Calculator","Overtime Calculator","Meds Calculator"] },
+    { title: "Pediatric Care",         items: ["CCP Pediatrics","AP Pediatrics","Care Tools","Estimated Weight"] },
+    { title: "Assessment Scores",      items: ["GCS Score","APGAR Score","SAT Score","Westley Score"] },
+    { title: "Ops / Links",            items: ["HOS","Websites","AS-Call","HMC Address Book","Shifts","Stay Connected"] }
+  ];
+
+  let currentTool = null;
+  let baseStateInitialized = false;
+
+  function ensureBaseState(){
+    if (!baseStateInitialized){
+      history.replaceState(null, "", location.pathname + location.search);
+      baseStateInitialized = true;
+    }
+  }
+
+  function setToolState(actionId, params = {}, replace = false){
+    ensureBaseState();
+    const hashParams = { tool: actionId, ...params };
+    const hash = new URLSearchParams(hashParams).toString();
+    const url = `${location.pathname}${location.search}${hash ? `#${hash}` : ""}`;
+    const state = { tool: actionId, params };
+    if (replace) history.replaceState(state, "", url);
+    else history.pushState(state, "", url);
+    currentTool = actionId;
+  }
+
+  // Router / action loader
+  async function runAction(actionId, params = {}, options = {}) {
+    try {
+      const mountEl = document.getElementById("panel-body");
+      mountEl.innerHTML = "";
+      openPanel(params.title || (actionId === "community" ? "Join the Community" : actionId.toUpperCase()));
+
+      // Inline: Community hub
+      if (actionId === "community") {
+        const links = [
+          { name:"Email",    href:"mailto:yniwashi@hamad.qa?subject=Ambulance%20(iOS)%20App%20Feedback", img:"images/email.png",    color:"#f44434" },
+          { name:"Discord",  href:"https://discord.gg/qc8fK3yd92",                                img:"images/discord.png",  color:"#5c64f4" },
+          { name:"Telegram", href:"https://t.me/+EAcWKnoaRq05YzY0",                               img:"images/telegram.png", color:"#24b4e3" },
+          { name:"WhatsApp", href:"https://whatsapp.com/channel/0029VadgCTH0QeamMlpEvX0x",       img:"images/whatsapp.png", color:"#24ac04" }
+        ];
+        mountEl.innerHTML = `
+          <div style="padding:16px; display:grid; gap:16px;">
+            <p style="margin:0; text-align:center; font-size:18px; font-weight:800">👇💡 Stay Connected! 💡👇</p>
+            <p style="margin:4px 0 0; text-align:center; font-size:14px; color:var(--muted)">
+              Join <strong>Discord</strong> and other platforms to stay up to date with real-time news, feature updates, and tips.
+            </p>
+            <div style="display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
+              ${links.map(l => `
+                <a href="${l.href}" target="_blank" rel="noopener"
+                   style="display:flex; flex-direction:column; align-items:center; text-decoration:none; padding:12px;
+                          background:linear-gradient(180deg,${l.color}cc,${l.color}); border-radius:14px; color:#fff; font-weight:700;
+                          box-shadow:0 4px 14px rgba(0,0,0,.2);">
+                  <img src="${l.img}" alt="${l.name}" class="community-icon">
+                  <span>${l.name}</span>
+                </a>
+              `).join("")}
+            </div>
+          </div>
+        `;
+        if (options.fromHistory) {
+          currentTool = actionId;
+        } else if (options.pushState !== false) {
+          if (options.initialLoad) {
+            setToolState(actionId, params, false);
+          } else {
+            const replace = currentTool != null;
+            setToolState(actionId, params, replace);
+          }
+        }
+        return;
+      }
+
+      // Default: load tool module. APP_VERSION controls cache refresh between releases.
+      const ver = encodeURIComponent(TOOL_MODULE_VERSION);
+      const mod = await import(`./tools/${actionId}.js?ver=${ver}`);
+      await mod.run(mountEl, params);
+      if (options.fromHistory) {
+        currentTool = actionId;
+      } else if (options.pushState !== false) {
+        if (options.initialLoad) {
+          setToolState(actionId, params, false);
+        } else {
+          const replace = currentTool != null;
+          setToolState(actionId, params, replace);
+        }
+      }
+    } catch (e) {
+      alert(`Could not load tool: ${actionId}\n${e.message || e}`);
+      console.error(e);
+    }
+  }
+
+  function parseHash(){ const h = new URLSearchParams((location.hash||"").replace(/^#/, "")); const obj = {}; for (const [k,v] of h.entries()) obj[k]=v; return obj; }
+  window.addEventListener("popstate", (event) => {
+    if (window.__modalPopHandled){ window.__modalPopHandled = false; return; }
+    const state = event.state;
+    if (state && state.tool){
+      runAction(state.tool, state.params || {}, { fromHistory: true, pushState: false });
+    } else {
+      closePanel(true);
+    }
+  });
+
+  // Swipe back
+  let touchStartX = 0; let touchStartY = 0; const SWIPE_THRESHOLD = 60; const VERTICAL_TOLERANCE = 40;
+  document.getElementById("panel-card").addEventListener("touchstart", e => { if (e.touches.length !== 1) return; touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; });
+  document.getElementById("panel-card").addEventListener("touchend", e => { if (e.changedTouches.length !== 1) return; const dx = e.changedTouches[0].clientX - touchStartX; const dy = Math.abs(e.changedTouches[0].clientY - touchStartY); if (dx > SWIPE_THRESHOLD && dy < VERTICAL_TOLERANCE) closePanel(); });
+
+  // Edge-swipe back
+  (() => {
+    const panel = document.getElementById("panel");
+    const card  = document.getElementById("panel-card");
+    const content = document.querySelector(".wrap");
+    const EDGE_ZONE = 24; const COMPLETE_THRESHOLD = 0.28; const V_TOL = 18; const MIN_H_START = 6;
+    let startX = 0, startY = 0, dragging = false, width = 0, lastDx = 0; let raf = 0;
+    function setX(x){ card.style.transform = `translateX(${x}px)`; if (content){ const p = Math.min(1, x / (width || 1)); content.style.transform = `translateX(${Math.min(12, 12*p)}px)`; content.style.opacity = String(1 - 0.04*p); } }
+    function onStart(e){ if (panel.hidden) return; const t = e.touches && e.touches[0]; if (!t) return; if (t.clientX > EDGE_ZONE) { dragging = false; return; } startX = t.clientX; startY = t.clientY; width = card.clientWidth || window.innerWidth; dragging = true; lastDx = 0; card.style.transition = "none"; if (content) content.style.transition = "none"; }
+    function onMove(e){ if (!dragging) return; const t = e.touches && e.touches[0]; if (!t) return; const dx = t.clientX - startX; const dy = Math.abs(t.clientY - startY); if (dy > V_TOL && dx < MIN_H_START) { cancel(); return; } const dragX = Math.max(0, dx); lastDx = dragX; if (dragX > MIN_H_START && dy < V_TOL) e.preventDefault(); if (!raf){ raf = requestAnimationFrame(() => { setX(lastDx); raf = 0; }); } }
+    function finishClose(){ card.style.transition = "transform 280ms cubic-bezier(.22,.61,.36,1)"; if (content) content.style.transition = "transform 280ms ease, opacity 280ms ease"; requestAnimationFrame(() => { setX(width); setTimeout(() => { closePanel(); card.style.transition = ""; if (content){ content.style.transition = ""; content.style.transform = ""; content.style.opacity = ""; } setX(0); }, 280); }); }
+    function snapBack(){ card.style.transition = "transform 260ms cubic-bezier(.22,.61,.36,1)"; if (content) content.style.transition = "transform 260ms ease, opacity 260ms ease"; requestAnimationFrame(() => { setX(0); setTimeout(() => { card.style.transition = ""; if (content){ content.style.transition = ""; content.style.transform = ""; content.style.opacity = ""; } }, 260); }); }
+    function onEnd(){ if (!dragging) return; dragging = false; const shouldClose = lastDx > (width * COMPLETE_THRESHOLD); if (shouldClose) finishClose(); else snapBack(); }
+    function cancel(){ dragging = false; snapBack(); }
+    card.addEventListener("touchstart", onStart, { passive: true });
+    card.addEventListener("touchmove",  onMove,  { passive: false });
+    card.addEventListener("touchend",   onEnd,   { passive: true });
+    card.addEventListener("touchcancel",cancel,  { passive: true });
+  })();
+</script>
+
+</body>
+</html>

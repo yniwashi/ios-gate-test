@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Ambulance</title>
+  <style>
+    /* ========= THEME TOKENS ========= */
+    :root{ --radius:12px; --speed:.22s; --shadow:0 8px 18px rgba(0,0,0,.28); --shadow-2:0 12px 28px rgba(0,0,0,.35) }
+    @media (prefers-color-scheme: light){ :root{
+      --bg:#f7f9fc; --surface:#ffffff; --border:#e7ecf3; --text:#0c1230; --muted:#616b86;
+      --accent:#1f6fff; --accent-2:#19b36b; --surface-2:#f1f5fb;
+    }}
+    @media (prefers-color-scheme: dark){ :root{
+      --bg:#0f1115; --surface:#171a21; --border:#232a37; --text:#eef2ff; --muted:#9aa6c3;
+      --accent:#2f81f7; --accent-2:#20c385; --surface-2:#12151c;
+    }}
+    [data-theme="light"]{ --bg:#f7f9fc; --surface:#ffffff; --border:#e7ecf3; --text:#0c1230; --muted:#616b86; --accent:#1f6fff; --accent-2:#19b36b; --surface-2:#f1f5fb }
+    [data-theme="dark"] { --bg:#0f1115; --surface:#171a21; --border:#232a37; --text:#eef2ff; --muted:#9aa6c3; --accent:#2f81f7; --accent-2:#20c385; --surface-2:#12151c }
+
+    /* ========= LAYOUT ========= */
+    html,body{height:100%}
+    body{
+      margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,system-ui,Arial,sans-serif;
+      background:var(--bg); color:var(--text); -webkit-tap-highlight-color:transparent;
+    }
+    .wrap{max-width:980px; margin:0 auto; padding:14px clamp(10px,4vw,20px) 24px; display:flex; flex-direction:column; gap:14px}
+
+    /* ========= TOPBAR ========= */
+    .topbar{display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .brand{display:flex; align-items:center; gap:10px}
+    .logo{width:26px; height:26px; border-radius:8px; background:linear-gradient(150deg,var(--accent),#8854d0); box-shadow:var(--shadow)}
+    .title{margin:0; font-size:clamp(18px,3.8vw,22px); letter-spacing:.2px}
+    .theme-toggle{background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:4px 10px; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text)}
+    .theme-toggle select{appearance:none; background:transparent; border:none; color:inherit; font:inherit; outline:none; cursor:pointer}
+
+    /* ========= NEWS ========= */
+    .news{display:none; background:linear-gradient(180deg,rgba(47,129,247,.12),rgba(47,129,247,.06));
+      border:1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+      color:color-mix(in oklab, var(--text) 85%, var(--accent));
+      padding:10px 12px; border-radius:12px; line-height:1.35; animation:fadeIn .25s ease-out both}
+    @keyframes fadeIn{from{opacity:0; transform:translateY(-4px)} to{opacity:1; transform:none}}
+
+    /* ========= SWITCH ROW ========= */
+    .row{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .copy{display:flex; flex-direction:column; gap:3px}
+    .copy .t{margin:0; font-size:15px; font-weight:600}
+    .copy .s{margin:0; font-size:12px; color:var(--muted)}
+    .toggle{position:relative; width:56px; height:30px; flex:none}
+    .toggle input{opacity:0; width:0; height:0}
+    .rail{position:absolute; inset:0; border-radius:999px; background:var(--surface-2); border:1px solid var(--border); transition:background var(--speed), border var(--speed)}
+    .knob{position:absolute; left:3px; top:3px; width:24px; height:24px; border-radius:50%; background:linear-gradient(180deg,#fff,#e7ecff); box-shadow:0 2px 6px rgba(0,0,0,.28); transition:transform var(--speed)}
+    .toggle input:checked + .rail{background:linear-gradient(180deg,var(--accent-2),#0ea76a); border-color:color-mix(in oklab, var(--accent-2) 60%, var(--border))}
+    .toggle input:checked + .rail .knob{transform:translateX(26px)}
+
+    /* ========= GRID & SMALL BUTTONS ========= */
+    .grid{display:grid; gap:8px; grid-template-columns:repeat(auto-fit, minmax(96px,1fr))}
+    @media (orientation:landscape){ .grid{grid-template-columns:repeat(auto-fit, minmax(110px,1fr))} }
+    .btn{
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-decoration:none; color:#fff;
+      border-radius:10px; min-height:70px; padding:10px 6px; font-size:12px; font-weight:700; letter-spacing:.2px; text-align:center;
+      box-shadow:var(--shadow); transition:transform var(--speed), box-shadow var(--speed), filter var(--speed)
+    }
+    .btn:hover{transform:translateY(-2px); box-shadow:var(--shadow-2)}
+    .btn:active{transform:translateY(0) scale(.98)}
+    .ico{width:22px; height:22px; display:block; opacity:.95}
+    .label{opacity:.98}
+    .btn{opacity:0; animation:pop .28s ease-out forwards} .btn:nth-child(odd){animation-delay:.02s} .btn:nth-child(even){animation-delay:.06s}
+    @keyframes pop{from{opacity:0; transform:scale(.97)} to{opacity:1; transform:scale(1)}}
+
+    /* ========= PER-BUTTON COLORS ========= */
+    .c-blue{background:linear-gradient(180deg,#3a7bfd,#2660ea)}
+    .c-teal{background:linear-gradient(180deg,#22c1b9,#169e97)}
+    .c-purple{background:linear-gradient(180deg,#7a5cff,#5a3df0)}
+    .c-pink{background:linear-gradient(180deg,#ff6ea9,#e34e8a)}
+    .c-green{background:linear-gradient(180deg,#2ecc71,#19b36b)}
+    .c-amber{background:linear-gradient(180deg,#ffb43a,#ff9620)}
+    .c-red{background:linear-gradient(180deg,#ff5757,#e23b3b)}
+    .c-cyan{background:linear-gradient(180deg,#12c2e9,#0aa0c2)}
+    .c-slate{background:linear-gradient(180deg,#64748b,#475569)}
+    .c-indigo{background:linear-gradient(180deg,#6366f1,#4f46e5)}
+    .c-olive{background:linear-gradient(180deg,#8cc84b,#6ea934)}
+    .c-brown{background:linear-gradient(180deg,#b76e3e,#96522a)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1 class="title">Ambulance</h1>
+      </div>
+      <!-- Theme switch -->
+      <div class="theme-toggle">
+        <span style="font-weight:600">Theme</span>
+        <select id="themeSelect" aria-label="Theme">
+          <option value="auto">Auto</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- News (hidden if empty) -->
+    <div id="news" class="news"></div>
+
+    <!-- Shortcuts Mode -->
+    <div class="row">
+      <div class="copy">
+        <p class="t">Shortcuts Mode</p>
+        <p class="s">Enable to run actions in the Shortcuts app. When off, items open in the Ambulance app and some features may be limited.</p>
+      </div>
+      <label class="toggle" aria-label="Toggle Shortcuts Mode">
+        <input id="mode" type="checkbox" />
+        <div class="rail"><div class="knob"></div></div>
+      </label>
+    </div>
+
+    <!-- Buttons -->
+    <div id="grid" class="grid"></div>
+  </div>
+
+  <!-- ===== SVG sprite (you can replace or extend) ===== -->
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="ico-user" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a5 5 0 1 1 0 10a5 5 0 0 1 0-10Zm0 12c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5Z"/></symbol>
+    <symbol id="ico-doc"  viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8Zm-2 14h-2v-2h2Zm0-4h-2v-2h2Zm0-4h-2V6h2Z"/></symbol>
+    <symbol id="ico-plus" viewBox="0 0 24 24"><path fill="currentColor" d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6z"/></symbol>
+    <symbol id="ico-home" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3z"/></symbol>
+    <symbol id="ico-call" viewBox="0 0 24 24"><path fill="currentColor" d="M6.6 10.8c1.44 2.83 3.76 5.14 6.6 6.6l2.2-2.2c.27-.27.67-.36 1.02-.24c1.12.37 2.33.57 3.57.57c.55 0 1 .45 1 1V20c0 .55-.45 1-1 1c-9.39 0-17-7.61-17-17c0-.55.45-1 1-1H7.5c.55 0 1 .45 1 1c0 1.25.2 2.45.57 3.57c.11.35.02.75-.25 1.02z"/></symbol>
+    <symbol id="ico-heart" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04z"/></symbol>
+    <symbol id="ico-globe" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20a10 10 0 0 0 0-20ZM4.93 6.27A8 8 0 0 1 9 4.07V8H6c-.97 0-1.75.78-1.75 1.75V12h2.75v2H5a2 2 0 0 0-2 2v.8a8 8 0 0 1 1.93-10.53ZM12 20a8 8 0 0 1-2-.27V16h2l2-2V9h3a2 2 0 0 0 2-2v-.28A8 8 0 0 1 12 20Z"/></symbol>
+    <symbol id="ico-flow"  viewBox="0 0 24 24"><path fill="currentColor" d="M10 4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm6 8h-4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm0-12h-4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V2Z"/></symbol>
+    <symbol id="ico-wrench" viewBox="0 0 24 24"><path fill="currentColor" d="M22 19l-6.6-6.6a5 5 0 0 0-6.8-6.8L11 8L8 11L4.6 8A5 5 0 0 0 11.4 14.6L19 22z"/></symbol>
+    <symbol id="ico-clip" viewBox="0 0 24 24"><path fill="currentColor" d="M16 6a4 4 0 0 0-8 0v9a6 6 0 1 0 12 0V9h-2v6a4 4 0 1 1-8 0V6a2 2 0 1 1 4 0v8h2z"/></symbol>
+    <symbol id="ico-star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21z"/></symbol>
+    <symbol id="ico-bars" viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2ZM9 17H7v-4h2Zm4 0h-2V6h2Zm4 0h-2V9h2Z"/></symbol>
+    <symbol id="ico-weight" viewBox="0 0 24 24"><path fill="currentColor" d="M7 2h10l3 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM9 8a3 3 0 1 0 6 0"/></symbol>
+    <symbol id="ico-calc" viewBox="0 0 24 24"><path fill="currentColor" d="M7 21h2v-2H7Zm4 0h2v-2h-2Zm4 0h2v-2h-2ZM19 3H5v2h14Zm-4 4H9v6h6Z"/></symbol>
+    <symbol id="ico-pulse" viewBox="0 0 24 24"><path fill="currentColor" d="M3 12h4l2-5l4 10l2-5h6"/></symbol>
+  </svg>
+
+  <script>
+    /* =========================
+       EASY CONFIG — EDIT HERE
+       ========================= */
+
+    // ---- Page Title (also in <title>)
+    // (Already set to "Ambulance" above, edit if needed)
+
+    // ---- News banner (set "" to hide)
+    const NEWS_MESSAGE = ""; // e.g., "New tools shipped. Try Shortcuts Mode."
+
+    // ---- Shortcuts wiring
+    const SHORTCUT_NAME = "Ambulance";      // the single Shortcut to run
+    const SEPARATOR     = "::";             // input format: web::Button Name
+    const USE_RETURN_URL = false;           // true: shortcut returns to your site with results
+    const RETURN_URL    = "https://yourdomain.com/done.html";
+
+    // ---- Sorting mode: "alpha" | "custom"
+    const SORT_MODE = "alpha";
+
+    // ---- Button catalog
+    // iconType: "svg" (uses <use href="#symbolId">) OR "img" (uses <img src="...">)
+    // icon: symbol id (if svg) OR image URL/path (if img)
+    // href: normal link when Shortcuts Mode is OFF (use "#" to leave empty)
+    // showDefault/showShortcuts: visibility per mode
+    // color: one of c-blue, c-teal, c-purple, c-pink, c-green, c-amber, c-red, c-cyan, c-slate, c-indigo, c-olive, c-brown
+    const BUTTONS = [
+      { text:"AP Pediatrics",     iconType:"svg", icon:"ico-user",   color:"c-green",  href:"#", showDefault:false,  showShortcuts:true },
+      { text:"APGAR Score",       iconType:"svg", icon:"ico-star",   color:"c-brown",  href:"#", showDefault:false,  showShortcuts:true },
+      { text:"AS-Call",           iconType:"svg", icon:"ico-call",   color:"c-green",  href:"#", showDefault:false,  showShortcuts:true },
+      { text:"Calculate MAP",     iconType:"svg", icon:"ico-calc",   color:"c-indigo", href:"#", showDefault:false,  showShortcuts:true },
+      { text:"Care Tools",        iconType:"svg", icon:"ico-wrench", color:"c-cyan",   href:"#", showDefault:false,  showShortcuts:true },
+      { text:"CCP Pediatric",     iconType:"svg", icon:"ico-user",   color:"c-blue",   href:"#", showDefault:false,  showShortcuts:true },
+      { text:"CPG Wizard",        iconType:"svg", icon:"ico-plus",   color:"c-purple", href:"#", showDefault:false,  showShortcuts:true },
+      { text:"CPR",               iconType:"svg", icon:"ico-heart",  color:"c-red",    href:"https://shortcuts.niwashibase.com/cpr", showDefault:true,  showShortcuts:false },
+      { text:"Estimated Weight",  iconType:"svg", icon:"ico-weight", color:"c-amber",  href:"#", showDefault:false,  showShortcuts:true },
+      { text:"Flowcharts",        iconType:"svg", icon:"ico-flow",   color:"c-indigo", href:"#", showDefault:false,  showShortcuts:true },
+      { text:"GCS Score",         iconType:"svg", icon:"ico-bars",   color:"c-blue",   href:"#", showDefault:false,  showShortcuts:true },
+      { text:"HOS",               iconType:"svg", icon:"ico-home",   color:"c-amber",  href:"#", showDefault:false,  showShortcuts:true },
+      { text:"RBS Converter",     iconType:"svg", icon:"ico-bars",   color:"c-purple", href:"#", showDefault:false,  showShortcuts:true },
+      { text:"RSI Checklist",     iconType:"svg", icon:"ico-clip",   color:"c-pink",   href:"#", showDefault:false,  showShortcuts:true },
+      { text:"SAT Score",         iconType:"svg", icon:"ico-star",   color:"c-olive",  href:"#", showDefault:false,  showShortcuts:true },
+      { text:"WAAFELSS",          iconType:"svg", icon:"ico-doc",    color:"c-teal",   href:"#", showDefault:false,  showShortcuts:true },
+      { text:"Websites",          iconType:"svg", icon:"ico-globe",  color:"c-slate",  href:"#", showDefault:false,  showShortcuts:false } // hidden in Shortcuts mode
+      // EXAMPLE (image icon):
+      // { text:"My Image Btn", iconType:"img", icon:"/assets/icons/myicon.svg", color:"c-blue", href:"https://example.com", showDefault:true, showShortcuts:true },
+    ];
+
+    /* =========================
+       NO-TOUCH CORE
+       ========================= */
+    const THEME_KEY = "amb_theme";
+
+    function applyTheme(val){ document.documentElement.setAttribute("data-theme", val); localStorage.setItem(THEME_KEY, val) }
+    function initTheme(){ const saved = localStorage.getItem(THEME_KEY) || "auto"; document.getElementById("themeSelect").value = saved; applyTheme(saved) }
+
+    function buildShortcutsUrl(label){
+      const base = `shortcuts://run-shortcut?name=${encodeURIComponent(SHORTCUT_NAME)}&input=text&text=`;
+      const payload = USE_RETURN_URL ? `web${SEPARATOR}${label}${SEPARATOR}${RETURN_URL}` : `web${SEPARATOR}${label}`;
+      return base + encodeURIComponent(payload);
+    }
+
+    function mount(){
+      // Theme
+      initTheme();
+      document.getElementById("themeSelect").addEventListener("change",(e)=>applyTheme(e.target.value));
+
+      // News
+      const newsEl = document.getElementById("news");
+      if (NEWS_MESSAGE && NEWS_MESSAGE.trim() !== ""){ newsEl.textContent = NEWS_MESSAGE.trim(); newsEl.style.display = "block" }
+
+      // Buttons
+      const grid = document.getElementById("grid");
+      const toggle = document.getElementById("mode");
+
+      // Optional: sort alphabetically by text
+      const data = [...BUTTONS];
+      if (SORT_MODE === "alpha"){
+        data.sort((a,b)=>a.text.localeCompare(b.text, undefined, {sensitivity:"base"}));
+      }
+
+      function render(){
+        const useShortcuts = toggle.checked;
+        grid.innerHTML = "";
+
+        data.forEach((btn, i) => {
+          const show = useShortcuts ? (btn.showShortcuts !== false) : (btn.showDefault !== false);
+          if (!show) return;
+
+          const id  = (btn.id || btn.text.toLowerCase().replace(/\s+/g,"-")).replace(/[^a-z0-9\-]/gi,"-");
+          const href = useShortcuts ? buildShortcutsUrl(btn.text) : (btn.href || "#");
+
+          const a = document.createElement("a");
+          a.className = `btn ${btn.color || "c-blue"}`;
+          a.id = id;
+          a.href = href;
+          a.style.animationDelay = `${i*18}ms`;
+
+          // icon renderer
+          const iconHtml = (btn.iconType === "img")
+            ? `<img class="ico" src="${btn.icon}" alt="" />`
+            : `<svg class="ico" aria-hidden="true"><use href="#${btn.icon}"/></svg>`;
+
+          a.innerHTML = `${iconHtml}<span class="label">${btn.text}</span>`;
+
+          if (!useShortcuts && (!btn.href || btn.href === "#")){
+            a.addEventListener("click",(e)=>{ e.preventDefault(); alert("This item has no link yet. Enable Shortcuts Mode or set BUTTONS[].href"); });
+          }
+
+          grid.appendChild(a);
+        });
+      }
+
+      toggle.addEventListener("change", render);
+      render();
+    }
+
+    document.addEventListener("DOMContentLoaded", mount);
+  </script>
+</body>
+</html>

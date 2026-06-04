@@ -1,0 +1,24 @@
+{
+  "websites": [
+    { "🔗 Ambulance App Linktree": "https://bit.ly/qambulance" },
+    { "🌐 Oracle - Leave, Salary, etc.": "http://ebusiness.hamad.qa" },
+    { "📧 HMC - Email": "https://outlook.office365.com/mail" },
+    { "🚨 HMC - OVA": "https://rmpf-hamadqa.msappproxy.net/RL6_Prod/Homecenter/Client/Login.aspx/" },
+    { "📱 Hamad App Store": "https://mobilestore.hamad.qa/" },
+    { "🖥 HMC Apps - Azure Portal": "https://myapps.hamad.qa/" },
+    { "🛠 HMC - SelfService Portal": "https://selfservice.hamad.qa/m/home" },
+    { "🎓 E-Taleem - Training Courses": "https://lms.etaleem.qa/index" },
+    { "📝 Questbase - Training Tests": "https://auth.questbase.com/#/account/emstraining.ems" },
+    { "📂 DHP - CPD Portfolio": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Login/AccreditationUserLogin.aspx?ReturnUrl=%2f_layouts%2f15%2fAuthenticate.aspx%3fSource%3d%252F&Source=%2F" },
+    { "🛂 DHP - Licensing Login Page": "https://dhpportal.moph.gov.qa/en/_layouts/15/LogIn.aspx?ReturnUrl=%2fen%2f_layouts%2fAuthenticate.aspx%3fSource=%2Fen%2FPages%2Fdefault%2Easpx" },
+    { "🗓️ Upcoming CPD Activities": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/UpcomingCPDActivityList.aspx" },
+    { "🎙️ PICU Doc On Call Podcast": "https://picudoconcall.org/episodes" },
+    { "🏥 HMC - My Health": "https://www.hamad.qa/EN/Patient-Information/Patient-Portal/Pages/default.aspx" },
+    { "🔗 HMC - Sogha Website": "https://soghahealth-hamadqa.msappproxy.net/Pages/default.aspx" },
+    { "📥 Install MS Office": "https://portal.office.com/account#installs" },
+    { "💳 Download Sogha Digital Card": "https://itawasol.hamad.qa/EN/HR-Portal/Sogha/Pages/SOGHA-Digital-Card.aspx" },
+    { "🔒 HMC - Account Security Settings": "https://mysignins.microsoft.com/security-info" },
+    { "📱 My HMC Account Devices": "https://myaccount.microsoft.com/device-list" },
+    { "🌍 Ambulance App Website": "https://niwashibase.com" }
+  ]
+}
