@@ -1,5 +1,6 @@
 <!--
   CHANGELOG (2026-06-04):
+  - Expose gate access type globally for tool modules and bump test assets for CCP limited-access fix.
   - Hide global search for Other User and pass gate access type to tool modules.
   - Add iOS gate access policy to hide/block protected document/internal tools for Other User access.
 
@@ -577,7 +578,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260604-gate-test-2";
+  const ASSET_VERSION = "asset-20260604-gate-test-3";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -648,10 +649,13 @@
       .then((data) => {
         gateAccessType = data?.access_type || ACCESS_TYPES.AMBULANCE_STAFF;
         document.body.dataset.accessType = gateAccessType;
+        window.__AMBULANCE_ACCESS_TYPE = gateAccessType;
         return data;
       })
       .catch(() => {
         gateAccessType = ACCESS_TYPES.AMBULANCE_STAFF;
+        document.body.dataset.accessType = gateAccessType;
+        window.__AMBULANCE_ACCESS_TYPE = gateAccessType;
         return null;
       });
     return gateSessionPromise;

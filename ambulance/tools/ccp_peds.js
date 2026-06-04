@@ -1,5 +1,6 @@
 // tools/ccp_peds.js
 // Changelog (2026-06-04):
+// - Resolve gate access type from app shell state so View Formulary stays blocked for Other User.
 // - Hide and block View Formulary for iOS Other User limited access.
 // Changelog (2026-05-01):
 // - Update hardcoded formulary page links for the new CPG page numbering.
@@ -7,7 +8,18 @@
 // - Fix PDF modal back to avoid blank viewer layer; preserve hash/state.
 // - Align age/weight logic, cap Dexamethasone at 12 mg, and clear invalid weight outputs.
 export async function run(mountEl, params = {}){
-  const canViewProtectedContent = params.accessType !== 'non_ambulance_staff';
+  function currentAccessType(){
+    return String(
+      params.accessType ||
+      window.__AMBULANCE_ACCESS_TYPE ||
+      document.body?.dataset?.accessType ||
+      ''
+    );
+  }
+  function canViewProtectedContentNow(){
+    return currentAccessType() !== 'non_ambulance_staff';
+  }
+  const canViewProtectedContent = canViewProtectedContentNow();
   mountEl.innerHTML = `
     <style>
       :root{
@@ -606,7 +618,9 @@ export async function run(mountEl, params = {}){
   function hideAlert(){ alertEl.style.display = 'none'; alertEl.textContent=''; }
 
   function updateFormularyButton(name){
-    if (!canViewProtectedContent) {
+    const canView = canViewProtectedContentNow();
+    viewBtn.classList.toggle('limited', !canView);
+    if (!canView) {
       viewBtn.disabled = true;
       viewBtn.removeAttribute('data-page');
       viewBtn.dataset.title = '';
@@ -1301,7 +1315,7 @@ Ref. Dose Calculation: ${refStr}`) ]};
   }
 
   viewBtn.addEventListener('click', ()=>{
-    if (!canViewProtectedContent) {
+    if (!canViewProtectedContentNow()) {
       alert('Protected Content\\n\\nThis section is available to ambulance staff only. Other app tools remain available.');
       return;
     }
