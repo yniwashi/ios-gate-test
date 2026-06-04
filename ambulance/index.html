@@ -1,5 +1,6 @@
 <!--
   CHANGELOG (2026-06-04):
+  - Add temporary Recheck Access button to test locked/revoked status without clearing install ID.
   - Add temporary test reset button to clear gate/app storage and return to registration.
   - Expose gate access type globally for tool modules and bump test assets for CCP limited-access fix.
   - Hide global search for Other User and pass gate access type to tool modules.
@@ -382,6 +383,8 @@
     .charlie-btn:hover{background:color-mix(in oklab,#C8935A 18%,var(--surface))}
     .gate-reset-btn{color:#c0392b;border-color:color-mix(in oklab,#c0392b 40%,transparent);background:color-mix(in oklab,#c0392b 10%,var(--surface))}
     .gate-reset-btn:hover{background:color-mix(in oklab,#c0392b 16%,var(--surface))}
+    .gate-recheck-btn{color:#7b4d00;border-color:color-mix(in oklab,#d99a00 44%,transparent);background:color-mix(in oklab,#d99a00 12%,var(--surface))}
+    .gate-recheck-btn:hover{background:color-mix(in oklab,#d99a00 18%,var(--surface))}
 
     /* What's New modal */
     .wn-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:color-mix(in oklab,var(--bg) 55%,#02050bed);backdrop-filter:blur(10px);z-index:99998}
@@ -487,6 +490,7 @@
   <div class="updates-cta">
     <button id="wnShowAgain" class="updates-btn" type="button">Updates</button>
     <button id="charlieBtn" class="updates-btn charlie-btn" type="button">Charlie</button>
+    <button id="gateRecheckBtn" class="updates-btn gate-recheck-btn" type="button">Recheck Access</button>
     <button id="gateResetBtn" class="updates-btn gate-reset-btn" type="button">Reset Test</button>
   </div>
 
@@ -582,7 +586,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260604-gate-test-4";
+  const ASSET_VERSION = "asset-20260604-gate-test-5";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -681,6 +685,14 @@
         const keys = await caches.keys();
         await Promise.all(keys.map((key) => caches.delete(key)));
       }
+    } catch (_) {}
+    location.replace("/");
+  }
+
+  async function recheckGateTestAccess() {
+    if (!confirm("Recheck this device access now? This keeps the test device ID.")) return;
+    try {
+      await fetch("/gate/logout", { method: "POST", credentials: "include", cache: "no-store" });
     } catch (_) {}
     location.replace("/");
   }
@@ -1509,6 +1521,7 @@
     if (scDownloadEl) scDownloadEl.href = SHORTCUT_DOWNLOAD_URL || "#";
     wireWhatsNewControls();
     wireCharlieModal();
+    document.getElementById("gateRecheckBtn")?.addEventListener("click", recheckGateTestAccess);
     document.getElementById("gateResetBtn")?.addEventListener("click", resetGateTestState);
     function applyUpdatesButtonVisibility(useShortcuts){
       const trigger = document.querySelector(".updates-cta");
