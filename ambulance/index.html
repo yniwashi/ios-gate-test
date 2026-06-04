@@ -1,4 +1,7 @@
 <!--
+  CHANGELOG (2026-06-04):
+  - Add iOS gate access policy to hide/block protected document/internal tools for Other User access.
+
   CHANGELOG (2026-05-29):
   - Add Charlie modal with introduction video, description, and Discord/Telegram links.
   - Add Charlie pill button on the home screen next to Updates to reopen the modal anytime.
@@ -572,7 +575,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260518-4";
+  const ASSET_VERSION = "asset-20260604-gate-test-1";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -611,6 +614,49 @@
 
   async function getAsCallDataModule() {
     return (await loadSharedModules()).asCallData;
+  }
+
+  const ACCESS_TYPES = {
+    AMBULANCE_STAFF: "ambulance_staff",
+    NON_AMBULANCE_STAFF: "non_ambulance_staff"
+  };
+  const PROTECTED_ACTIONS = new Set(["cpg_wizard", "sop", "flowcharts", "formulary", "as_call", "hos"]);
+  const PROTECTED_SEARCH_TYPES = new Set(["cpg", "sop", "cpm", "flowchart", "formulary"]);
+  let gateSessionPromise = null;
+  let gateAccessType = ACCESS_TYPES.AMBULANCE_STAFF;
+
+  function isProtectedAction(actionId) {
+    return PROTECTED_ACTIONS.has(String(actionId || ""));
+  }
+
+  function canOpenProtectedContent() {
+    return gateAccessType === ACCESS_TYPES.AMBULANCE_STAFF;
+  }
+
+  function isProtectedSearchItem(item) {
+    if (!item) return false;
+    if (item.type === "tool") return isProtectedAction(item.actionId);
+    return PROTECTED_SEARCH_TYPES.has(String(item.type || ""));
+  }
+
+  async function loadGateSession() {
+    if (gateSessionPromise) return gateSessionPromise;
+    gateSessionPromise = fetch("/gate/session-info", { credentials: "include", cache: "no-store" })
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        gateAccessType = data?.access_type || ACCESS_TYPES.AMBULANCE_STAFF;
+        document.body.dataset.accessType = gateAccessType;
+        return data;
+      })
+      .catch(() => {
+        gateAccessType = ACCESS_TYPES.AMBULANCE_STAFF;
+        return null;
+      });
+    return gateSessionPromise;
+  }
+
+  function showProtectedContentDialog() {
+    alert("Protected Content\n\nThis section is available to ambulance staff only. Other app tools remain available.");
   }
   /* =========================
        CONFIG (production)
@@ -937,10 +983,11 @@
         gsToolItems()
       ]);
       const documentTargets = await getGlobalDocumentTargets(GLOBAL_SEARCH_CONFIG);
-      return [
+      const items = [
         ...toolItems,
         ...documentTargets
       ];
+      return canOpenProtectedContent() ? items : items.filter((item) => !isProtectedSearchItem(item));
     })();
     return globalSearchItemsPromise;
   }
@@ -1106,6 +1153,10 @@
       input.blur();
       setSearchActive(true);
       if (item.type === "tool") {
+        if (isProtectedAction(item.actionId) && !canOpenProtectedContent()) {
+          showProtectedContentDialog();
+          return;
+        }
         if (item.actionId) {
           runAction(item.actionId, { title: item.title }, { pushState: true });
         } else if (item.href && item.href !== "#") {
@@ -1114,6 +1165,10 @@
           alert("Coming Soon...");
         }
       } else {
+        if (isProtectedSearchItem(item) && !canOpenProtectedContent()) {
+          showProtectedContentDialog();
+          return;
+        }
         openGlobalPdf(item.page || item.pageStart, item.title, item.type);
       }
     }
@@ -1383,14 +1438,15 @@
     document.addEventListener("touchcancel", hide, { passive: true });
   }
 
-  function initTacOrApp(){
+  async function initTacOrApp(){
     const consent = localStorage.getItem(TAC_KEY) === "1";
-    if (consent) mount(); else { wireTacGate(); showTacGate(); }
+    if (consent) await mount(); else { wireTacGate(); showTacGate(); }
     try { sessionStorage.setItem("ambulance_home_url", location.pathname + location.search); } catch (_) {}
   }
   document.addEventListener("DOMContentLoaded", initTacOrApp);
 
-  function mount(){
+  async function mount(){
+    await loadGateSession();
     initTheme();
     initPullRefresh();
     const appVersionLabel = document.getElementById("appVersionLabel");
@@ -1459,6 +1515,7 @@ function render(){
   const useShortcuts = toggle.checked;
   document.body.classList.toggle("shortcuts-mode-on", useShortcuts);
   if (useShortcuts) globalSearch?.clear();
+  const allowProtected = canOpenProtectedContent();
 
   // --- News card tied to Shortcuts Mode ---
   const newsEl = document.getElementById("news");
@@ -1509,7 +1566,8 @@ function render(){
     const items = sec.items
       .map(name => map.get(name))
       .filter(Boolean)
-      .filter(btn => useShortcuts ? (btn.showShortcuts !== false) : (btn.showDefault !== false));
+      .filter(btn => useShortcuts ? (btn.showShortcuts !== false) : (btn.showDefault !== false))
+      .filter(btn => allowProtected || !isProtectedAction(btn.actionId));
     if (!items.length) continue;
 
     const secEl = document.createElement("section");
@@ -1543,6 +1601,10 @@ function render(){
         if (btn.actionId){
           a.addEventListener("click", (e) => {
             e.preventDefault();
+            if (isProtectedAction(btn.actionId) && !canOpenProtectedContent()) {
+              showProtectedContentDialog();
+              return;
+            }
             runAction(btn.actionId, { title: btn.text }, { pushState: true });
           });
         } else if (!btn.href || btn.href === "#"){
@@ -1691,6 +1753,13 @@ function wireCharlieModal(){
   // Router / action loader
   async function runAction(actionId, params = {}, options = {}) {
     try {
+      if (isProtectedAction(actionId) && !canOpenProtectedContent()) {
+        showProtectedContentDialog();
+        if (options.initialLoad) {
+          history.replaceState(null, "", location.pathname + location.search);
+        }
+        return;
+      }
       const mountEl = document.getElementById("panel-body");
       mountEl.innerHTML = "";
       openPanel(params.title || (actionId === "community" ? "Join the Community" : actionId.toUpperCase()));
