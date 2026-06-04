@@ -1,5 +1,6 @@
 // ios-ambulance-gate-test-worker.js
 // CHANGELOG (2026-06-04):
+// - Add required registration device model selector and use the selected model as device_label.
 // - Improve gate screen spacing/support icons and remove scroll blur that dismissed the iOS keyboard while typing.
 // - Improve gate API error handling so validation responses show clear messages instead of connection errors.
 // - Add first-name session storage, weak iOS fingerprint hash, support view, access-granted view, and locked retry countdown.
@@ -480,8 +481,8 @@ function gatePageHtml() {
   <div class="brand"><img class="logo" src="/ambulance/images/logo.png" alt="Ambulance"><div><h1>Ambulance Access</h1><p id="subtitle">Checking your access...</p></div></div>
   <div id="loadingView" class="status"><span class="spinner" aria-hidden="true"></span><span id="loadingText">Checking access...</span></div>
   <section id="choiceView" class="hidden"><h2>Choose Access Type</h2><p class="message">Choose the access type that applies to you. Protected ambulance documents and internal resources are available to ambulance staff only.</p><div class="choice-grid"><button class="choice primary" id="staffChoice" type="button"><span><strong>Ambulance Staff</strong><span>Use your HMCAS email and corporation number.</span></span><b>&gt;</b></button><button class="choice" id="otherChoice" type="button"><span><strong>Other User</strong><span>Use general tools without protected ambulance documents.</span></span><b>&gt;</b></button></div><div class="actions"><button class="btn" type="button" data-support>Contact Support</button></div></section>
-  <section id="staffView" class="hidden"><h2>Ambulance Staff Access</h2><p class="message">Please complete staff access registration to continue. Your details are used to manage app access for this device.</p><form id="staffForm" novalidate><label>HMCAS Email<input name="email" type="email" placeholder="name@hamad.qa" autocomplete="email" autocapitalize="none" required></label><div class="row"><label>First Name<input name="first_name" autocomplete="given-name" autocapitalize="words" maxlength="60" required></label><label>Last Name<input name="last_name" autocomplete="family-name" autocapitalize="words" maxlength="60" required></label></div><div class="row"><label>Corporation Number<input name="corp_number" inputmode="numeric" pattern="[0-9]*" required></label><label>Role<select name="role" required><option>AP</option><option>CCA</option><option>CCP</option><option>Supervisor</option><option>Other</option></select></label></div><label>Phone Number <small>Optional, Qatar number</small><div class="phone-field"><span>+974</span><input name="phone" inputmode="tel" autocomplete="tel" placeholder="Optional"></div></label><div class="error" id="staffError"></div><div class="actions"><button class="btn primary" type="submit">Continue</button><button class="btn" type="button" data-back>Back</button><button class="btn" type="button" data-support>Support</button></div></form></section>
-  <section id="otherView" class="hidden"><h2>Other User Access</h2><p class="message">Register for limited access to app tools. Protected ambulance documents and internal resources are not available with this access type.</p><form id="otherForm" novalidate><label>Email<input name="email" type="email" autocomplete="email" autocapitalize="none" required></label><div class="row"><label>First Name<input name="first_name" autocomplete="given-name" autocapitalize="words" maxlength="60" required></label><label>Last Name<input name="last_name" autocomplete="family-name" autocapitalize="words" maxlength="60" required></label></div><label>Profession<select name="profession_select" id="professionSelect" required><option>Doctor</option><option>EMT</option><option>Medical Student</option><option>Nurse</option><option>Paramedic</option><option>Physician Assistant</option><option>Respiratory Therapist</option><option>Student</option><option>Other</option></select></label><label id="otherProfessionLabel" class="hidden">Profession Details<input name="profession_other" maxlength="40" placeholder="Enter profession"></label><label>Phone Number <small>Optional, Qatar number</small><div class="phone-field"><span>+974</span><input name="phone" inputmode="tel" autocomplete="tel" placeholder="Optional"></div></label><div class="error" id="otherError"></div><div class="actions"><button class="btn primary" type="submit">Continue</button><button class="btn" type="button" data-back>Back</button><button class="btn" type="button" data-support>Support</button></div></form></section>
+  <section id="staffView" class="hidden"><h2>Ambulance Staff Access</h2><p class="message">Please complete staff access registration to continue. Your details are used to manage app access for this device.</p><form id="staffForm" novalidate><label>HMCAS Email<input name="email" type="email" placeholder="name@hamad.qa" autocomplete="email" autocapitalize="none" required></label><div class="row"><label>First Name<input name="first_name" autocomplete="given-name" autocapitalize="words" maxlength="60" required></label><label>Last Name<input name="last_name" autocomplete="family-name" autocapitalize="words" maxlength="60" required></label></div><label>Device Model<select name="device_model" required><option value="">Select device model</option></select></label><div class="row"><label>Corporation Number<input name="corp_number" inputmode="numeric" pattern="[0-9]*" required></label><label>Role<select name="role" required><option>AP</option><option>CCA</option><option>CCP</option><option>Supervisor</option><option>Other</option></select></label></div><label>Phone Number <small>Optional, Qatar number</small><div class="phone-field"><span>+974</span><input name="phone" inputmode="tel" autocomplete="tel" placeholder="Optional"></div></label><div class="error" id="staffError"></div><div class="actions"><button class="btn primary" type="submit">Continue</button><button class="btn" type="button" data-back>Back</button><button class="btn" type="button" data-support>Support</button></div></form></section>
+  <section id="otherView" class="hidden"><h2>Other User Access</h2><p class="message">Register for limited access to app tools. Protected ambulance documents and internal resources are not available with this access type.</p><form id="otherForm" novalidate><label>Email<input name="email" type="email" autocomplete="email" autocapitalize="none" required></label><div class="row"><label>First Name<input name="first_name" autocomplete="given-name" autocapitalize="words" maxlength="60" required></label><label>Last Name<input name="last_name" autocomplete="family-name" autocapitalize="words" maxlength="60" required></label></div><label>Device Model<select name="device_model" required><option value="">Select device model</option></select></label><label>Profession<select name="profession_select" id="professionSelect" required><option>Doctor</option><option>EMT</option><option>Medical Student</option><option>Nurse</option><option>Paramedic</option><option>Physician Assistant</option><option>Respiratory Therapist</option><option>Student</option><option>Other</option></select></label><label id="otherProfessionLabel" class="hidden">Profession Details<input name="profession_other" maxlength="40" placeholder="Enter profession"></label><label>Phone Number <small>Optional, Qatar number</small><div class="phone-field"><span>+974</span><input name="phone" inputmode="tel" autocomplete="tel" placeholder="Optional"></div></label><div class="error" id="otherError"></div><div class="actions"><button class="btn primary" type="submit">Continue</button><button class="btn" type="button" data-back>Back</button><button class="btn" type="button" data-support>Support</button></div></form></section>
   <section id="confirmView" class="hidden"><h2 id="confirmTitle">Confirm Details</h2><p class="message" id="confirmMessage">Review your details before continuing.</p><div class="confirm-list" id="confirmList"></div><div class="error" id="confirmError"></div><div class="actions"><button class="btn primary" id="confirmSubmitBtn" type="button">Confirm and Continue</button><button class="btn" id="confirmEditBtn" type="button">Edit</button></div></section>
   <section id="grantedView" class="hidden"><div class="granted-icon">✓</div><h2>Access Granted</h2><p class="message" id="grantedMessage">Your Ambulance access is ready. You can now continue to the App.</p><div class="actions"><button class="btn primary" id="openAppBtn" type="button">Continue</button></div></section>
   <section id="lockedView" class="hidden"><div class="locked-icon">!</div><h2 id="lockedTitle">Access Locked</h2><p id="lockedMessage">Access for this device is currently locked.</p><div class="retry-panel" id="retryPanel"><span id="retryLabel">Try again available in</span><b id="retryValue">--:--</b></div><div class="actions"><button class="btn primary" id="tryAgainBtn" type="button">Try Again</button><button class="btn" type="button" data-support>Contact Support</button></div></section>
@@ -498,6 +499,7 @@ function gatePageHtml() {
   const launchMessages = ["Preparing Ambulance...", "Checking access...", "Loading your dashboard...", "Getting things ready..."];
   const roles = ["AP", "CCA", "CCP", "Supervisor", "Other"];
   const professions = ["Doctor", "EMT", "Medical Student", "Nurse", "Paramedic", "Physician Assistant", "Respiratory Therapist", "Student", "Other"];
+  const deviceModels = ["iPhone 17 Pro", "iPhone 17 Pro Max", "iPhone Air", "iPhone 17", "iPhone 17e", "iPhone 16 Pro", "iPhone 16 Pro Max", "iPhone 16", "iPhone 16 Plus", "iPhone 16e", "iPhone 15 Pro", "iPhone 15 Pro Max", "iPhone 15", "iPhone 15 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max", "iPhone 14", "iPhone 14 Plus", "iPhone 13 Pro", "iPhone 13 Pro Max", "iPhone 13 mini", "iPhone 13", "iPhone SE (3rd generation)", "iPhone 12 Pro", "iPhone 12 Pro Max", "iPhone 12 mini", "iPhone 12", "iPhone 11 Pro", "iPhone 11 Pro Max", "iPhone 11", "iPhone SE (2nd generation)", "iPhone XS", "iPhone XS Max", "iPhone XR", "iPhone X", "iPhone 8 Plus", "iPhone 8", "iPhone 7 Plus", "iPhone 7", "iPad Pro 13-in. (M5)", "iPad Pro 11-in. (M5)", "iPad Air 13-in. (M4)", "iPad Air 11-in. (M4)", "iPad (A16)", "iPad mini (A17 Pro)", "iPad Pro 13-in. (M4)", "iPad Pro 12.9-in. (6th generation)", "iPad Pro 12.9-in. (5th generation)", "iPad Pro 12.9-in. (4th generation)", "iPad Pro 12.9-in. (3rd generation)", "iPad Pro 12.9-in. (2nd generation)", "iPad Pro 12.9-in. (1st generation)", "iPad Pro 11-in. (M4)", "iPad Pro 11-in. (4th generation)", "iPad Pro 11-in. (3rd generation)", "iPad Pro 11-in. (2nd generation)", "iPad Pro 11-in. (1st generation)", "iPad Pro 10.5-in.", "iPad Pro 9.7-in.", "iPad Air 13-in. (M3)", "iPad Air 11-in. (M3)", "iPad Air 13-in. (M2)", "iPad Air 11-in. (M2)", "iPad Air (5th generation)", "iPad Air (4th generation)", "iPad Air (3rd generation)", "iPad Air 2", "iPad Air (1st generation)", "iPad (10th generation)", "iPad (9th generation)", "iPad (8th generation)", "iPad (7th generation)", "iPad (6th generation)", "iPad (5th generation)", "iPad mini (6th generation)", "iPad mini (5th generation)", "iPad mini 4", "iPad mini 3", "iPad mini 2", "Other iPhone", "Other iPad", "Other iOS device"];
   const subtitle = document.getElementById("subtitle");
   const loadingText = document.getElementById("loadingText");
   const staffError = document.getElementById("staffError");
@@ -510,6 +512,9 @@ function gatePageHtml() {
   let supportReturnView = "choiceView";
   let currentLockedData = null;
   let retryTimer = null;
+  document.querySelectorAll('select[name="device_model"]').forEach((select) => {
+    select.insertAdjacentHTML("beforeend", deviceModels.map((model) => '<option>' + model + '</option>').join(""));
+  });
   let launchTimer = null;
   let launchIndex = 0;
   const show = (id) => {
@@ -551,7 +556,7 @@ function gatePageHtml() {
     return hash;
   }
   async function payload(extra = {}) {
-    return { ...extra, platform: "ios", install_id: installId(), app_version: APP_VERSION, device_label: deviceLabel(), device_fingerprint_hash: await deviceFingerprintHash() };
+    return { platform: "ios", install_id: installId(), app_version: APP_VERSION, device_label: deviceLabel(), ...extra, device_fingerprint_hash: await deviceFingerprintHash() };
   }
   const validEmail = (email) => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) && email.length <= 254;
   const cleanName = (value) => String(value || "").replace(/[\\x00-\\x1f\\x7f]+/g, " ").replace(/\\s+/g, " ").replace(/[^\\p{L}\\p{M} .'-]/gu, "").replace(/\\s+/g, " ").trim().slice(0, 60).trim();
@@ -738,6 +743,7 @@ function gatePageHtml() {
     const username = email.split("@")[0] || "";
     const firstName = cleanName(raw.first_name);
     const lastName = cleanName(raw.last_name);
+    const selectedDevice = String(raw.device_model || "").trim();
     const corpNumber = normalizeCorpNumber(raw.corp_number);
     const role = String(raw.role || "").trim();
     const phone = normalizeQatarPhone(raw.phone);
@@ -747,11 +753,12 @@ function gatePageHtml() {
     form.phone.value = phone ? phone.replace(/^\\+974/, "") : String(raw.phone || "").trim();
     if (!email.endsWith("@hamad.qa") || username.length < 3 || /^\\d+$/.test(username)) return { error: "Enter a valid HMCAS work email." };
     if (!firstName || !lastName) return { error: "Enter your first and last name." };
+    if (!deviceModels.includes(selectedDevice)) return { error: "Select your device model." };
     if (!corpNumber) return { error: "Enter a valid HMC corporation number." };
     if (!roles.includes(role)) return { error: "Select a valid role." };
     return {
-      body: { email, first_name: firstName, last_name: lastName, corp_number: corpNumber, role, phone },
-      rows: [["Name", firstName + " " + lastName], ["Email", email], ["Corporation Number", corpNumber], ["Role", role], ["Phone", phone || "Not provided"]]
+      body: { email, first_name: firstName, last_name: lastName, device_label: selectedDevice, corp_number: corpNumber, role, phone },
+      rows: [["Name", firstName + " " + lastName], ["Email", email], ["Device", selectedDevice], ["Corporation Number", corpNumber], ["Role", role], ["Phone", phone || "Not provided"]]
     };
   }
   function otherInput(form) {
@@ -759,6 +766,7 @@ function gatePageHtml() {
     const email = String(raw.email || "").trim().toLowerCase();
     const firstName = cleanName(raw.first_name);
     const lastName = cleanName(raw.last_name);
+    const selectedDevice = String(raw.device_model || "").trim();
     const selected = String(raw.profession_select || "").trim();
     const profession = selected === "Other" ? cleanProfession(raw.profession_other) : selected;
     const phone = normalizeQatarPhone(raw.phone);
@@ -767,10 +775,11 @@ function gatePageHtml() {
     form.phone.value = phone ? phone.replace(/^\\+974/, "") : String(raw.phone || "").trim();
     if (!validEmail(email)) return { error: "Enter a valid email address." };
     if (!firstName || !lastName) return { error: "Enter your first and last name." };
+    if (!deviceModels.includes(selectedDevice)) return { error: "Select your device model." };
     if (!professions.includes(selected) || !profession) return { error: "Select your profession." };
     return {
-      body: { email, first_name: firstName, last_name: lastName, profession, phone },
-      rows: [["Name", firstName + " " + lastName], ["Email", email], ["Access", "Limited"], ["Profession", profession], ["Phone", phone || "Not provided"]]
+      body: { email, first_name: firstName, last_name: lastName, device_label: selectedDevice, profession, phone },
+      rows: [["Name", firstName + " " + lastName], ["Email", email], ["Device", selectedDevice], ["Access", "Limited"], ["Profession", profession], ["Phone", phone || "Not provided"]]
     };
   }
   async function submitPending() {
