@@ -1,5 +1,6 @@
 // ios-ambulance-gate-test-worker.js
 // CHANGELOG (2026-06-04):
+// - Add safe debug-config endpoint to verify test Worker API/static origin settings.
 // - Serve the testing gate page directly from the Worker root so production root files stay untouched.
 // - Add testing-only iOS Access Gate Worker draft that proxies the shared Ambulance Access Gate API.
 // - Mint signed wc cookies only after active access, and protect app-owned routes on the test domain.
@@ -46,6 +47,10 @@ export default {
 
     if (path === "/gate/session-info" && req.method === "GET") {
       return sessionInfo(req, env);
+    }
+
+    if (path === "/gate/debug-config" && req.method === "GET") {
+      return debugConfig(env);
     }
 
     if (path === "/gate/check" && req.method === "POST") {
@@ -192,6 +197,33 @@ async function callAccessApi(env, endpoint, body) {
     http_status: res.status,
     ...data
   };
+}
+
+async function debugConfig(env) {
+  const apiBase = String(env.ACCESS_GATE_API_BASE || DEFAULT_ACCESS_GATE_API_BASE).replace(/\/+$/, "");
+  const staticOrigin = String(env.STATIC_ORIGIN || DEFAULT_STATIC_ORIGIN).replace(/\/+$/, "");
+  let ping = { ok: false };
+  try {
+    const res = await fetch(`${apiBase}/ping`, { method: "GET" });
+    ping = {
+      ok: res.ok,
+      status: res.status,
+      body_start: (await res.text()).slice(0, 160)
+    };
+  } catch (err) {
+    ping = {
+      ok: false,
+      error: String(err?.message || err).slice(0, 160)
+    };
+  }
+
+  return json({
+    ok: true,
+    access_gate_api_base: apiBase,
+    static_origin: staticOrigin,
+    has_signing_key: Boolean(env.SIGNING_KEY),
+    ping
+  }, 200);
 }
 
 async function responseWithSessionCookie(req, env, api, installId) {
