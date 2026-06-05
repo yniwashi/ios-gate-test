@@ -1,5 +1,6 @@
 // /ambulance/tools/peds_vitals.js
 // CHANGELOG (2026-06-05):
+// - Remove implementation-source reference from the visible intro text.
 // - Add the Android pediatric Normal Vital Signs reference table to the iOS App.
 
 export async function run(root) {
@@ -23,7 +24,7 @@ export async function run(root) {
       :root[data-theme="dark"] .pvs-intro{background:#20243B;border-color:#4F5B93;color:#BFC8FF}
     </style>
     <div class="pvs-wrap">
-      <p class="pvs-intro">Normal pediatric vital-sign ranges used by the Android Ambulance App.</p>
+      <p class="pvs-intro">Normal pediatric vital-sign ranges used by the Ambulance App.</p>
       <div class="pvs-table-wrap">
         <table class="pvs-table">
           <thead><tr><th>Age</th><th>Weight kg</th><th>RR /min</th><th>HR /min</th><th>SBP mmHg</th><th>DBP mmHg</th><th>Temp °C</th><th>RBS mmol/L</th></tr></thead>

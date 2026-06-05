@@ -1,5 +1,6 @@
 <!--
   CHANGELOG (2026-06-05):
+  - Remove implementation-source references from visible category descriptions.
   - Bump the testing asset key for deployment of the Pediatrics, references, Calculators, and router updates.
   - Fix the panel Back button passing its click event as a history-navigation flag.
   - Prevent stale asynchronous tool loads from replacing the currently selected tool.
@@ -1027,7 +1028,7 @@
     },
     category_guidelines: {
       title: "Guidelines",
-      intro: "Open the same document groups available in the Android Guidelines screen.",
+      intro: "Open document groups and clinical references.",
       protected: true,
       sections: [
         { title: "Documents", items: [
@@ -1043,7 +1044,7 @@
     },
     category_calculators: {
       title: "Infusions & Calculations",
-      intro: "Infusions, calculations, and conversions from the Android Calculators screen.",
+      intro: "Infusions, calculations, and conversions.",
       sections: [
         { title: "Infusions", items: [
           { title:"Adult Infusions", subtitle:"Adult medication infusion references", icon:"fluid", color:"#2196F3", actionId:"adult_infusions" },
@@ -1063,7 +1064,7 @@
     },
     category_scores: {
       title: "Scores",
-      intro: "Choose a clinical score, matching the Android score selector.",
+      intro: "Choose a clinical score.",
       sections: [
         { title: "Clinical Scores", items: [
           { title:"GCS", subtitle:"Adult Glasgow Coma Scale", icon:"psychology_alt", color:"#1CCC0C", actionId:"gcs" },
