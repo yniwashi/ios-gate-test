@@ -1,5 +1,7 @@
 <!--
   CHANGELOG (2026-06-05):
+  - Restore left-aligned greeting content, remove the blue fallback and dimming overlay, and show the road image at full brightness.
+  - Reduce home tile height, increase label size, and add more spacing between menu buttons.
   - Center the greeting icon and message, remove the tap hint, and match the Android status wording.
   - Move Theme below the menu so the top-right header contains only the Notices bell.
   - Make Notice show the current in-app update message and Updates open the iOS What's New website.
@@ -165,16 +167,12 @@
     }
     .app-home-status{display:block}
     .app-greeting{
-      position:relative;min-height:66px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 18px;
-      color:#fff;overflow:hidden;cursor:pointer;isolation:isolate;background:#075985;
+      position:relative;min-height:66px;display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:0 24px;
+      color:#fff;overflow:hidden;cursor:pointer;isolation:isolate;background:transparent;
       transition:transform 180ms ease,filter 180ms ease;
     }
     .app-greeting:active{transform:scale(.992);filter:brightness(1.04)}
-    .app-greeting-road{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
-    .app-greeting-shade{
-      position:absolute;inset:0;z-index:-1;
-      background:linear-gradient(90deg,rgba(2,18,38,.46),rgba(2,35,64,.32) 50%,rgba(2,18,38,.34));
-    }
+    .app-greeting-road{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
     .app-greeting-glow{
       position:absolute;inset:0 0 0 auto;width:42%;opacity:0;pointer-events:none;
       background:radial-gradient(circle at 72% 48%,rgba(247,253,255,.85),rgba(223,244,255,.34) 38%,transparent 72%);
@@ -267,12 +265,12 @@
 
     /* Grid & buttons */
     .grid{display:grid; gap:8px; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); grid-auto-flow:dense}
-    .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+    .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
     @media (orientation:landscape){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
     .btn{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-decoration:none; color:var(--btn-fg,#fff); border-radius:12px; padding:10px 10px; min-height:72px; font-size:13px; font-weight:800; letter-spacing:.2px; text-align:center; box-shadow:var(--shadow); transition:transform var(--speed), box-shadow var(--speed), filter var(--speed)}
     .btn{
-      position:relative;overflow:hidden;min-height:46px;border-radius:8px;padding:6px 9px;
-      flex-direction:row;gap:7px;justify-content:center;text-align:center;font-size:12px;
+      position:relative;overflow:hidden;min-height:40px;border-radius:8px;padding:4px 9px;
+      flex-direction:row;gap:7px;justify-content:center;text-align:center;font-size:14px;
       border:1px solid rgba(255,255,255,.22);
       box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 2px 0 rgba(15,23,42,.16),0 4px 9px rgba(15,23,42,.13);
     }
@@ -282,7 +280,7 @@
     }
     .btn .material-symbols-rounded{
       position:relative;z-index:1;display:flex;align-items:center;justify-content:center;
-      font-size:21px;flex:none;
+      font-size:20px;flex:none;
     }
     .btn .label{position:relative;z-index:1;min-width:0;overflow-wrap:anywhere}
     .btn.app-wide-tile{grid-column:1/-1}
@@ -492,7 +490,6 @@
   <section class="app-home-status" id="appHomeStatus" aria-label="App status">
     <div class="app-greeting" id="appGreeting" role="button" tabindex="0" aria-label="Change greeting">
       <img class="app-greeting-road" src="images/main_greeting_banner_road.png" alt="">
-      <span class="app-greeting-shade" aria-hidden="true"></span>
       <span class="app-greeting-glow" aria-hidden="true"></span>
       <img class="app-greeting-icon" id="appGreetingIcon" src="images/ic_greeting_ambulance_flat.png" alt="">
       <span class="app-greeting-text" id="appGreetingText">Stay safe</span>
