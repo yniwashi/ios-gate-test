@@ -1,5 +1,9 @@
 <!--
   CHANGELOG (2026-06-05):
+  - Center the greeting icon and message, remove the tap hint, and match the Android status wording.
+  - Move Theme below the menu so the top-right header contains only the Notices bell.
+  - Make Notice show the current in-app update message and Updates open the iOS What's New website.
+  - Compact and center home menu buttons, round status actions, and widen unpaired final section items.
   - Polish Android-style home and nested buttons with stronger hierarchy, spacing, icon treatment, and theme-aware surfaces.
   - Use the Android road banner and greeting icon assets with the complete Android greeting message rotation.
   - Change the greeting on tap with the Android press/glow interaction.
@@ -144,7 +148,7 @@
     .brand-title{display:flex; align-items:baseline; gap:7px; min-width:0}
     .title{ margin:0; font-size:clamp(20px,3.8vw,26px); font-weight:800; letter-spacing:.25px }
     .app-version{font-size:11px;font-weight:850;color:var(--muted);letter-spacing:.02em;white-space:nowrap}
-    .theme-toggle{background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:4px 10px; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text)}
+    .theme-toggle{background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:5px 11px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text)}
     .theme-toggle select{appearance:none; background:transparent; border:none; color:inherit; font:inherit; outline:none; cursor:pointer}
     .top-actions{display:flex;align-items:center;gap:7px}
     .notice-bell{
@@ -161,7 +165,7 @@
     }
     .app-home-status{display:block}
     .app-greeting{
-      position:relative;min-height:66px;display:flex;align-items:center;gap:12px;padding:0 22px;
+      position:relative;min-height:66px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 18px;
       color:#fff;overflow:hidden;cursor:pointer;isolation:isolate;background:#075985;
       transition:transform 180ms ease,filter 180ms ease;
     }
@@ -169,7 +173,7 @@
     .app-greeting-road{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
     .app-greeting-shade{
       position:absolute;inset:0;z-index:-1;
-      background:linear-gradient(90deg,rgba(2,18,38,.72),rgba(2,35,64,.35) 58%,rgba(2,18,38,.12));
+      background:linear-gradient(90deg,rgba(2,18,38,.46),rgba(2,35,64,.32) 50%,rgba(2,18,38,.34));
     }
     .app-greeting-glow{
       position:absolute;inset:0 0 0 auto;width:42%;opacity:0;pointer-events:none;
@@ -177,20 +181,16 @@
     }
     .app-greeting.tap .app-greeting-glow{animation:greetingGlow 350ms ease-out}
     @keyframes greetingGlow{0%{opacity:0}28%{opacity:1}100%{opacity:0}}
-    .app-greeting-icon{width:34px;height:34px;object-fit:contain;position:relative;z-index:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.34))}
+    .app-greeting-icon{width:32px;height:32px;object-fit:contain;position:relative;z-index:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.34))}
     .app-greeting-text{
       position:relative;z-index:1;min-width:0;font-size:15px;font-weight:900;line-height:1.2;
       text-shadow:0 1px 4px rgba(0,0,0,.75);
-    }
-    .app-greeting-hint{
-      position:absolute;right:12px;bottom:6px;z-index:1;color:rgba(255,255,255,.76);
-      font-size:9px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.65);
     }
     .app-status-row{display:flex;align-items:center;gap:9px;padding:10px 16px 8px}
     .app-status-dot{width:9px;height:9px;border-radius:50%;background:#16a34a;box-shadow:0 0 0 3px color-mix(in oklab,#16a34a 15%,transparent)}
     .app-status-copy{font-size:13px;font-weight:800;color:color-mix(in oklab,var(--text) 82%,var(--muted))}
     .app-status-actions{display:flex;gap:8px;padding:0 12px 11px}
-    .app-status-actions .updates-btn{flex:1;min-height:36px;border-radius:8px}
+    .app-status-actions .updates-btn{flex:1;min-height:36px;border-radius:999px}
 
     /* Global search */
     .global-search{position:relative; display:flex; flex-direction:column; gap:6px}
@@ -267,26 +267,25 @@
 
     /* Grid & buttons */
     .grid{display:grid; gap:8px; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); grid-auto-flow:dense}
-    .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
     @media (orientation:landscape){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
     .btn{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-decoration:none; color:var(--btn-fg,#fff); border-radius:12px; padding:10px 10px; min-height:72px; font-size:13px; font-weight:800; letter-spacing:.2px; text-align:center; box-shadow:var(--shadow); transition:transform var(--speed), box-shadow var(--speed), filter var(--speed)}
     .btn{
-      position:relative;overflow:hidden;min-height:56px;border-radius:8px;padding:8px 11px;
-      flex-direction:row;gap:9px;justify-content:flex-start;text-align:left;font-size:13px;
+      position:relative;overflow:hidden;min-height:46px;border-radius:8px;padding:6px 9px;
+      flex-direction:row;gap:7px;justify-content:center;text-align:center;font-size:12px;
       border:1px solid rgba(255,255,255,.22);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 2px 0 rgba(15,23,42,.18),0 5px 11px rgba(15,23,42,.16);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 2px 0 rgba(15,23,42,.16),0 4px 9px rgba(15,23,42,.13);
     }
     .btn::after{
       content:"";position:absolute;left:0;right:0;top:0;height:45%;
       background:linear-gradient(180deg,rgba(255,255,255,.14),transparent);pointer-events:none;
     }
     .btn .material-symbols-rounded{
-      position:relative;z-index:1;width:32px;height:32px;border-radius:9px;display:flex;
-      align-items:center;justify-content:center;font-size:21px;flex:none;
-      background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);
+      position:relative;z-index:1;display:flex;align-items:center;justify-content:center;
+      font-size:21px;flex:none;
     }
     .btn .label{position:relative;z-index:1;min-width:0;overflow-wrap:anywhere}
-    .btn.app-wide-tile{grid-column:1/-1;justify-content:center}
+    .btn.app-wide-tile{grid-column:1/-1}
     .btn:hover{ transform:translateY(-2px); box-shadow:var(--shadow-2) }
     .btn:active{ transform:translateY(0) scale(.98) }
     .label{ opacity:.98; line-height:1.12 }
@@ -344,6 +343,7 @@
     }
     .category-heading::after{content:"";height:1px;flex:1;background:var(--border)}
     .category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .category-grid > .category-item:last-child:nth-child(odd){grid-column:1/-1}
     .category-item{
       appearance:none;position:relative;width:100%;min-height:78px;border:1px solid
       color-mix(in oklab,var(--item-color,var(--accent)) 22%,var(--border));border-radius:8px;
@@ -381,6 +381,8 @@
       .category-grid{grid-template-columns:1fr}
       .btn{font-size:12px;padding-inline:8px}
     }
+
+    .app-footer-controls{display:flex;justify-content:center;padding:4px 0 2px}
 
     /* Panel */
     #panel{ position: fixed; inset: 0; background: transparent; z-index: 9999; }
@@ -484,14 +486,6 @@
       <button id="noticesBellBtn" class="notice-bell" type="button" aria-label="Notices">
         <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
       </button>
-      <div class="theme-toggle">
-        <span style="font-weight:600">Theme</span>
-        <select id="themeSelect" aria-label="Theme">
-          <option value="auto">Auto</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-      </div>
     </div>
   </div>
 
@@ -502,11 +496,10 @@
       <span class="app-greeting-glow" aria-hidden="true"></span>
       <img class="app-greeting-icon" id="appGreetingIcon" src="images/ic_greeting_ambulance_flat.png" alt="">
       <span class="app-greeting-text" id="appGreetingText">Stay safe</span>
-      <span class="app-greeting-hint">Tap for another</span>
     </div>
     <div class="app-status-row">
       <span class="app-status-dot" aria-hidden="true"></span>
-      <span class="app-status-copy" id="appStatusCopy">Ambulance App is ready</span>
+      <span class="app-status-copy" id="appStatusCopy">Up to date · Ambulance v0.3</span>
     </div>
     <div class="app-status-actions">
       <button id="appNoticeBtn" class="updates-btn" type="button">Notice</button>
@@ -541,6 +534,17 @@
 
   <!-- Sections container -->
   <div id="sections" class="sections"></div>
+
+  <div class="app-footer-controls">
+    <label class="theme-toggle">
+      <span style="font-weight:700">Theme</span>
+      <select id="themeSelect" aria-label="Theme">
+        <option value="auto">Auto</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </label>
+  </div>
 </div>
 
 <!-- Results Panel -->
@@ -1477,7 +1481,7 @@
         }
       });
     }
-    if (status) status.textContent = `Ambulance ${APP_VERSION} · App Mode`;
+    if (status) status.textContent = `Up to date · Ambulance ${APP_VERSION}`;
   }
 
   function openPanel(title){
@@ -1633,11 +1637,13 @@
     wireWhatsNewControls();
     wireCharlieModal();
     document.getElementById("appUpdatesBtn")?.addEventListener("click", () => {
+      location.href = "https://www.niwashibase.com/whats-new/?platform=ios";
+    });
+    document.getElementById("appCharlieBtn")?.addEventListener("click", openCharlieModal);
+    document.getElementById("appNoticeBtn")?.addEventListener("click", () => {
       localStorage.removeItem(WHATS_NEW_KEY);
       handleWhatsNew();
     });
-    document.getElementById("appCharlieBtn")?.addEventListener("click", openCharlieModal);
-    document.getElementById("appNoticeBtn")?.addEventListener("click", () => showComingSoon("Notice"));
     document.getElementById("noticesBellBtn")?.addEventListener("click", () => showComingSoon("Notices"));
     document.getElementById("gateRecheckBtn")?.addEventListener("click", recheckGateTestAccess);
     document.getElementById("gateResetBtn")?.addEventListener("click", resetGateTestState);
@@ -1680,7 +1686,9 @@ function render(){
 
       const a = document.createElement("a");
       a.className = `btn ${btn.color || "c-blue"}`;
-      if (items.length === 1) a.classList.add("app-wide-tile");
+      if (items.length === 1 || (items.length % 2 === 1 && i === items.length - 1)) {
+        a.classList.add("app-wide-tile");
+      }
       a.id = id;
       a.href = href;
       a.style.animationDelay = `${i*18}ms`;
