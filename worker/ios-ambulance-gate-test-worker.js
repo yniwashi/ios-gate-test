@@ -1,4 +1,7 @@
 // ios-ambulance-gate-test-worker.js
+// CHANGELOG (2026-06-05):
+// - Add the existing full-screen Ambulance splash image before access checking and gate UI.
+//
 // CHANGELOG (2026-06-04):
 // - Preserve selected iOS device model for registration cookies and future access checks.
 // - Persist locked retry countdown across webclip closes and override locked retry TTL to two minutes for testing.
@@ -489,14 +492,17 @@ function gatePageHtml() {
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f9fc">
+  <link rel="preload" as="image" href="/splash.png">
   <style>
     :root{color-scheme:light dark;--bg:#f7f9fc;--card:#fff;--text:#0c1230;--muted:#647089;--border:#e1e7f0;--accent:#0d5bb5;--danger:#b42318;--shadow:0 16px 44px rgba(15,23,42,.14)}
     @media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171a21;--text:#eef2ff;--muted:#9aa6c3;--border:#232a37;--accent:#2f81f7;--danger:#f87171;--shadow:0 18px 48px rgba(0,0,0,.36)}}
     *{box-sizing:border-box}html,body{min-height:100%;margin:0}body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,var(--bg),color-mix(in oklab,var(--bg) 88%,#0d5bb5));color:var(--text);padding:calc(env(safe-area-inset-top) + 12px) 14px calc(env(safe-area-inset-bottom) + 18px)}
     .shell{width:min(560px,100%);min-height:calc(100vh - 30px);margin:0 auto;display:flex;align-items:flex-start;justify-content:center}.card{width:100%;background:var(--card);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);padding:24px 20px 20px;display:flex;flex-direction:column;gap:18px;position:relative;overflow:hidden}.card:before{content:"";position:absolute;inset:0 0 auto;height:8px;background:linear-gradient(90deg,#0d63b2,#1283d6,#0d63b2)}section:not(.hidden){display:flex;flex-direction:column;gap:14px}.brand{display:flex;align-items:center;gap:13px;padding-top:2px}.logo{width:58px;height:58px;border-radius:16px;object-fit:cover;border:1px solid color-mix(in oklab,var(--accent) 22%,var(--border));background:#fff;box-shadow:0 8px 18px rgba(13,99,178,.18)}h1{margin:0;font-size:25px;line-height:1.08;font-weight:950}h2{margin:0;font-size:21px;line-height:1.16;font-weight:950}p{margin:0;color:var(--muted);font-size:14px;line-height:1.5;font-weight:650}.message{background:color-mix(in oklab,var(--accent) 8%,var(--card));border:1px solid color-mix(in oklab,var(--accent) 20%,var(--border));border-radius:15px;padding:13px 14px;color:color-mix(in oklab,var(--text) 82%,var(--muted));font-weight:750}.status{display:flex;align-items:center;gap:10px;background:color-mix(in oklab,var(--accent) 10%,var(--card));border:1px solid color-mix(in oklab,var(--accent) 24%,var(--border));border-radius:14px;padding:13px;color:var(--text);font-weight:850}.spinner{width:18px;height:18px;border:3px solid color-mix(in oklab,var(--accent) 25%,transparent);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex:none}@keyframes spin{to{transform:rotate(360deg)}}.choice-grid{display:grid;gap:12px}.choice,.support-card{appearance:none;border:1px solid var(--border);background:linear-gradient(180deg,color-mix(in oklab,var(--card) 96%,var(--accent)),color-mix(in oklab,var(--card) 88%,var(--accent)));color:var(--text);border-radius:16px;padding:16px;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:13px;cursor:pointer;box-shadow:0 8px 18px rgba(15,23,42,.08);text-decoration:none}.choice strong,.support-card strong{display:block;font-size:16px;font-weight:950;margin-bottom:0}.choice.primary{background:linear-gradient(180deg,#1283d6,#0d63b2);border-color:transparent;color:#fff}form{display:flex;flex-direction:column;gap:14px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media (max-width:420px){.row{grid-template-columns:1fr}}label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:900;color:var(--muted)}label small{font-size:11px;font-weight:800;color:color-mix(in oklab,var(--muted) 82%,var(--text))}input,select{width:100%;min-height:50px;border:1px solid var(--border);border-radius:13px;background:color-mix(in oklab,var(--card) 92%,var(--bg));color:var(--text);padding:11px 12px;font:800 16px/1.2 system-ui;outline:none}input:focus,select:focus{border-color:color-mix(in oklab,var(--accent) 72%,var(--border));box-shadow:0 0 0 3px color-mix(in oklab,var(--accent) 16%,transparent)}.phone-field{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:13px;background:color-mix(in oklab,var(--card) 92%,var(--bg));padding:0 12px}.phone-field:focus-within{border-color:color-mix(in oklab,var(--accent) 72%,var(--border));box-shadow:0 0 0 3px color-mix(in oklab,var(--accent) 16%,transparent)}.phone-field span{color:var(--accent);font:800 16px/1.2 system-ui}.phone-field input{border:0;box-shadow:none;background:transparent;padding-left:0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}.btn{appearance:none;border:1px solid var(--border);background:color-mix(in oklab,var(--card) 92%,var(--bg));color:var(--text);border-radius:13px;padding:12px 14px;font:950 14px/1 system-ui;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;flex:1}.btn.primary{background:linear-gradient(180deg,#1283d6,#0d63b2);border-color:transparent;color:#fff;box-shadow:0 12px 24px rgba(13,91,181,.26)}.btn.danger{color:var(--danger);flex:0 1 auto}.btn:disabled{opacity:.58;cursor:wait}.error{display:none;border:1px solid color-mix(in oklab,var(--danger) 35%,var(--border));background:color-mix(in oklab,var(--danger) 10%,var(--card));color:var(--danger);border-radius:13px;padding:11px 12px;font-size:13px;font-weight:850;line-height:1.35}.error.show{display:block}.support-list{display:grid;gap:10px}.support-icon{width:38px;height:38px;border-radius:11px;object-fit:contain;flex:none;background:#fff;padding:5px;border:1px solid color-mix(in oklab,var(--accent) 16%,var(--border))}.support-copy{flex:1;min-width:0}.support-copy span{display:block;font-size:12px;color:var(--muted);font-weight:750;line-height:1.38}.confirm-list{border:1px solid var(--border);border-radius:15px;overflow:hidden}.confirm-row{display:flex;justify-content:space-between;gap:12px;padding:11px 12px;border-top:1px solid var(--border);font-size:13px}.confirm-row:first-child{border-top:0}.confirm-row b{color:var(--muted);font-weight:850}.confirm-row span{text-align:right;font-weight:900}.locked-icon,.granted-icon{width:62px;height:62px;border-radius:20px;display:grid;place-items:center;border:1px solid color-mix(in oklab,var(--danger) 28%,var(--border));font:950 30px/1 system-ui;margin:0 auto}.locked-icon{background:color-mix(in oklab,var(--danger) 12%,var(--card));color:var(--danger)}.granted-icon{background:color-mix(in oklab,#1283d6 12%,var(--card));border-color:color-mix(in oklab,#1283d6 30%,var(--border));color:var(--accent)}.retry-panel{border:1px solid color-mix(in oklab,var(--accent) 22%,var(--border));background:color-mix(in oklab,var(--accent) 8%,var(--card));border-radius:15px;padding:12px;text-align:center}.retry-panel b{display:block;color:var(--accent);font-size:26px;margin-top:4px}.hidden{display:none!important}
+    #startupSplash{position:fixed;inset:0;z-index:10000;background:#fff url("/splash.png") center center/cover no-repeat;opacity:1;transition:opacity 260ms ease-out}#startupSplash.hide{opacity:0;pointer-events:none}
   </style>
 </head>
 <body>
+<div id="startupSplash" aria-hidden="true"></div>
 <main class="shell"><section class="card">
   <div class="brand"><img class="logo" src="/ambulance/images/logo.png" alt="Ambulance"><div><h1 id="pageTitle">Ambulance Access</h1></div></div>
   <div id="loadingView" class="status"><span class="spinner" aria-hidden="true"></span><span id="loadingText">Checking access...</span></div>
@@ -534,10 +540,26 @@ function gatePageHtml() {
   const tryAgainBtn = document.getElementById("tryAgainBtn");
   const professionSelect = document.getElementById("professionSelect");
   const otherProfessionLabel = document.getElementById("otherProfessionLabel");
+  const startupSplash = document.getElementById("startupSplash");
+  const splashStartedAt = Date.now();
+  const MIN_SPLASH_MS = 900;
   let pendingRegistration = null;
   let supportReturnView = "choiceView";
   let currentLockedData = null;
   let retryTimer = null;
+  let splashHidden = false;
+  let splashFallbackTimer = null;
+  function hideStartupSplash() {
+    if (splashHidden) return;
+    splashHidden = true;
+    if (splashFallbackTimer) clearTimeout(splashFallbackTimer);
+    const delay = Math.max(0, MIN_SPLASH_MS - (Date.now() - splashStartedAt));
+    setTimeout(() => {
+      startupSplash.classList.add("hide");
+      setTimeout(() => startupSplash.remove(), 280);
+    }, delay);
+  }
+  splashFallbackTimer = setTimeout(hideStartupSplash, 2500);
   function setTitle(text) { pageTitle.textContent = text; }
   function populateDeviceModel(form, preserveValue = "") {
     const typeSelect = form.querySelector('select[name="device_type"]');
@@ -558,6 +580,7 @@ function gatePageHtml() {
   const show = (id) => {
     views.forEach((v) => document.getElementById(v).classList.toggle("hidden", v !== id));
     if (id !== "lockedView") stopRetryCountdown();
+    if (id !== "loadingView") hideStartupSplash();
   };
   const installId = () => {
     let id = localStorage.getItem(INSTALL_ID_KEY);
@@ -758,6 +781,7 @@ function gatePageHtml() {
         stopLaunchMessages();
         setTitle("Could Not Check Access");
         loadingText.textContent = friendly(data);
+        hideStartupSplash();
         return;
       }
       handle(data, { directOpen: true });
@@ -765,6 +789,7 @@ function gatePageHtml() {
       stopLaunchMessages();
       setTitle("Could Not Check Access");
       loadingText.textContent = "Check your connection and try again.";
+      hideStartupSplash();
     }
   }
   function formObject(form) { return Object.fromEntries(new FormData(form).entries()); }
