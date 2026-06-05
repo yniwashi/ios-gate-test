@@ -1,4 +1,13 @@
 <!--
+  CHANGELOG (2026-06-05):
+  - Mirror the Android home button hierarchy and add nested Pediatrics, Guidelines, Calculators, and Scores menus.
+  - Route nested Android destinations to existing iOS tool modules and mark unavailable destinations as Coming Soon.
+  - Preserve nested browser history so Back returns from a tool to its parent category.
+  - Remove Shortcuts Mode, its setup UI, banner, payload routing, and mode-specific messaging.
+  - Make the Android-aligned App Mode home the only application experience.
+  - Add an Android-aligned App Mode home with personalized greeting, status panel, grouped two-column sections, and limited-access reflow.
+  - Replace the always-visible App Mode search field with a Search quick-action tile that opens the existing global search view.
+
   CHANGELOG (2026-06-04):
   - Add temporary Recheck Access button to test locked/revoked status without clearing install ID.
   - Add temporary test reset button to clear gate/app storage and return to registration.
@@ -67,35 +76,14 @@
        Bump TAC_KEY and update the gate copy whenever Terms change. Cancel replaces the
        entire body with a reminder and closes the app a moment later.
 
-  2. Shortcuts Mode block
-     - Static header + description + toggle. The JS `toggle` element determines whether
-       Shortcuts Mode is active; this drives button behavior, the News card visibility,
-       the Shortcuts banner, and can be read elsewhere (render()) to branch per mode.
-
-  3. Shortcuts download banner
-     - `#scBanner` remains hidden until render() decides to show it (current logic:
-       only when Shortcuts Mode is enabled and SHOW_SHORTCUTS_BANNER isn’t false).
-       Update the CTA by changing SHORTCUT_DOWNLOAD_URL (links the Download button)
-       and the copy inside the HTML block as needed.
-
-  4. News card (`NEWS_MESSAGE`)
-     - Inline card that lives under Shortcuts Mode. Controlled by:
-         SHOW_NEWS: master toggle.
-         NEWS_DISMISSED_KEY: bump string to re-show after users dismiss.
-         NEWS_MESSAGE: template HTML-keep IDs for download/settings/close if you want
-           the existing event handlers. Card only appears when Shortcuts Mode is on,
-           SHOW_NEWS is true, message isn’t empty, and the dismissal key hasn’t been set.
-
-  5. What’s New modal
+  2. What’s New modal
      - Centered overlay defined near the bottom of the HTML. Controlled by:
          WHATS_NEW_ENABLED: disable in emergencies without removing markup.
          WHATS_NEW_KEY: bump whenever you change release notes to force a re-show.
-         WHATS_NEW_TARGET: "default", "shortcuts", or "both" to limit which mode sees it.
          WHATS_NEW_MESSAGE: HTML body inserted into the modal.
        The overlay locks scroll and tracks dismissals in localStorage; clicking outside,
        pressing ESC, or tapping Close stores the key so it stays hidden until you bump it.
-       The “Updates” pill under Shortcuts Mode simply clears that key so you can preview
-       the latest message on demand.
+       The Updates button clears that key so the latest message can be opened on demand.
 
   Keep the comment blocks near each config in sync when adding or revising announcements.
 -->
@@ -155,99 +143,48 @@
     .app-version{font-size:11px;font-weight:850;color:var(--muted);letter-spacing:.02em;white-space:nowrap}
     .theme-toggle{background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:4px 10px; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text)}
     .theme-toggle select{appearance:none; background:transparent; border:none; color:inherit; font:inherit; outline:none; cursor:pointer}
+    .top-actions{display:flex;align-items:center;gap:7px}
+    .notice-bell{
+      appearance:none;width:40px;height:40px;border:1px solid var(--border);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;background:var(--surface);color:var(--text);
+      cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.08);
+    }
+    .notice-bell .material-symbols-rounded{font-size:22px}
 
-/* News container */
-.news{
-  display:none;
-  background:linear-gradient(180deg,rgba(47,129,247,.10),rgba(47,129,247,.05));
-  border:1px solid color-mix(in oklab, var(--accent) 35%, transparent);
-  color:color-mix(in oklab, var(--text) 90%, var(--accent));
-  padding:8px 10px;             /* was 10px 12px */
-  border-radius:12px;
-  line-height:1.32;              /* slightly tighter */
-  animation:fadeIn .22s ease-out both;
-  box-shadow:0 4px 12px rgba(0,0,0,.08); /* subtle depth, small */
-}
-
-/* Slightly faster/lighter animation */
-@keyframes fadeIn{
-  from{opacity:0; transform:translateY(-3px)}
-  to  {opacity:1; transform:none}
-}
-
-/* Compact card content */
-.news-compact{display:block; font-size:13px}
-
-/* Header row with dismiss */
-.news-row{
-  display:flex; align-items:center; justify-content:space-between; gap:8px;
-  margin-bottom:4px;
-}
-.news-x{
-  appearance:none; border:none; background:transparent;
-  color:var(--muted);
-  font:800 16px/1 system-ui; cursor:pointer;
-  padding:4px 6px; border-radius:8px;
-  transition:background .15s ease, opacity .15s ease;
-}
-.news-x:hover{ background:var(--surface-2); opacity:.9 }
-
-/* Steps list */
-.news-steps{ margin:6px 0; padding-left:18px }
-.news-steps li{ margin:2px 0 }
-
-/* Red alert note */
-.news-note{ margin:6px 0 6px }
-.news-note .warn{ color:#c62828; font-weight:800 }
-
-/* Buttons row */
-.news-actions{
-  display:flex; gap:8px; flex-wrap:wrap; margin-top:4px
-}
-
-/* Make the buttons a touch smaller inside the news card only */
-.news .btn{
-  padding:7px 10px;              /* was 8px 12px globally */
-  font-size:12.5px;              /* slightly smaller */
-  box-shadow:0 3px 10px rgba(0,0,0,.10);
-}
-
-/* Optional: compact <details> help block if you use it */
-.news-help{ margin-top:4px }
-.news-help summary{
-  cursor:pointer; font-weight:700; list-style:none; outline:none;
-}
-.news-help summary::-webkit-details-marker{ display:none }
-.news-help summary::after{
-  content:"›"; font-weight:900; margin-left:6px; display:inline-block; transform:rotate(90deg);
-}
-.news-help[open] summary::after{ transform:rotate(270deg) }
-.news-help ul{ margin:6px 0 0 18px }
-.news-help li{ margin:2px 0 }
-
-/* Tiny-screen tweaks */
-@media (max-width:380px){
-  .news{ padding:8px }                    /* tighter padding */
-  .news-compact{ font-size:12.5px }       /* shrink text slightly */
-  .news .btn{ padding:6px 9px; font-size:12px }
-}
-
-
-    /* Shortcuts mode row */
-    .row{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px}
-    .copy{display:flex; flex-direction:column; gap:3px}
-    .copy .t{margin:0; font-size:15px; font-weight:600}
-    .copy .s{margin:0; font-size:12px; color:var(--muted)}
-    .toggle{position:relative; width:56px; height:30px; flex:none}
-    .toggle input{opacity:0; width:0; height:0}
-    .rail{position:absolute; inset:0; border-radius:999px; background:var(--surface-2); border:1px solid var(--border); transition:background var(--speed), border var(--speed)}
-    .knob{position:absolute; left:3px; top:3px; width:24px; height:24px; border-radius:50%; background:linear-gradient(180deg,#fff,#e7ecff);
-      box-shadow:0 2px 6px rgba(0,0,0,.28); transition:transform var(--speed)}
-    .toggle input:checked + .rail{background:linear-gradient(180deg,var(--accent-2),#0ea76a); border-color:color-mix(in oklab, var(--accent-2) 60%, var(--border))}
-    .toggle input:checked + .rail .knob{transform:translateX(26px)}
+    /* Android-aligned App Mode status */
+    .app-home-status{
+      display:none; overflow:hidden; border:1px solid var(--border); border-radius:8px;
+      background:var(--surface); box-shadow:0 5px 14px rgba(0,0,0,.10);
+    }
+    .app-home-status{display:block}
+    .app-greeting{
+      position:relative; min-height:58px; display:flex; align-items:center; gap:12px;
+      padding:0 18px; color:#fff; overflow:hidden;
+      background:linear-gradient(105deg,#075985 0%,#0369a1 48%,#0f766e 100%);
+    }
+    .app-greeting::after{
+      content:""; position:absolute; inset:auto -26px -42px 28%;
+      height:86px; border-radius:50%; background:rgba(255,255,255,.08);
+      transform:rotate(-5deg); pointer-events:none;
+    }
+    .app-greeting .material-symbols-rounded{position:relative;z-index:1;font-size:30px}
+    .app-greeting-text{position:relative;z-index:1;font-size:15px;font-weight:850;line-height:1.2}
+    .app-status-row{display:flex;align-items:center;gap:9px;padding:10px 16px 8px}
+    .app-status-dot{width:9px;height:9px;border-radius:50%;background:#16a34a;box-shadow:0 0 0 3px color-mix(in oklab,#16a34a 15%,transparent)}
+    .app-status-copy{font-size:13px;font-weight:800;color:color-mix(in oklab,var(--text) 82%,var(--muted))}
+    .app-status-actions{display:flex;gap:8px;padding:0 12px 11px}
+    .app-status-actions .updates-btn{flex:1;min-height:36px;border-radius:8px}
 
     /* Global search */
     .global-search{position:relative; display:flex; flex-direction:column; gap:6px}
+    .global-search-head{display:none;align-items:center;gap:10px}
+    .global-search-back{
+      appearance:none;border:1px solid var(--border);background:var(--surface);color:var(--text);
+      width:40px;height:40px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;
+      cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.08);
+    }
+    .global-search-back .material-symbols-rounded{font-size:24px}
+    .global-search-title{font-size:18px;font-weight:850}
     .global-search-box{
       background:var(--surface); border:1px solid var(--border); border-radius:12px;
       display:flex; align-items:center; gap:10px; padding:11px 12px;
@@ -287,23 +224,41 @@
       border-radius:999px; padding:4px 8px; font-size:11px; font-weight:850;
     }
     body.global-search-active #news,
-    body.global-search-active .row,
     body.global-search-active .updates-cta,
-    body.global-search-active #scBanner,
     body.global-search-active #sections{display:none!important}
-    body.shortcuts-mode-on #globalSearch{display:none!important}
     body[data-access-type="non_ambulance_staff"] #globalSearch{display:none!important}
+    #globalSearch{display:none}
+    body.app-search-open #globalSearch{display:flex}
+    body.app-search-open .global-search-head{display:flex}
+    body.app-search-open .app-home-status,
+    body.app-search-open .updates-cta,
+    body.app-search-open #sections{display:none!important}
 
     /* Sections */
     .sections{display:flex; flex-direction:column; gap:8px}
     .section{display:flex; flex-direction:column; gap:4px}
     .section-head{ display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; padding:4px 2px 0 }
     .section-head::after{content:""; height:1px; background:var(--border); flex:1}
+    .sections{gap:10px}
+    .section{
+      gap:7px;padding:9px 8px 5px;border:1px solid var(--border);border-radius:8px;
+      background:var(--surface);box-shadow:0 5px 14px rgba(0,0,0,.09);
+    }
+    .section-head{
+      padding:0 2px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.08em;
+    }
 
     /* Grid & buttons */
     .grid{display:grid; gap:8px; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); grid-auto-flow:dense}
-    @media (orientation:landscape){ .grid{ grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); } }
+    .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+    @media (orientation:landscape){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
     .btn{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-decoration:none; color:var(--btn-fg,#fff); border-radius:12px; padding:10px 10px; min-height:72px; font-size:13px; font-weight:800; letter-spacing:.2px; text-align:center; box-shadow:var(--shadow); transition:transform var(--speed), box-shadow var(--speed), filter var(--speed)}
+    .btn{
+      min-height:52px;border-radius:8px;padding:7px 9px;flex-direction:row;gap:9px;
+      justify-content:flex-start;text-align:left;font-size:13px;box-shadow:0 3px 8px rgba(0,0,0,.16);
+    }
+    .btn .material-symbols-rounded{font-size:23px;flex:none}
+    .btn.app-wide-tile{grid-column:1/-1;justify-content:center}
     .btn:hover{ transform:translateY(-2px); box-shadow:var(--shadow-2) }
     .btn:active{ transform:translateY(0) scale(.98) }
     .label{ opacity:.98; line-height:1.12 }
@@ -340,6 +295,47 @@
     .btn-vent{background:linear-gradient(180deg,#7EC8FF,#3FA9FF); --btn-fg:#fff}
     .btn-formulary{background:linear-gradient(180deg,#5EB0EF,#2684FF); --btn-fg:#fff}
     .btn-community{background:linear-gradient(180deg,#24d366,#128c7e); --btn-fg:#fff}
+    .btn-search{background:linear-gradient(180deg,#1677e8,#005FCB);--btn-fg:#fff}
+    .btn-pediatrics{background:linear-gradient(180deg,#e0529a,#D63384);--btn-fg:#fff}
+    .btn-guidelines{background:linear-gradient(180deg,#1677e8,#005FCB);--btn-fg:#fff}
+    .btn-calculators{background:linear-gradient(180deg,#7890a4,#5E7A92);--btn-fg:#fff}
+    .btn-visual-guides{background:linear-gradient(180deg,#20a8c5,#0891B2);--btn-fg:#fff}
+    .btn-scores{background:linear-gradient(180deg,#16a7df,#0284C7);--btn-fg:#fff}
+
+    /* Android-style nested menus */
+    .category-wrap{padding:12px}
+    .category-intro{
+      margin:0 0 12px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;
+      background:var(--surface);color:var(--muted);font-size:13px;font-weight:700;line-height:1.4;
+    }
+    .category-section{margin-bottom:12px}
+    .category-heading{
+      display:flex;align-items:center;gap:8px;margin:0 0 7px;color:var(--muted);
+      font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+    }
+    .category-heading::after{content:"";height:1px;flex:1;background:var(--border)}
+    .category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .category-item{
+      appearance:none;width:100%;min-height:64px;border:1px solid var(--border);border-radius:8px;
+      padding:10px;background:var(--surface);color:var(--text);text-align:left;cursor:pointer;
+      display:flex;align-items:center;gap:10px;box-shadow:0 3px 9px rgba(0,0,0,.10);
+    }
+    .category-item:active{transform:scale(.985)}
+    .category-icon{
+      width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+      flex:none;background:color-mix(in oklab,var(--item-color,var(--accent)) 15%,var(--surface));
+      color:var(--item-color,var(--accent));
+    }
+    .category-icon .material-symbols-rounded{font-size:23px}
+    .category-copy{min-width:0;display:flex;flex-direction:column;gap:3px}
+    .category-title{font-size:14px;font-weight:900;line-height:1.15}
+    .category-subtitle{font-size:11px;font-weight:700;line-height:1.25;color:var(--muted)}
+    .category-item.coming-soon{opacity:.72}
+    .category-badge{
+      display:inline-flex;width:max-content;padding:2px 6px;border-radius:999px;
+      background:var(--surface-2);color:var(--muted);font-size:9px;font-weight:900;text-transform:uppercase;
+    }
+    @media(max-width:370px){.category-grid{grid-template-columns:1fr}}
 
     /* Panel */
     #panel{ position: fixed; inset: 0; background: transparent; z-index: 9999; }
@@ -350,35 +346,12 @@
     .panel-title{ margin: 0; font-size: 15px; font-weight: 800 }
     body.panel-open .wrap{ transition: transform 300ms ease, opacity 300ms ease; }
 
-    /* Shortcuts banner */
-    .sc-banner{display:none;background:linear-gradient(180deg,rgba(47,129,247,.08),rgba(47,129,247,.04));border:1px solid color-mix(in oklab,var(--accent) 30%,transparent);border-radius:12px;padding:10px;margin-top:8px}
-    .sc-row{display:flex;align-items:center;gap:10px}
-    .sc-thumb{ width:54px; height:54px; flex:0 0 54px; border-radius:14px; overflow:hidden; background:var(--surface); display:flex; align-items:center; justify-content:center; border:1px solid var(--border) }
-    .sc-thumb img{ width:100%; height:100%; object-fit:contain; object-position:center }
-    .sc-copy{flex:1 1 auto;min-width:0}
-    .sc-title{margin:0;font:800 14px/1.2 system-ui}
-    .sc-desc{margin:2px 0 0 0;font-size:12px;color:var(--muted)}
-    .sc-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-    .sc-badge{font-size:11px;font-weight:700;color:var(--text);background:color-mix(in oklab,var(--accent) 12%,var(--surface));border:1px dashed color-mix(in oklab,var(--accent) 35%,transparent);padding:4px 6px;border-radius:8px}
-    .sc-cta{flex:0 0 auto}
-    .sc-btn{appearance:none;text-decoration:none;cursor:pointer;padding:8px 12px;font:800 13px/1 system-ui;color:#fff;background:linear-gradient(180deg,var(--accent),#0D5BB5);border:1px solid color-mix(in oklab,var(--accent) 60%,transparent);border-radius:10px;box-shadow:var(--shadow)}
-    @media (max-width:420px){ .sc-desc{display:none} }
-
-    /* News rich content */
-    .news{white-space:normal}
-    .news h3{margin:0 0 6px 0;font-size:16px;font-weight:800}
-    .news p{margin:6px 0;font-size:14px;line-height:1.4}
-    .news a{color:var(--accent);font-weight:700;text-decoration:none;border-bottom:1px dotted color-mix(in oklab,var(--accent) 60%, transparent)}
-    .news a:hover{text-decoration:underline}
-    .news img, .news figure{display:block;max-width:100%;height:auto;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.18);margin:8px 0;border:1px solid var(--border)}
-    .news figure{padding:6px;background:var(--surface)}
-    .news figcaption{margin-top:4px;font-size:12px;color:var(--muted);text-align:center}
-    .news .btn{display:inline-block;padding:8px 12px;border-radius:10px;background:linear-gradient(180deg,var(--accent),#0D5BB5);color:#fff!important;border:1px solid color-mix(in oklab,var(--accent) 60%,transparent);font-weight:800;font-size:13px;text-decoration:none;box-shadow:var(--shadow);margin-top:6px}
-
     /* What's New trigger */
     .updates-cta{display:flex;justify-content:flex-start;gap:8px;margin:4px 0 2px}
     .updates-btn{appearance:none;border:1px solid color-mix(in oklab,var(--accent) 40%,transparent);background:color-mix(in oklab,var(--accent) 12%,var(--surface));color:var(--accent);font:700 12px/1 system-ui;padding:6px 12px;border-radius:999px;cursor:pointer}
     .updates-btn:hover{background:color-mix(in oklab,var(--accent) 18%,var(--surface));}
+    .updates-cta #wnShowAgain,
+    .updates-cta #charlieBtn{display:none}
     .charlie-btn{color:#C8935A;border-color:color-mix(in oklab,#C8935A 40%,transparent);background:color-mix(in oklab,#C8935A 12%,var(--surface))}
     .charlie-btn:hover{background:color-mix(in oklab,#C8935A 18%,var(--surface))}
     .gate-reset-btn{color:#c0392b;border-color:color-mix(in oklab,#c0392b 40%,transparent);background:color-mix(in oklab,#c0392b 10%,var(--surface))}
@@ -462,30 +435,36 @@
         <span id="appVersionLabel" class="app-version"></span>
       </div>
     </div>
-    <div class="theme-toggle">
-      <span style="font-weight:600">Theme</span>
-      <select id="themeSelect" aria-label="Theme">
-        <option value="auto">Auto</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-      </select>
+    <div class="top-actions">
+      <button id="noticesBellBtn" class="notice-bell" type="button" aria-label="Notices">
+        <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+      </button>
+      <div class="theme-toggle">
+        <span style="font-weight:600">Theme</span>
+        <select id="themeSelect" aria-label="Theme">
+          <option value="auto">Auto</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
     </div>
   </div>
 
-  <!-- News -->
-  <div id="news" class="news"></div>
-
-  <!-- Shortcuts Mode -->
-  <div class="row">
-    <div class="copy">
-      <p class="t">Shortcuts Mode</p>
-      <p class="s">Enable to run actions in the Shortcuts app. When off, items open in the Ambulance app and some features may be limited.</p>
+  <section class="app-home-status" id="appHomeStatus" aria-label="App status">
+    <div class="app-greeting" id="appGreeting">
+      <span class="material-symbols-rounded" id="appGreetingIcon" aria-hidden="true">emergency</span>
+      <span class="app-greeting-text" id="appGreetingText">Stay safe</span>
     </div>
-    <label class="toggle" aria-label="Toggle Shortcuts Mode">
-      <input id="mode" type="checkbox" />
-      <div class="rail"><div class="knob"></div></div>
-    </label>
-  </div>
+    <div class="app-status-row">
+      <span class="app-status-dot" aria-hidden="true"></span>
+      <span class="app-status-copy" id="appStatusCopy">Ambulance App is ready</span>
+    </div>
+    <div class="app-status-actions">
+      <button id="appNoticeBtn" class="updates-btn" type="button">Notice</button>
+      <button id="appUpdatesBtn" class="updates-btn" type="button">Updates</button>
+      <button id="appCharlieBtn" class="updates-btn charlie-btn" type="button">Charlie</button>
+    </div>
+  </section>
 
   <div class="updates-cta">
     <button id="wnShowAgain" class="updates-btn" type="button">Updates</button>
@@ -496,6 +475,12 @@
 
   <!-- Global Search -->
   <div class="global-search" id="globalSearch">
+    <div class="global-search-head">
+      <button id="globalSearchBack" class="global-search-back" type="button" aria-label="Back to home">
+        <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+      </button>
+      <span class="global-search-title">Search</span>
+    </div>
     <div class="global-search-box">
       <span class="material-symbols-rounded" aria-hidden="true">search</span>
       <input id="globalSearchInput" type="search" inputmode="search" placeholder="Search..." autocomplete="off" />
@@ -503,26 +488,6 @@
     </div>
     <div class="global-search-hint">Search symptoms, medications, guidelines and tools</div>
     <div id="globalSearchResults" class="global-results" role="listbox" aria-label="Search results"></div>
-  </div>
-
-  <!-- Shortcuts banner -->
-  <div id="scBanner" class="sc-banner" hidden>
-    <div class="sc-row">
-      <div class="sc-thumb" aria-hidden="true">
-        <img src="images/shortcuts.png" alt="Ambulance Shortcut" onerror="this.src='images/logo.png'">
-      </div>
-      <div class="sc-copy">
-        <p class="sc-title">Download the “Ambulance” Shortcut</p>
-        <p class="sc-desc">Required for Shortcuts Mode.</p>
-        <div class="sc-badges">
-          <span class="sc-badge">Tap <strong>Replace</strong> if asked</span>
-          <span class="sc-badge"><strong>Allow</strong> permissions on first use</span>
-        </div>
-      </div>
-      <div class="sc-cta">
-        <a id="scDownload" class="sc-btn" href="#" rel="noopener">Download</a>
-      </div>
-    </div>
   </div>
 
   <!-- Sections container -->
@@ -631,7 +596,7 @@
     AMBULANCE_STAFF: "ambulance_staff",
     NON_AMBULANCE_STAFF: "non_ambulance_staff"
   };
-  const PROTECTED_ACTIONS = new Set(["cpg_wizard", "sop", "flowcharts", "formulary", "as_call", "hos"]);
+  const PROTECTED_ACTIONS = new Set(["category_guidelines", "cpg_wizard", "sop", "flowcharts", "formulary", "as_call", "hos"]);
   const PROTECTED_SEARCH_TYPES = new Set(["cpg", "sop", "cpm", "flowchart", "formulary"]);
   let gateSessionPromise = null;
   let gateAccessType = ACCESS_TYPES.AMBULANCE_STAFF;
@@ -699,16 +664,11 @@
   /* =========================
        CONFIG (production)
        - HOST/theme + feature toggles
-       - NEWS controls (inline banner under Shortcuts Mode)
        - WHAT'S NEW modal (center overlay for release notes)
        Update the versioned keys whenever you introduce new copy so
        previous dismissals do not hide the latest announcement.
      ========================= */
   const HOST = ''; // root-relative on current origin (works with your Worker/CNAME)
-  const SHORTCUT_NAME = "Ambulance";
-  const SEPARATOR     = "::";
-  const USE_RETURN_URL = false;
-  const RETURN_URL    = "https://yourdomain.com/done.html";
 
   /* =========================
        Messaging config hub
@@ -719,45 +679,9 @@
     // -- Terms gate --
     TAC_KEY: "amb_tac_v2", // bump when Terms copy changes
 
-    // -- Shortcuts download banner --
-    SHOW_SHORTCUTS_BANNER: true,
-    SHORTCUT_DOWNLOAD_URL: "https://ios.niwashibase.com/s/ambulance",
-
-    // -- News card (Shortcuts Mode only) --
-    SHOW_NEWS: true,
-    NEWS_DISMISSED_KEY: "amb_news_shortcuts_v1",
-    NEWS_MESSAGE: `
-  <div class="news-compact">
-    <div class="news-row">
-      <strong>Enable Shortcuts Mode - Quick Guide</strong>
-      <button id="newsClose" class="news-x" aria-label="Dismiss">✕</button>
-    </div>
-
-    <ol class="news-steps">
-      <li>Install the <strong>“Ambulance”</strong> Shortcut, then return here.</li>
-      <li>
-        Turn on <strong>Allow Sharing Large Amounts of Data</strong> -
-        tap <em>Open Settings</em> below or go:
-        <small><em>Settings → Apps → Shortcuts → Advanced</em></small>.
-      </li>
-    </ol>
-
-    <p class="news-note">
-      <span class="warn">⚠️ Privacy Alerts:</span>
-      choose <strong>“Always Allow”</strong> (or <strong>“Allow”</strong> if that’s the only option) to avoid repeated prompts.
-    </p>
-
-    <div class="news-actions">
-      <a id="btnDownloadShortcut" class="btn" href="#" rel="noopener">Download Shortcut</a>
-      <a id="btnOpenSettings"   class="btn" href="#" rel="noopener">Open Settings</a>
-    </div>
-  </div>
-`,
-
     // -- What's New modal --
     WHATS_NEW_ENABLED: true,
     WHATS_NEW_KEY: "amb_whats_new_v04",
-    WHATS_NEW_TARGET: "default", // "default", "shortcuts", "both"
     WHATS_NEW_MESSAGE: `
   <ul>
     <li><strong>CPG updated to v2.5.</strong> The CPG has been updated to the latest version, including the new flowcharts and medications.</li>
@@ -788,102 +712,137 @@
 
   const {
     TAC_KEY,
-    SHOW_SHORTCUTS_BANNER,
-    SHORTCUT_DOWNLOAD_URL,
-    SHOW_NEWS,
-    NEWS_DISMISSED_KEY,
-    NEWS_MESSAGE,
     WHATS_NEW_ENABLED,
     WHATS_NEW_KEY,
-    WHATS_NEW_TARGET,
     WHATS_NEW_MESSAGE
   } = MESSAGING_CONFIG;
 
   const BUTTONS = [
+    { text:"Search",           iconType:"material", icon:"search",        color:"btn-search",
+      href:"#", showDefault:true, appHomeAction:"search", protectedHome:true },
+
     // Resuscitation & Timers
     { text:"CPR",              iconType:"material", icon:"monitor_heart", color:"btn-cpr",
-      href: `${HOST}/cpr/`, showDefault:true, showShortcuts:false },
+      href: `${HOST}/cpr/`, showDefault:true },
 
     { text:"RSI Checklist",    iconType:"material", icon:"checklist",     color:"btn-rsi",
-      href: `${HOST}/helpers/rsi_checklist_js.html`, showDefault:true, showShortcuts:true },
+      href: `${HOST}/helpers/rsi_checklist_js.html`, showDefault:true, appLabel:"RSI" },
 
     { text:"WAAFELSS",         iconType:"material", icon:"face",          color:"btn-waafelss",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"waafels" },
+      href:"#", showDefault:true, actionId:"waafels" },
 
-    // Pediatric Care
-    { text:"CCP Pediatrics",   iconType:"material", icon:"vaccines",      color:"btn-ccp",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"ccp_peds" },
+    // Clinical · Calculators
+    { text:"Pediatrics",       iconType:"material", icon:"child_care",    color:"btn-pediatrics",
+      href:"#", showDefault:true, actionId:"category_pediatrics" },
 
-    { text:"AP Pediatrics",    iconType:"material", icon:"medication",    color:"btn-ap",
-      href:"#", showDefault:true, showShortcuts:true },
+    { text:"Guidelines",       iconType:"material", icon:"menu_book",     color:"btn-guidelines",
+      href:"#", showDefault:true, actionId:"category_guidelines" },
 
-    { text:"Care Tools",       iconType:"material", icon:"widgets",       color:"btn-caretools",
-      href:"#", showDefault:true, showShortcuts:false, actionId:"caretools" },
-
-    { text:"Estimated Weight", iconType:"material", icon:"monitor_weight",color:"btn-weight",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"estweight" },
-
-    // Assessment Scores
-    { text:"GCS Score",        iconType:"material", icon:"psychology_alt",color:"btn-gcs",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"gcs" },
-
-    { text:"APGAR Score",      iconType:"material", icon:"child_care",    color:"btn-apgar",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"apgar" },
-
-    { text:"SAT Score",        iconType:"material", icon:"syringe",       color:"btn-sat",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"sat" },
-
-    // Calculators · Reference
     { text:"Flowcharts",       iconType:"material", icon:"apps",          color:"btn-flowcharts",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"flowcharts" },
+      href:"#", showDefault:true, actionId:"flowcharts" },
 
-    { text:"RBS Converter",    iconType:"material", icon:"glucose",       color:"btn-rbs",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"rbs" },
+    { text:"Calculators",      iconType:"material", icon:"calculate",     color:"btn-calculators",
+      href:"#", showDefault:true, actionId:"category_calculators" },
 
-    { text:"CPG",              iconType:"material", icon:"manage_search", color:"btn-cpg",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"cpg_wizard", shortcutLabel:"CPG Wizard" },
+    { text:"Visual Guides",    iconType:"material", icon:"photo_library", color:"btn-visual-guides",
+      href:"#", showDefault:true, comingSoon:true },
 
-    { text:"SOP",              iconType:"material", icon:"manage_search", color:"btn-sop",
-      href:"#", showDefault:true, showShortcuts:false, actionId:"sop" },
-
-    { text:"MAP Calculator",   iconType:"material", icon:"calculate",     color:"btn-map",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"map" },
+    { text:"Scores",           iconType:"material", icon:"fact_check",    color:"btn-scores",
+      href:"#", showDefault:true, actionId:"category_scores" },
 
     // Ops / Links
     { text:"AS-Call",          iconType:"material", icon:"call",          color:"btn-ascall",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"as_call" },
+      href:"#", showDefault:true, actionId:"as_call" },
 
     { text:"HOS",              iconType:"material", icon:"local_airport", color:"btn-hos",
-      href:"#", showDefault:false, showShortcuts:true },
+      href:"#", showDefault:true, protectedHome:true, comingSoon:true },
 
     { text:"Websites",         iconType:"material", icon:"language",      color:"btn-websites",
-      href:"https://example.com", showDefault:true, showShortcuts:true, actionId:"websites" },
+      href:"https://example.com", showDefault:true, actionId:"websites" },
 
     { text:"Stay Connected",   iconType:"material", icon:"maps_ugc",      color:"btn-community",
-      href:"#", showDefault:true, showShortcuts:false, actionId:"community" },
-
-    // Shortcuts-mode only
-    { text:"Westley Score",    iconType:"material", icon:"stethoscope",   color:"btn-westley",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"westley" },
-
+      href:"#", showDefault:true, actionId:"community" },
     { text:"Overtime Calculator", iconType:"material", icon:"schedule",   color:"btn-overtime",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"overtime" },
-
-    { text:"HMC Address Book", iconType:"material", icon:"contacts",      color:"btn-address",
-      href:"#", showDefault:false, showShortcuts:true },
+      href:"#", showDefault:true, actionId:"overtime", appLabel:"Overtime" },
 
     { text:"Shifts",           iconType:"material", icon:"calendar_month",color:"btn-shifts",
-      href:"#", showDefault:false, showShortcuts:true },
-
-    { text:"Meds Calculator",  iconType:"material", icon:"vaccines",      color:"btn-meds",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"meds_calculator" },
+      href:"#", showDefault:true, appLabel:"Shift Schedule", comingSoon:true },
 
     { text:"Ventilator Settings", iconType:"material", icon:"airwave",    color:"btn-vent",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"ventilator_settings" },
-
-    { text:"Formulary",        iconType:"material", icon:"medication",    color:"btn-formulary",
-      href:"#", showDefault:true, showShortcuts:true, actionId:"formulary" },
+      href:"#", showDefault:true, actionId:"ventilator_settings" },
   ];
+
+  const CATEGORY_SCREENS = {
+    category_pediatrics: {
+      title: "Pediatrics",
+      intro: "Choose scope and age, or open a pediatric reference tool.",
+      sections: [
+        { title: "AP", items: [
+          { title:"Months", subtitle:"AP pediatric medications · 0-12 months", icon:"child_care", color:"#0A96FA", actionId:"ap_peds", params:{ initialGroup:"Months" } },
+          { title:"Years", subtitle:"AP pediatric medications · 1-14 years", icon:"child_care", color:"#0A96FA", actionId:"ap_peds", params:{ initialGroup:"Years" } }
+        ]},
+        { title: "CCP", items: [
+          { title:"Months", subtitle:"CCP pediatric medications · 0-12 months", icon:"vaccines", color:"#81818F", actionId:"ccp_peds", params:{ initialGroup:"Months" } },
+          { title:"Years", subtitle:"CCP pediatric medications · 1-14 years", icon:"vaccines", color:"#81818F", actionId:"ccp_peds", params:{ initialGroup:"Years" } }
+        ]},
+        { title: "Tools", items: [
+          { title:"Est. Weight", subtitle:"Estimate pediatric weight from age", icon:"monitor_weight", color:"#8E34BF", actionId:"estweight" },
+          { title:"Vital Signs", subtitle:"Pediatric normal vital-sign reference", icon:"monitor_heart", color:"#0891B2", comingSoon:true },
+          { title:"Care Tools", subtitle:"Pediatric care references", icon:"widgets", color:"#F78000", actionId:"caretools" }
+        ]}
+      ]
+    },
+    category_guidelines: {
+      title: "Guidelines",
+      intro: "Open the same document groups available in the Android Guidelines screen.",
+      protected: true,
+      sections: [
+        { title: "Documents", items: [
+          { title:"CPG", subtitle:"Clinical Practice Guidelines", icon:"menu_book", color:"#02C202", actionId:"cpg_wizard" },
+          { title:"SOP", subtitle:"Standard Operating Procedures", icon:"description", color:"#FF4040", actionId:"sop" },
+          { title:"CPM", subtitle:"Clinical Practice Manual", icon:"picture_as_pdf", color:"#005FCB", documentType:"cpm" },
+          { title:"PAT", subtitle:"Pediatric Assessment Triangle references", icon:"child_care", color:"#7C3AED", comingSoon:true }
+        ]},
+        { title: "References", items: [
+          { title:"Formulary", subtitle:"Medication reference", icon:"medication", color:"#2684FF", actionId:"formulary" }
+        ]}
+      ]
+    },
+    category_calculators: {
+      title: "Calculators",
+      intro: "Infusions, calculations, and conversions from the Android Calculators screen.",
+      sections: [
+        { title: "Infusions", items: [
+          { title:"Adult Infusions", subtitle:"Medication infusion references", icon:"fluid", color:"#2196F3", comingSoon:true },
+          { title:"Pediatric Infusions", subtitle:"Pediatric infusion references", icon:"fluid", color:"#F04FED", comingSoon:true }
+        ]},
+        { title: "Calculations", items: [
+          { title:"Burn Surface Area", subtitle:"Rule of Nines %TBSA calculator", icon:"local_fire_department", color:"#EF4444", comingSoon:true },
+          { title:"Infusion Rate", subtitle:"Calculate rate from dose and concentration", icon:"speed", color:"#06B6D4", actionId:"meds_calculator", params:{ initialMode:"infusion" } },
+          { title:"Dose Volume", subtitle:"Calculate volume from ordered dose", icon:"vaccines", color:"#10B981", actionId:"meds_calculator", params:{ initialMode:"dose" } },
+          { title:"Proportion", subtitle:"Cross-multiply concentration values", icon:"percent", color:"#8B5CF6", comingSoon:true },
+          { title:"MAP", subtitle:"Mean arterial pressure calculator", icon:"calculate", color:"#FF6600", actionId:"map" }
+        ]},
+        { title: "Conversions", items: [
+          { title:"RBS Converter", subtitle:"Convert glucose units", icon:"glucose", color:"#D4B900", actionId:"rbs" }
+        ]}
+      ]
+    },
+    category_scores: {
+      title: "Scores",
+      intro: "Choose a clinical score, matching the Android score selector.",
+      sections: [
+        { title: "Clinical Scores", items: [
+          { title:"GCS", subtitle:"Adult Glasgow Coma Scale", icon:"psychology_alt", color:"#1CCC0C", actionId:"gcs" },
+          { title:"APGAR", subtitle:"Newborn assessment", icon:"child_care", color:"#FF5CE2", actionId:"apgar" },
+          { title:"SAT Score", subtitle:"Sedation Assessment Tool", icon:"syringe", color:"#FF8A00", actionId:"sat" },
+          { title:"qSOFA", subtitle:"Quick Sequential Organ Failure Assessment", icon:"medical_information", color:"#DC2626", comingSoon:true },
+          { title:"Westley Croup", subtitle:"Croup severity", icon:"stethoscope", color:"#FFC107", actionId:"westley" },
+          { title:"Pediatric GCS", subtitle:"Pediatric Glasgow Coma Scale", icon:"child_care", color:"#0284C7", comingSoon:true }
+        ]}
+      ]
+    }
+  };
 
   const GLOBAL_SEARCH_CONFIG = {
     urlIndex: "https://docs.niwashibase.com/helpers/cpg_index.json",
@@ -1007,10 +966,25 @@
       "AS-Call": ["phone", "call", "contacts", "directory", "numbers"],
       "Stay Connected": ["community", "discord", "telegram", "whatsapp"]
     };
-    return buildFeatureTargets(BUTTONS.map((btn) => ({
+    const nestedItems = Object.values(CATEGORY_SCREENS).flatMap((category) =>
+      category.sections.flatMap((section) =>
+        section.items.map((item) => ({
+          text: item.title,
+          title: item.title,
+          subtitle: item.subtitle,
+          actionId: item.actionId,
+          params: item.params,
+          comingSoon: item.comingSoon,
+          documentType: item.documentType,
+          parentCategory: category.title
+        }))
+      )
+    );
+    const features = [...BUTTONS, ...nestedItems];
+    return buildFeatureTargets(features.map((btn) => ({
       ...btn,
-      terms: [btn.text, ...(extra[btn.text] || [])]
-    })), Object.fromEntries(BUTTONS.map((btn) => [btn.text, extra[btn.text] || []])));
+      terms: [btn.text || btn.title, btn.parentCategory, ...(extra[btn.text || btn.title] || [])]
+    })), Object.fromEntries(features.map((btn) => [btn.text || btn.title, extra[btn.text || btn.title] || []])));
   }
 
   async function loadGlobalSearchItems(){
@@ -1119,6 +1093,7 @@
     const input = document.getElementById("globalSearchInput");
     const resultsEl = document.getElementById("globalSearchResults");
     const clearBtn = document.getElementById("globalSearchClear");
+    const backBtn = document.getElementById("globalSearchBack");
     if (!input || !resultsEl || !clearBtn) return;
     let searchTouchStartY = 0;
     let searchTouchCanDismiss = false;
@@ -1136,6 +1111,24 @@
       resultsEl.innerHTML = "";
       resultsEl.__items = [];
       setSearchActive(false);
+    }
+
+    function closeAppSearch(){
+      input.blur();
+      input.value = "";
+      clearBtn.classList.remove("show");
+      hideResults();
+      document.body.classList.remove("app-search-open");
+    }
+
+    function openAppSearch(){
+      if (!canOpenProtectedContent()) {
+        showProtectedContentDialog();
+        return;
+      }
+      document.body.classList.add("app-search-open");
+      loadGlobalSearchItems().catch(() => {});
+      requestAnimationFrame(() => input.focus());
     }
 
     function renderResults(results){
@@ -1191,12 +1184,21 @@
       input.blur();
       setSearchActive(true);
       if (item.type === "tool") {
+        const feature = item.raw || item;
+        if (feature.comingSoon) {
+          showComingSoon(item.title);
+          return;
+        }
+        if (feature.documentType && feature.documentType !== "feature") {
+          openGlobalPdf(1, item.title, feature.documentType);
+          return;
+        }
         if (isProtectedAction(item.actionId) && !canOpenProtectedContent()) {
           showProtectedContentDialog();
           return;
         }
         if (item.actionId) {
-          runAction(item.actionId, { title: item.title }, { pushState: true });
+          runAction(item.actionId, { title: item.title, ...(feature.params || {}) }, { pushState: true });
         } else if (item.href && item.href !== "#") {
           location.href = item.href;
         } else {
@@ -1232,6 +1234,7 @@
       hideResults();
       input.focus();
     });
+    backBtn?.addEventListener("click", closeAppSearch);
     resultsEl.addEventListener("click", (e) => {
       const btn = e.target.closest(".gs-result[data-index]");
       if (!btn) return;
@@ -1264,6 +1267,8 @@
     }, { passive: true });
 
     return {
+      open: openAppSearch,
+      close: closeAppSearch,
       clear(){
         input.value = "";
         clearBtn.classList.remove("show");
@@ -1342,10 +1347,39 @@
     }
   }
 
-  function buildShortcutsUrl(label){
-    const base = `shortcuts://run-shortcut?name=${encodeURIComponent(SHORTCUT_NAME)}&input=text&text=`;
-    const payload = `web${SEPARATOR}${label}`;
-    return base + encodeURIComponent(payload);
+  function configureAppHomeStatus(){
+    const firstName = (localStorage.getItem("ambulance_ios_first_name") || "").trim() || "there";
+    const hour = new Date().getHours();
+    const greetingOptions = hour >= 5 && hour <= 11
+      ? [
+          ["Good morning", "wb_sunny"],
+          ["Stay hydrated", "water_drop"],
+          ["Drive safe", "local_taxi"]
+        ]
+      : hour >= 12 && hour <= 16
+        ? [
+            ["Good afternoon", "wb_sunny"],
+            ["Stay sharp", "my_location"],
+            ["Keep cool", "water_drop"]
+          ]
+        : hour >= 17 && hour <= 20
+          ? [
+              ["Good evening", "dark_mode"],
+              ["Stay safe", "health_and_safety"],
+              ["One call at a time", "emergency"]
+            ]
+          : [
+              ["Good evening", "dark_mode"],
+              ["Stay alert tonight", "coffee"],
+              ["Finish strong", "sports_score"]
+            ];
+    const selected = greetingOptions[Math.floor(Math.random() * greetingOptions.length)];
+    const text = document.getElementById("appGreetingText");
+    const icon = document.getElementById("appGreetingIcon");
+    const status = document.getElementById("appStatusCopy");
+    if (text) text.textContent = `${selected[0]}, ${firstName}`;
+    if (icon) icon.textContent = selected[1];
+    if (status) status.textContent = `Ambulance ${APP_VERSION} · App Mode`;
   }
 
   function openPanel(title){
@@ -1490,124 +1524,46 @@
     const appVersionLabel = document.getElementById("appVersionLabel");
     if (appVersionLabel) appVersionLabel.textContent = APP_VERSION;
     const globalSearch = initGlobalSearch();
+    configureAppHomeStatus();
     getSearchDataModule().then(({ preloadSearchData }) => preloadSearchData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
     getWebsitesDataModule().then(({ preloadWebsitesData }) => preloadWebsitesData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
     getAsCallDataModule().then(({ preloadAsCallData }) => preloadAsCallData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
     scheduleAppWarmup();
     document.getElementById("themeSelect").addEventListener("change",(e)=>applyTheme(e.target.value));
 
-    const newsEl = document.getElementById("news");
-    if (SHOW_NEWS && NEWS_MESSAGE.trim() !== "") {
-  newsEl.innerHTML = NEWS_MESSAGE.trim();
-  newsEl.style.display = "block";
-
-  // 1) Download button → your existing shortcut link
-  const dl = document.getElementById("btnDownloadShortcut");
-  if (dl) dl.href = SHORTCUT_DOWNLOAD_URL || "#";
-
-  // 2) Open Settings button → call your Shortcut with input "Open Settings"
-  const os = document.getElementById("btnOpenSettings");
-  os?.addEventListener("click", (e) => {
-    e.preventDefault();
-    location.href = buildShortcutsUrl("Open Settings");
-  });
-}
-
-
-    const toggle      = document.getElementById("mode");
     const sectionsEl  = document.getElementById("sections");
-    const scBannerEl  = document.getElementById("scBanner");
-    const scDownloadEl= document.getElementById("scDownload");
-    if (scDownloadEl) scDownloadEl.href = SHORTCUT_DOWNLOAD_URL || "#";
     wireWhatsNewControls();
     wireCharlieModal();
+    document.getElementById("appUpdatesBtn")?.addEventListener("click", () => {
+      localStorage.removeItem(WHATS_NEW_KEY);
+      handleWhatsNew();
+    });
+    document.getElementById("appCharlieBtn")?.addEventListener("click", openCharlieModal);
+    document.getElementById("appNoticeBtn")?.addEventListener("click", () => showComingSoon("Notice"));
+    document.getElementById("noticesBellBtn")?.addEventListener("click", () => showComingSoon("Notices"));
     document.getElementById("gateRecheckBtn")?.addEventListener("click", recheckGateTestAccess);
     document.getElementById("gateResetBtn")?.addEventListener("click", resetGateTestState);
-    function applyUpdatesButtonVisibility(useShortcuts){
-      const trigger = document.querySelector(".updates-cta");
-      if (!trigger) return;
-      const matches =
-        WHATS_NEW_TARGET === "both" ||
-        (WHATS_NEW_TARGET === "shortcuts" && useShortcuts) ||
-        (WHATS_NEW_TARGET === "default" && !useShortcuts);
-      trigger.style.display = matches ? "flex" : "none";
-    }
-
     const whatsNewTrigger = document.getElementById("wnShowAgain");
     whatsNewTrigger?.addEventListener("click", () => {
       localStorage.removeItem(WHATS_NEW_KEY);
-      handleWhatsNew(toggle.checked);
-      applyUpdatesButtonVisibility(toggle.checked);
+      handleWhatsNew();
     });
-
-    // === Hidden tap to reset Shortcuts news card ===
-document.querySelector('.copy .t')?.addEventListener('click', () => {
-  if (confirm('Show Shortcuts setup tip again?')) {
-    localStorage.removeItem('amb_news_shortcuts_v1'); // use your actual NEWS_DISMISSED_KEY
-    render();
-  }
-});
-
-
-    const map = new Map(BUTTONS.map(b => [b.text, b]));
 
 function render(){
-  const useShortcuts = toggle.checked;
-  document.body.classList.toggle("shortcuts-mode-on", useShortcuts);
-  if (useShortcuts) globalSearch?.clear();
   const allowProtected = canOpenProtectedContent();
 
-  // --- News card tied to Shortcuts Mode ---
-  const newsEl = document.getElementById("news");
-  const dismissed = localStorage.getItem(NEWS_DISMISSED_KEY) === "1";
-
-  if (SHOW_NEWS && useShortcuts && !dismissed && NEWS_MESSAGE.trim() !== "") {
-    newsEl.innerHTML = NEWS_MESSAGE.trim();
-    newsEl.style.display = "block";
-
-    // Buttons inside the card
-    const dl = document.getElementById("btnDownloadShortcut");
-    if (dl) dl.href = SHORTCUT_DOWNLOAD_URL || "#";
-
-    const os = document.getElementById("btnOpenSettings");
-    os?.addEventListener("click", (e) => {
-      e.preventDefault();
-      location.href = buildShortcutsUrl("Open Settings");
-    });
-
-    // Dismiss (remembered)
-    const closeBtn = document.getElementById("newsClose");
-    closeBtn?.addEventListener("click", () => {
-      localStorage.setItem(NEWS_DISMISSED_KEY, "1");
-      newsEl.style.display = "none";
-      newsEl.innerHTML = "";
-    });
-  } else {
-    // Hide when Shortcuts Mode is off or already dismissed
-    newsEl.style.display = "none";
-    newsEl.innerHTML = "";
-  }
-
-  // --- Shortcuts banner (your existing logic) ---
-  if (scBannerEl){
-    const shouldShow = useShortcuts && (typeof SHOW_SHORTCUTS_BANNER !== "undefined" ? SHOW_SHORTCUTS_BANNER : true);
-    scBannerEl.hidden = !shouldShow;
-    scBannerEl.style.display = shouldShow ? "block" : "none";
-  }
-
-  handleWhatsNew(useShortcuts);
-  applyUpdatesButtonVisibility(useShortcuts);
+  handleWhatsNew();
 
   // --- Sections grid ---
   sectionsEl.innerHTML = "";
   const map = new Map(BUTTONS.map(b => [b.text, b]));
 
-  for (const sec of SECTIONS){
+  for (const sec of APP_MODE_SECTIONS){
     const items = sec.items
       .map(name => map.get(name))
       .filter(Boolean)
-      .filter(btn => useShortcuts ? (btn.showShortcuts !== false) : (btn.showDefault !== false))
-      .filter(btn => allowProtected || !isProtectedAction(btn.actionId));
+      .filter(btn => btn.showDefault !== false)
+      .filter(btn => allowProtected || (!isProtectedAction(btn.actionId) && !btn.protectedHome));
     if (!items.length) continue;
 
     const secEl = document.createElement("section");
@@ -1622,10 +1578,11 @@ function render(){
 
     items.forEach((btn, i) => {
       const id  = (btn.id || btn.text.toLowerCase().replace(/\s+/g,"-")).replace(/[^a-z0-9\-]/gi,"-");
-      const href = useShortcuts ? buildShortcutsUrl(btn.shortcutLabel || btn.text) : (btn.href || "#");
+      const href = btn.href || "#";
 
       const a = document.createElement("a");
       a.className = `btn ${btn.color || "c-blue"}`;
+      if (items.length === 1) a.classList.add("app-wide-tile");
       a.id = id;
       a.href = href;
       a.style.animationDelay = `${i*18}ms`;
@@ -1635,24 +1592,33 @@ function render(){
           ? `<span class="material-symbols-rounded" aria-hidden="true">${btn.icon}</span>`
           : "";
 
-      a.innerHTML = `${iconHtml}<span class="label">${btn.text}</span>`;
+      const displayLabel = btn.appLabel || btn.text;
+      a.innerHTML = `${iconHtml}<span class="label">${displayLabel}</span>`;
 
-      if (!useShortcuts){
-        if (btn.actionId){
-          a.addEventListener("click", (e) => {
-            e.preventDefault();
-            if (isProtectedAction(btn.actionId) && !canOpenProtectedContent()) {
-              showProtectedContentDialog();
-              return;
-            }
-            runAction(btn.actionId, { title: btn.text }, { pushState: true });
-          });
-        } else if (!btn.href || btn.href === "#"){
-          a.addEventListener("click",(e)=>{
-            e.preventDefault();
-            alert("Coming Soon...");
-          });
-        }
+      if (btn.appHomeAction === "search"){
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          globalSearch?.open();
+        });
+      } else if (btn.comingSoon){
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          showComingSoon(displayLabel);
+        });
+      } else if (btn.actionId){
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          if (isProtectedAction(btn.actionId) && !canOpenProtectedContent()) {
+            showProtectedContentDialog();
+            return;
+          }
+          runAction(btn.actionId, { title: btn.text }, { pushState: true });
+        });
+      } else if (!btn.href || btn.href === "#"){
+        a.addEventListener("click",(e)=>{
+          e.preventDefault();
+          alert("Coming Soon...");
+        });
       }
 
       grid.appendChild(a);
@@ -1664,9 +1630,7 @@ function render(){
   }
 }
 
-// Evaluate the What's New modal on each render so it can follow
-// the chosen mode (default-only, Shortcuts-only, or both).
-function handleWhatsNew(useShortcuts){
+function handleWhatsNew(){
   const overlay = document.getElementById("whatsNewOverlay");
   const body = document.getElementById("whatsNewBody");
   const versionPill = document.getElementById("wnVersionPill");
@@ -1674,12 +1638,7 @@ function handleWhatsNew(useShortcuts){
   if (versionPill) versionPill.textContent = `🚑 ${APP_VERSION} released`;
   const dismissed = localStorage.getItem(WHATS_NEW_KEY) === "1";
   const message = WHATS_NEW_MESSAGE.trim();
-  const matchesMode =
-    WHATS_NEW_TARGET === "both" ||
-    (WHATS_NEW_TARGET === "shortcuts" && useShortcuts) ||
-    (WHATS_NEW_TARGET === "default" && !useShortcuts);
-
-  const shouldShow = WHATS_NEW_ENABLED && !dismissed && message && matchesMode;
+  const shouldShow = WHATS_NEW_ENABLED && !dismissed && message;
 
   if (shouldShow){
     body.innerHTML = message;
@@ -1752,7 +1711,6 @@ function wireCharlieModal(){
 }
 
 
-    toggle.addEventListener("change", render);
     document.getElementById("panel-back").addEventListener("click", closePanel);
     render();
 
@@ -1761,12 +1719,11 @@ function wireCharlieModal(){
   }
 
   // Sections layout
-  const SECTIONS = [
+  const APP_MODE_SECTIONS = [
+    { title: "Quick Actions", items: ["Search","Stay Connected"] },
     { title: "Resuscitation & Timers", items: ["CPR","WAAFELSS","RSI Checklist","Ventilator Settings"] },
-    { title: "Calculators · Reference", items: ["CPG","SOP","Flowcharts","Formulary","RBS Converter","MAP Calculator","Overtime Calculator","Meds Calculator"] },
-    { title: "Pediatric Care",         items: ["CCP Pediatrics","AP Pediatrics","Care Tools","Estimated Weight"] },
-    { title: "Assessment Scores",      items: ["GCS Score","APGAR Score","SAT Score","Westley Score"] },
-    { title: "Ops / Links",            items: ["HOS","Websites","AS-Call","HMC Address Book","Shifts","Stay Connected"] }
+    { title: "Clinical · Calculators", items: ["Pediatrics","Guidelines","Flowcharts","Calculators","Visual Guides","Scores"] },
+    { title: "Operations", items: ["Overtime Calculator","HOS","AS-Call","Websites","Shifts"] }
   ];
 
   let currentTool = null;
@@ -1790,6 +1747,69 @@ function wireCharlieModal(){
     currentTool = actionId;
   }
 
+  function showComingSoon(title){
+    alert(`${title || "This feature"}\n\nComing Soon`);
+  }
+
+  function renderCategoryScreen(mountEl, categoryId){
+    const category = CATEGORY_SCREENS[categoryId];
+    if (!category) return false;
+
+    mountEl.innerHTML = `
+      <div class="category-wrap">
+        <p class="category-intro">${gsEscape(category.intro || "")}</p>
+        ${category.sections.map((section, sectionIndex) => `
+          <section class="category-section">
+            <h3 class="category-heading">${gsEscape(section.title)}</h3>
+            <div class="category-grid">
+              ${section.items.map((item, itemIndex) => `
+                <button
+                  class="category-item${item.comingSoon ? " coming-soon" : ""}"
+                  type="button"
+                  data-section="${sectionIndex}"
+                  data-item="${itemIndex}"
+                  style="--item-color:${gsEscape(item.color || "var(--accent)")}"
+                >
+                  <span class="category-icon" aria-hidden="true">
+                    <span class="material-symbols-rounded">${gsEscape(item.icon || "open_in_new")}</span>
+                  </span>
+                  <span class="category-copy">
+                    <span class="category-title">${gsEscape(item.title)}</span>
+                    <span class="category-subtitle">${gsEscape(item.subtitle || "")}</span>
+                    ${item.comingSoon ? `<span class="category-badge">Coming Soon</span>` : ""}
+                  </span>
+                </button>
+              `).join("")}
+            </div>
+          </section>
+        `).join("")}
+      </div>
+    `;
+
+    mountEl.addEventListener("click", (event) => {
+      const button = event.target.closest(".category-item");
+      if (!button) return;
+      const item = category.sections[Number(button.dataset.section)]?.items[Number(button.dataset.item)];
+      if (!item) return;
+      if (item.comingSoon) {
+        showComingSoon(item.title);
+        return;
+      }
+      if (item.documentType) {
+        openGlobalPdf(1, item.title, item.documentType);
+        return;
+      }
+      if (item.actionId) {
+        runAction(
+          item.actionId,
+          { title: item.title, ...(item.params || {}), parentCategory: categoryId },
+          { pushState: true, nested: true }
+        );
+      }
+    });
+    return true;
+  }
+
   // Router / action loader
   async function runAction(actionId, params = {}, options = {}) {
     try {
@@ -1802,12 +1822,26 @@ function wireCharlieModal(){
       }
       const mountEl = document.getElementById("panel-body");
       mountEl.innerHTML = "";
-      openPanel(params.title || (actionId === "community" ? "Join the Community" : actionId.toUpperCase()));
+      const category = CATEGORY_SCREENS[actionId];
+      openPanel(params.title || category?.title || (actionId === "community" ? "Join the Community" : actionId.toUpperCase()));
+
+      if (category) {
+        renderCategoryScreen(mountEl, actionId);
+        if (options.fromHistory) {
+          currentTool = actionId;
+        } else if (options.pushState !== false) {
+          const replace = currentTool != null && !options.nested;
+          setToolState(actionId, { ...params, title: category.title }, replace);
+        }
+        return;
+      }
 
       // Inline: Community hub
       if (actionId === "community") {
         const links = [
-          { name:"Email",    href:"mailto:yniwashi@hamad.qa?subject=Ambulance%20(iOS)%20App%20Feedback", img:"images/email.png",    color:"#f44434" },
+          { name:"Suggest Feature", href:"mailto:yniwashi@hamad.qa?subject=Ambulance%20App%20Feature%20Suggestion", img:"images/email.png", color:"#f44434" },
+          { name:"Report Issue", href:"mailto:yniwashi@hamad.qa?subject=Ambulance%20iOS%20App%20Issue", icon:"bug_report", color:"#dc2626" },
+          { name:"App Intro", icon:"slideshow", color:"#0ea5e9", comingSoon:true },
           { name:"Discord",  href:"https://discord.gg/qc8fK3yd92",                                img:"images/discord.png",  color:"#5c64f4" },
           { name:"Telegram", href:"https://t.me/+EAcWKnoaRq05YzY0",                               img:"images/telegram.png", color:"#24b4e3" },
           { name:"WhatsApp", href:"https://whatsapp.com/channel/0029VadgCTH0QeamMlpEvX0x",       img:"images/whatsapp.png", color:"#24ac04" }
@@ -1819,25 +1853,35 @@ function wireCharlieModal(){
               Join <strong>Discord</strong> and other platforms to stay up to date with real-time news, feature updates, and tips.
             </p>
             <div style="display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
-              ${links.map(l => `
-                <a href="${l.href}" target="_blank" rel="noopener"
-                   style="display:flex; flex-direction:column; align-items:center; text-decoration:none; padding:12px;
-                          background:linear-gradient(180deg,${l.color}cc,${l.color}); border-radius:14px; color:#fff; font-weight:700;
+              ${links.map((l, index) => `
+                <a href="${l.href || "#"}" ${l.comingSoon ? `data-community-coming="${index}"` : `target="_blank" rel="noopener"`}
+                   style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-decoration:none; padding:12px;
+                          min-height:92px;background:linear-gradient(180deg,${l.color}cc,${l.color}); border-radius:8px; color:#fff; font-weight:700;
                           box-shadow:0 4px 14px rgba(0,0,0,.2);">
-                  <img src="${l.img}" alt="${l.name}" class="community-icon">
+                  ${l.img
+                    ? `<img src="${l.img}" alt="" class="community-icon">`
+                    : `<span class="material-symbols-rounded" aria-hidden="true" style="font-size:42px;margin-bottom:4px">${l.icon}</span>`}
                   <span>${l.name}</span>
+                  ${l.comingSoon ? `<small style="margin-top:4px;opacity:.85">Coming Soon</small>` : ""}
                 </a>
               `).join("")}
             </div>
           </div>
         `;
+        mountEl.querySelectorAll("[data-community-coming]").forEach((link) => {
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            const item = links[Number(link.dataset.communityComing)];
+            showComingSoon(item?.name);
+          });
+        });
         if (options.fromHistory) {
           currentTool = actionId;
         } else if (options.pushState !== false) {
           if (options.initialLoad) {
             setToolState(actionId, params, false);
           } else {
-            const replace = currentTool != null;
+            const replace = currentTool != null && !options.nested;
             setToolState(actionId, params, replace);
           }
         }
@@ -1854,7 +1898,7 @@ function wireCharlieModal(){
         if (options.initialLoad) {
           setToolState(actionId, params, false);
         } else {
-          const replace = currentTool != null;
+          const replace = currentTool != null && !options.nested;
           setToolState(actionId, params, replace);
         }
       }

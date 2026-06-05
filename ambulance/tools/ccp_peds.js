@@ -1,4 +1,6 @@
 // tools/ccp_peds.js
+// Changelog (2026-06-05):
+// - Accept an initial Months/Years group from the Android-style Pediatrics menu.
 // Changelog (2026-06-04):
 // - Resolve gate access type from app shell state so View Formulary stays blocked for Other User.
 // - Hide and block View Formulary for iOS Other User limited access.
@@ -1358,5 +1360,5 @@ Ref. Dose Calculation: ${refStr}`) ]};
 
   /* ====== bootstrap ====== */
   renderGrid();
-  setMode('months'); // default landing mode
+  setMode(String(params.initialGroup || "").toLowerCase() === "years" ? "years" : "months");
 }

@@ -1,5 +1,7 @@
+// CHANGELOG (2026-06-05):
+// - Accept an initial Months/Years group from the Android-style Pediatrics menu.
 // tools/ap_peds.js
-export async function run(mountEl){
+export async function run(mountEl, params = {}){
   mountEl.innerHTML = `
     <style>
       /* ========= AP Pediatrics (scoped) ========= */
@@ -674,7 +676,7 @@ RR < 30`;
   });
 
   // init
-  setGroupActive('Months');
+  setGroupActive(String(params.initialGroup || "").toLowerCase() === "years" ? "Years" : "Months");
   selectedEl.textContent = '-';
   ageLineEl.textContent = '';
   doseEl.textContent = 'Pick a medication.';
