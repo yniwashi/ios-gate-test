@@ -1,5 +1,6 @@
 // ios-ambulance-gate-test-worker.js
 // CHANGELOG (2026-06-05):
+// - Mirror production install gating: browser/direct-route misses go to /install/ and /install/dl remains public.
 // - Keep the startup splash visible for 1.8 seconds before opening the Ambulance App.
 // - Add the existing full-screen Ambulance splash image before access checking and gate UI.
 //
@@ -51,6 +52,10 @@ export default {
     const path = normalizePath(url.pathname);
 
     if (req.method === "OPTIONS") return corsPreflight();
+
+    if (path === "/install/dl" && req.method === "GET") {
+      return serveInstallProfile(req, env, ctx);
+    }
 
     if ((path === "/" || path === "/index.html") && req.method === "GET") {
       return new Response(gatePageHtml(), {
@@ -387,9 +392,39 @@ function isProtectedPath(path) {
 }
 
 function redirectToGate(url) {
-  const target = new URL("/", url.origin);
-  target.searchParams.set("gate", "required");
-  return Response.redirect(target.toString(), 302);
+  return Response.redirect(new URL("/install/", url.origin).toString(), 302);
+}
+
+async function serveInstallProfile(req, env, ctx) {
+  const url = new URL(req.url);
+  const requested = url.searchParams.get("file") || "AmbulanceApp.mobileconfig";
+  const file = requested.split("/").pop();
+  if (!file || !/^[a-zA-Z0-9._-]+\.mobileconfig$/.test(file)) {
+    return new Response("Invalid profile filename", { status: 400 });
+  }
+
+  const profileUrl = new URL(`/install/${file}`, url.origin);
+  const profileReq = new Request(profileUrl, { method: "GET", headers: req.headers });
+  const originResp = await fetchStatic(profileReq, env);
+  if (!originResp.ok) return new Response("File not found", { status: 404 });
+
+  if (env.IOS_DLLOGS?.put) {
+    const event = {
+      time: new Date().toISOString(),
+      filename: file,
+      version: url.searchParams.get("v") || "",
+      source: "ios-gate-test",
+      user_agent: (req.headers.get("user-agent") || "").slice(0, 500)
+    };
+    const key = `test:${Date.now()}:${crypto.randomUUID?.() || Math.random().toString(16).slice(2)}`;
+    ctx.waitUntil(env.IOS_DLLOGS.put(key, JSON.stringify(event), { expirationTtl: 60 * 60 * 24 * 30 }));
+  }
+
+  const headers = new Headers(originResp.headers);
+  headers.set("content-disposition", `attachment; filename="${file}"`);
+  headers.set("content-type", "application/x-apple-aspen-config");
+  headers.set("cache-control", "no-store");
+  return new Response(originResp.body, { status: 200, headers });
 }
 
 function noStore(resp) {
@@ -517,6 +552,11 @@ function gatePageHtml() {
 </section></main>
 <script>
 (() => {
+  const inStandalone = (navigator.standalone === true) || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+  if (!inStandalone) {
+    location.replace("/install/");
+    return;
+  }
   const APP_VERSION = "v0.3";
   const INSTALL_ID_KEY = "ambulance_ios_install_id";
   const FIRST_NAME_KEY = "ambulance_ios_first_name";
