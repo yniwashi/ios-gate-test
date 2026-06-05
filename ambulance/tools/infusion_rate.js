@@ -1,5 +1,6 @@
 // /ambulance/tools/infusion_rate.js
 // CHANGELOG (2026-06-05):
+// - Match page accent color and description to the calculator source screen.
 // - Port Android Infusion Rate with four dose units and optional weight-based dosing.
 
 export async function run(root) {
@@ -7,8 +8,8 @@ export async function run(root) {
   const {calculatorCss,formatTrimmed,installCalculatorKeyboardDismiss,wireDecimalInputs}=await import(`../calculator_common.js?ver=${version}`);
   let withWeight=false, unit="mcg/min";
   const units=["mcg/min","mcg/hr","mg/min","mg/hr"];
-  root.innerHTML=`<style>${calculatorCss}</style><div class="calc-page" style="--calc-accent:#5F6670">
-    <div class="calc-heading"><h2>Infusion Rate</h2><p>Calculate ml/hr and ml/min from concentration and recommended dose.</p></div>
+  root.innerHTML=`<style>${calculatorCss}</style><div class="calc-page" style="--calc-accent:#5F6670;--calc-accent-dark:#737D8A">
+    <div class="calc-heading"><h2>Infusion Rate</h2><p>Calculate rate from dose and concentration.</p></div>
     <div class="calc-stack"><section class="calc-card">
       <h3>Drug concentration</h3><div class="calc-row">
         <label class="calc-field"><span>Amount</span><span class="calc-input-wrap"><input id="irAmount" class="calc-input" data-decimal inputmode="decimal"><b class="calc-suffix">mg</b></span></label>

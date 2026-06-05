@@ -1,5 +1,6 @@
 // /ambulance/tools/burn_surface_area.js
 // CHANGELOG (2026-06-05):
+// - Match page accent color and description to the calculator source screen.
 // - Port the Android adult, child, and infant burn diagrams and Rule of Nines zones.
 
 const zone = (id,label,x,y,w,h,value,rotate=0,oval=false) => ({id,label,x,y,w,h,value,rotate,oval});
@@ -22,16 +23,19 @@ export async function run(root){
   let age="adult";const selected=new Map();
   root.innerHTML=`<style>
     .burn-page{max-width:760px;margin:auto;padding:18px;color:var(--text)}.burn-head{text-align:center}.burn-head h2{margin:0;font-size:25px;font-weight:950}.burn-head p{margin:6px;color:var(--muted)}
-    .burn-types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}.burn-types button{min-height:44px;border:0;border-radius:14px;background:var(--surface-2);color:var(--text);font-weight:900}.burn-types button.active{background:#EF4444;color:#fff}
+    .burn-page{--burn-accent:#B45309;--burn-accent-dark:#9A4A08;--burn-live-accent:var(--burn-accent)}
+    :root[data-theme="dark"] .burn-page{--burn-live-accent:var(--burn-accent-dark)}
+    @media(prefers-color-scheme:dark){:root[data-theme="auto"] .burn-page{--burn-live-accent:var(--burn-accent-dark)}}
+    .burn-types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}.burn-types button{min-height:44px;border:0;border-radius:14px;background:var(--surface-2);color:var(--text);font-weight:900}.burn-types button.active{background:var(--burn-live-accent);color:#fff}
     .burn-summary{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:0 3px 10px rgba(0,0,0,.1)}
-    .burn-total strong{display:block;color:#EF4444;font-size:28px}.burn-clear{border:0;border-radius:14px;padding:10px 14px;background:var(--surface-2);color:var(--text);font-weight:900}
+    .burn-total strong{display:block;color:var(--burn-live-accent);font-size:28px}.burn-clear{border:0;border-radius:14px;padding:10px 14px;background:var(--surface-2);color:var(--text);font-weight:900}
     .burn-diagrams{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}.burn-card{padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);text-align:center}.burn-card h3{margin:0 0 8px;font-size:17px}
     .burn-stage{position:relative;width:100%;max-width:300px;margin:auto}.burn-stage.adult,.burn-stage.child{aspect-ratio:346/721}.burn-stage.infant{aspect-ratio:475/525;max-width:350px}.burn-stage img{display:block;width:100%;height:100%;object-fit:contain}
-    .burn-zone{position:absolute;border:1px dashed rgba(239,68,68,.48);border-radius:8px;background:rgba(239,68,68,.06);font-size:0}.burn-zone.oval{border-radius:50%}.burn-zone.selected{border:2px solid #DC2626;background:rgba(239,68,68,.48);box-shadow:0 0 0 2px rgba(255,255,255,.75)}
+    .burn-zone{position:absolute;border:1px dashed color-mix(in srgb,var(--burn-live-accent) 62%,transparent);border-radius:8px;background:color-mix(in srgb,var(--burn-live-accent) 8%,transparent);font-size:0}.burn-zone.oval{border-radius:50%}.burn-zone.selected{border:2px solid var(--burn-live-accent);background:color-mix(in srgb,var(--burn-live-accent) 45%,transparent);box-shadow:0 0 0 2px rgba(255,255,255,.75)}
     .burn-list{margin-top:14px;padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--surface)}.burn-list h3{margin:0 0 8px}.burn-list p{margin:0;color:var(--muted)}.burn-list ul{margin:0;padding-left:22px;line-height:1.7}
     :root[data-theme="dark"] .burn-zone{border-color:rgba(248,113,113,.7);background:rgba(127,29,29,.12)}:root[data-theme="dark"] .burn-zone.selected{background:rgba(220,38,38,.55)}
     @media(max-width:500px){.burn-page{padding:14px 10px}.burn-diagrams{gap:7px}.burn-card{padding:7px}.burn-card h3{font-size:14px}}
-  </style><div class="burn-page"><div class="burn-head"><h2>Burn Surface Area</h2><p>Tap each affected body area to calculate total body surface area.</p></div>
+  </style><div class="burn-page"><div class="burn-head"><h2>Burn Surface Area</h2><p>Rule of Nines %TBSA calculator.</p></div>
   <div class="burn-types">${["adult","child","infant"].map(x=>`<button data-age="${x}" class="${x===age?"active":""}">${x[0].toUpperCase()+x.slice(1)}</button>`).join("")}</div>
   <div class="burn-summary"><div class="burn-total"><span>Total burn surface area</span><strong id="burnTotal">0%</strong></div><button class="burn-clear">Clear</button></div>
   <div class="burn-diagrams" id="burnDiagrams"></div><section class="burn-list"><h3>Selected areas</h3><div id="burnList"><p>No areas selected.</p></div></section></div>`;

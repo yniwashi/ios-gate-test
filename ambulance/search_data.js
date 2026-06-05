@@ -1,5 +1,6 @@
 // /ambulance/search_data.js
 // CHANGELOG (2026-06-05):
+// - Include PAT in version-aware document config, caching, and global search targets.
 // - Resolve document and reference helper URLs from iOS App config, with API-route defaults.
 // - Add Android-aligned formulary/reference page resolution for direct CPG navigation.
 // CHANGELOG (2026-05-17):
@@ -12,11 +13,12 @@ const DEFAULT_CONFIG = {
   urlIndex: "https://api.niwashibase.com/api/v1/ambulance/app-data/cpg-index",
   urlSopIndex: "https://api.niwashibase.com/api/v1/ambulance/app-data/sop-index",
   urlCpmIndex: "https://api.niwashibase.com/api/v1/ambulance/app-data/cpm-index",
+  urlPatIndex: "https://api.niwashibase.com/api/v1/ambulance/app-data/pat-index",
   urlFlowcharts: "https://api.niwashibase.com/api/v1/ambulance/app-data/flowcharts",
   urlFormulary: "https://api.niwashibase.com/api/v1/ambulance/app-data/formulary"
 };
 
-const CACHE_KEY = "amb_search_data_v1";
+const CACHE_KEY = "amb_search_data_v2";
 const MAX_CACHE_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 let config = { ...DEFAULT_CONFIG };
@@ -90,6 +92,7 @@ async function applyIosAppConfig() {
       urlIndex: documentUrl("CPG") || config.urlIndex,
       urlSopIndex: documentUrl("SOP") || config.urlSopIndex,
       urlCpmIndex: documentUrl("CPM") || config.urlCpmIndex,
+      urlPatIndex: documentUrl("PAT") || config.urlPatIndex,
       urlFlowcharts: data?.flowcharts?.url || config.urlFlowcharts,
       urlFormulary: data?.formulary?.url || config.urlFormulary
     };
@@ -100,15 +103,16 @@ async function applyIosAppConfig() {
 
 async function fetchFresh() {
   await applyIosAppConfig();
-  const [core, cpg, sop, cpm, flowcharts, formulary] = await Promise.all([
+  const [core, cpg, sop, cpm, pat, flowcharts, formulary] = await Promise.all([
     getSearchCore(),
     fetchJson(config.urlIndex).catch(() => []),
     fetchJson(config.urlSopIndex).catch(() => ({ items: [] })),
     fetchJson(config.urlCpmIndex).catch(() => ({ items: [] })),
+    fetchJson(config.urlPatIndex).catch(() => ({ items: [] })),
     fetchJson(config.urlFlowcharts).catch(() => ({})),
     fetchJson(config.urlFormulary).catch(() => ({}))
   ]);
-  rawData = { cpg, sop, cpm, flowcharts, formulary };
+  rawData = { cpg, sop, cpm, pat, flowcharts, formulary };
   targets = buildTargets(rawData, core);
   writeCache(rawData);
   return rawData;
@@ -120,6 +124,7 @@ function buildTargets(data, core) {
     ...buildDocumentTargets(data.cpg || [], "cpg"),
     ...buildDocumentTargets(data.sop || { items: [] }, "sop"),
     ...buildDocumentTargets(data.cpm || { items: [] }, "cpm"),
+    ...buildDocumentTargets(data.pat || { items: [] }, "pat"),
     ...buildSimplePageTargets(data.flowcharts || {}, "flowchart", { pillLabel: "Flowchart" }),
     ...buildSimplePageTargets(data.formulary || {}, "formulary", { pillLabel: "Formulary" })
   ];

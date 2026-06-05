@@ -1,5 +1,6 @@
 // /ambulance/tools/dose_volume.js
 // CHANGELOG (2026-06-05):
+// - Match page accent color and description to the calculator source screen.
 // - Port the Android Dose Volume calculator UI, validation, formula, and result detail.
 
 export async function run(root) {
@@ -8,8 +9,8 @@ export async function run(root) {
     await import(`../calculator_common.js?ver=${version}`);
   let unit = "mg";
   root.innerHTML = `<style>${calculatorCss}</style>
-    <div class="calc-page" style="--calc-accent:#1F53D6">
-      <div class="calc-heading"><h2>Dose Volume</h2><p>Enter the vial concentration and desired dose.</p></div>
+    <div class="calc-page" style="--calc-accent:#0068FA;--calc-accent-dark:#1D5FCC">
+      <div class="calc-heading"><h2>Dose Volume</h2><p>Calculate volume from ordered dose.</p></div>
       <div class="calc-stack">
         <section class="calc-card">
           <h3>Concentration unit written on vial/ampule</h3>

@@ -1,5 +1,6 @@
 // /ambulance/pediatric_ui.js
 // CHANGELOG (2026-06-05):
+// - Pass readable titles when CCP Pediatrics opens Dose Volume or Pediatric Infusions.
 // - Use the central nested router so Pediatrics shortcuts preserve correct Back behavior.
 // - Route CCP Dose Volume and Pediatric Infusions to the new Android-aligned calculator tools.
 // - Align the Age and Weight labels with their input text inset.
@@ -318,6 +319,6 @@ export async function runPediatricScreen(root, { scope, initialGroup, accessType
     const error=inputError(); if(error){showDialog("Check age or weight",error);return;}
     renderResult(buildWaafels(scope,mode,age.value,weight?.value||"",formatNumber));
   };
-  app.querySelector("[data-special=dose]")?.addEventListener("click",()=>openTool("dose_volume",{parentCategory:"category_pediatrics"}));
-  app.querySelector("[data-special=infusions]")?.addEventListener("click",()=>openTool("pediatric_infusions",{parentCategory:"category_pediatrics"}));
+  app.querySelector("[data-special=dose]")?.addEventListener("click",()=>openTool("dose_volume",{title:"Dose Volume",parentCategory:"category_pediatrics"}));
+  app.querySelector("[data-special=infusions]")?.addEventListener("click",()=>openTool("pediatric_infusions",{title:"Pediatric Infusions",parentCategory:"category_pediatrics"}));
 }

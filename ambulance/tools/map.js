@@ -1,11 +1,12 @@
 // /ambulance/tools/map.js
 // CHANGELOG (2026-06-05):
+// - Match page accent color and description to the calculator source screen.
 // - Replace the legacy MAP tool with the Android formula, validation, statuses, and dark-mode UI.
 
 export async function run(root){
   const v=encodeURIComponent(window.__AMBULANCE_ASSET_VERSION||"current");
   const {calculatorCss,formatTrimmed,installCalculatorKeyboardDismiss,wireDecimalInputs}=await import(`../calculator_common.js?ver=${v}`);
-  root.innerHTML=`<style>${calculatorCss}</style><div class="calc-page" style="--calc-accent:#F97316"><div class="calc-heading"><h2>Mean Arterial Pressure</h2><p>Calculate MAP from systolic and diastolic blood pressure.</p></div><div class="calc-stack">
+  root.innerHTML=`<style>${calculatorCss}</style><div class="calc-page" style="--calc-accent:#2196F3;--calc-accent-dark:#1E78C2"><div class="calc-heading"><h2>MAP</h2><p>Mean arterial pressure calculator.</p></div><div class="calc-stack">
   <section class="calc-card"><div class="calc-row"><label class="calc-field"><span>Systolic BP</span><span class="calc-input-wrap"><input id="mapS" class="calc-input" data-decimal inputmode="decimal"><b class="calc-suffix">mmHg</b></span></label><label class="calc-field"><span>Diastolic BP</span><span class="calc-input-wrap"><input id="mapD" class="calc-input" data-decimal inputmode="decimal"><b class="calc-suffix">mmHg</b></span></label></div><button id="mapGo" class="calc-button">Calculate</button></section>
   <section class="calc-result" id="mapOut"><h3>Result</h3><p class="calc-muted">Enter blood pressure values, then tap Calculate.</p></section></div></div>`;
   installCalculatorKeyboardDismiss(root);wireDecimalInputs(root);

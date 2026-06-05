@@ -1,12 +1,13 @@
 // /ambulance/tools/proportion.js
 // CHANGELOG (2026-06-05):
+// - Match page accent color and description to the calculator source screen.
 // - Port the Android cross-multiplication Proportion calculator.
 
 export async function run(root){
   const version=encodeURIComponent(window.__AMBULANCE_ASSET_VERSION||"current");
   const {calculatorCss,formatTrimmed,installCalculatorKeyboardDismiss,wireDecimalInputs}=await import(`../calculator_common.js?ver=${version}`);
-  root.innerHTML=`<style>${calculatorCss}</style><div class="calc-page" style="--calc-accent:#3F51B5">
-    <div class="calc-heading"><h2>Proportion</h2><p>Solve proportional values using A : B = C : X.</p></div>
+  root.innerHTML=`<style>${calculatorCss}</style><div class="calc-page" style="--calc-accent:#3F51B5;--calc-accent-dark:#4D5DBA">
+    <div class="calc-heading"><h2>Proportion</h2><p>Cross-multiply concentration values.</p></div>
     <div class="calc-stack"><section class="calc-card calc-formula"><h3>Formula</h3><strong>A : B = C : X</strong><span>X = (C x B) / A</span></section>
     <section class="calc-card"><div class="calc-row">
       <label class="calc-field"><span>A - Known 1</span><span class="calc-input-wrap"><input id="propA" class="calc-input" data-decimal inputmode="decimal"></span></label>

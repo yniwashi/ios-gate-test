@@ -1,5 +1,13 @@
 <!--
   CHANGELOG (2026-06-05):
+  - Point Guidelines document PDFs to the Android-aligned shared PDF viewer path.
+  - Add a local PDF viewer base override for testing shared pdf-viewer changes before upload.
+  - Match Guidelines PDF search toolbar to Android and prevent Guidelines tab switches from trapping Back navigation.
+  - Remove the extra Guidelines header/status rows and open Guidelines PDFs with the search-only App viewer toolbar.
+  - Add Android-aligned Guidelines tabs for CPG/SOP/CPM/PAT with app-config document versions and PDF URLs.
+  - Add PAT to protected search/document handling and warm the Guidelines documents from iOS App config.
+  - Default new users to Light theme until they choose another theme.
+  - Match calculator menu colors, icons, and descriptions to the app source with dark-mode-safe accents.
   - Remove implementation-source references from visible category descriptions.
   - Bump the testing asset key for deployment of the Pediatrics, references, Calculators, and router updates.
   - Fix the panel Back button passing its click event as a history-navigation flag.
@@ -128,7 +136,7 @@
   Keep the comment blocks near each config in sync when adding or revising announcements.
 -->
 <!DOCTYPE html>
-<html lang="en" data-theme="auto">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -650,8 +658,8 @@
         <label class="theme-toggle status-theme">
           <span>Theme</span>
           <select id="themeSelect" aria-label="Theme">
-            <option value="auto">Auto</option>
             <option value="light">Light</option>
+            <option value="auto">Auto</option>
             <option value="dark">Dark</option>
           </select>
         </label>
@@ -773,9 +781,10 @@
         import(`./as_call_data.js${ASSET_QUERY}`),
         import(`./app_config_data.js${ASSET_QUERY}`),
         import(`./pediatric_data.js${ASSET_QUERY}`),
-        import(`./reference_data.js${ASSET_QUERY}`)
-      ]).then(([searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData]) => {
-        const shared = { assetVersion: ASSET_VERSION, searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData };
+        import(`./reference_data.js${ASSET_QUERY}`),
+        import(`./document_data.js${ASSET_QUERY}`)
+      ]).then(([searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData, documentData]) => {
+        const shared = { assetVersion: ASSET_VERSION, searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData, documentData };
         window.__AMBULANCE_SHARED_MODULES = shared;
         return shared;
       }).finally(() => { sharedModulesPromise = null; });
@@ -811,6 +820,10 @@
     return (await loadSharedModules()).referenceData;
   }
 
+  async function getDocumentDataModule() {
+    return (await loadSharedModules()).documentData;
+  }
+
   function normalizeAppVersion(value) {
     const text = String(value || "").trim();
     return text || APP_VERSION;
@@ -831,7 +844,7 @@
     NON_AMBULANCE_STAFF: "non_ambulance_staff"
   };
   const PROTECTED_ACTIONS = new Set(["category_guidelines", "cpg_wizard", "sop", "flowcharts", "formulary", "as_call", "hos"]);
-  const PROTECTED_SEARCH_TYPES = new Set(["cpg", "sop", "cpm", "flowchart", "formulary"]);
+  const PROTECTED_SEARCH_TYPES = new Set(["cpg", "sop", "cpm", "pat", "flowchart", "formulary"]);
   let gateSessionPromise = null;
   let gateAccessType = ACCESS_TYPES.AMBULANCE_STAFF;
 
@@ -1028,17 +1041,14 @@
     },
     category_guidelines: {
       title: "Guidelines",
-      intro: "Open document groups and clinical references.",
+      intro: "Search CPG, SOP, CPM, and PAT documents and open the right page quickly.",
       protected: true,
       sections: [
         { title: "Documents", items: [
-          { title:"CPG", subtitle:"Clinical Practice Guidelines", icon:"menu_book", color:"#02C202", actionId:"cpg_wizard" },
-          { title:"SOP", subtitle:"Standard Operating Procedures", icon:"description", color:"#FF4040", actionId:"sop" },
-          { title:"CPM", subtitle:"Clinical Practice Manual", icon:"picture_as_pdf", color:"#005FCB", documentType:"cpm" },
-          { title:"PAT", subtitle:"Pediatric Assessment Triangle references", icon:"child_care", color:"#7C3AED", comingSoon:true }
-        ]},
-        { title: "References", items: [
-          { title:"Formulary", subtitle:"Medication reference", icon:"medication", color:"#2684FF", actionId:"flowcharts", params:{ initialMode:"formulary" } }
+          { title:"CPG", fullTitle:"Clinical Practice Guidelines", subtitle:"Clinical Practice Guidelines", color:"#2563A9", darkColor:"#1E4E86", documentType:"cpg" },
+          { title:"SOP", fullTitle:"Standard Operating Procedures", subtitle:"Standard Operating Procedures", color:"#D23B3B", darkColor:"#A83232", documentType:"sop" },
+          { title:"CPM", fullTitle:"Clinical Procedure Manual", subtitle:"Clinical Procedure Manual", color:"#F78000", darkColor:"#C76700", documentType:"cpm" },
+          { title:"PAT", fullTitle:"Pediatric Assessment & Treatment Guide", subtitle:"Pediatric Assessment & Treatment Guide", color:"#C026D3", darkColor:"#9822A8", documentType:"pat" }
         ]}
       ]
     },
@@ -1047,18 +1057,18 @@
       intro: "Infusions, calculations, and conversions.",
       sections: [
         { title: "Infusions", items: [
-          { title:"Adult Infusions", subtitle:"Adult medication infusion references", icon:"fluid", color:"#2196F3", actionId:"adult_infusions" },
-          { title:"Pediatric Infusions", subtitle:"Pediatric medication infusion references", icon:"fluid", color:"#F04FED", actionId:"pediatric_infusions" }
+          { title:"Adult Infusions", subtitle:"Medication infusion references", icon:"infusion", color:"#2196F3", darkColor:"#1E78C2", actionId:"adult_infusions" },
+          { title:"Pediatric Infusions", subtitle:"Pediatric infusion references", icon:"infusion", color:"#F04FED", darkColor:"#B73BB8", actionId:"pediatric_infusions" }
         ]},
         { title: "Calculations", items: [
-          { title:"Burn Surface Area", subtitle:"Rule of Nines %TBSA calculator", icon:"local_fire_department", color:"#EF4444", actionId:"burn_surface_area" },
-          { title:"Infusion Rate", subtitle:"Calculate rate from dose and concentration", icon:"speed", color:"#06B6D4", actionId:"infusion_rate" },
-          { title:"Dose Volume", subtitle:"Calculate volume from ordered dose", icon:"vaccines", color:"#10B981", actionId:"dose_volume" },
-          { title:"Proportion", subtitle:"Solve proportional medication values", icon:"percent", color:"#8B5CF6", actionId:"proportion" },
-          { title:"MAP", subtitle:"Mean arterial pressure calculator", icon:"calculate", color:"#FF6600", actionId:"map" }
+          { title:"Burn Surface Area", subtitle:"Rule of Nines %TBSA calculator", icon:"calculate", color:"#B45309", darkColor:"#9A4A08", actionId:"burn_surface_area" },
+          { title:"Infusion Rate", subtitle:"Calculate rate from dose and concentration", icon:"calculate", color:"#5F6670", darkColor:"#737D8A", actionId:"infusion_rate" },
+          { title:"Dose Volume", subtitle:"Calculate volume from ordered dose", icon:"calculate", color:"#0068FA", darkColor:"#1D5FCC", actionId:"dose_volume" },
+          { title:"Proportion", subtitle:"Cross-multiply concentration values", icon:"calculate", color:"#3F51B5", darkColor:"#4D5DBA", actionId:"proportion" },
+          { title:"MAP", subtitle:"Mean arterial pressure calculator", icon:"calculate", color:"#2196F3", darkColor:"#1E78C2", actionId:"map" }
         ]},
         { title: "Conversions", items: [
-          { title:"RBS Converter", subtitle:"Convert glucose units", icon:"glucose", color:"#D4B900", actionId:"rbs" }
+          { title:"RBS Converter", subtitle:"Convert glucose units", icon:"calculate", color:"#E0A800", darkColor:"#B98500", actionId:"rbs" }
         ]}
       ]
     },
@@ -1086,15 +1096,18 @@
     urlFormulary: "https://api.niwashibase.com/api/v1/ambulance/app-data/formulary",
     urlWebsites: "https://docs.niwashibase.com/helpers/websites.json",
     urlAsCall: "https://docs.niwashibase.com/helpers/as_call.json",
+    urlViewerBase: "https://docs.niwashibase.com/viewer/android/",
     urlPageBase: "https://docs.niwashibase.com/viewer/web/?file=/docs/cpg-81w9d1f.pdf#page=",
     urlSopPageBase: "https://docs.niwashibase.com/viewer/web/?file=/docs/sop-101qq9f2w.pdf#page=",
-    urlCpmPageBase: "https://docs.niwashibase.com/viewer/web/?file=/docs/cpm-202e9d33q.pdf#page="
+    urlCpmPageBase: "https://docs.niwashibase.com/viewer/web/?file=/docs/cpm-202e9d33q.pdf#page=",
+    urlPatPageBase: "https://docs.niwashibase.com/viewer/web/?file=/docs/pat-301h6j54r.pdf#page="
   };
 
   /* =========================
        CORE
      ========================= */
   const THEME_KEY = "amb_theme";
+  const PDF_VIEWER_BASE_KEY = "amb_pdf_viewer_base_v2";
   const themeMeta = document.getElementById("theme-color");
   let globalSearchItemsPromise = null;
   let appWarmupStarted = false;
@@ -1119,6 +1132,45 @@
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#39;");
+  }
+
+  function normalizeViewerBase(value) {
+    const text = String(value || "").trim();
+    if (!text) return GLOBAL_SEARCH_CONFIG.urlViewerBase;
+    return text.endsWith("/") ? text : `${text}/`;
+  }
+
+  function configuredPdfViewerBase() {
+    try {
+      const params = new URLSearchParams(location.search);
+      const requested = params.get("pdfViewerBase");
+      if (requested) {
+        const normalized = normalizeViewerBase(requested);
+        localStorage.setItem(PDF_VIEWER_BASE_KEY, normalized);
+        return normalized;
+      }
+      return normalizeViewerBase(localStorage.getItem(PDF_VIEWER_BASE_KEY) || GLOBAL_SEARCH_CONFIG.urlViewerBase);
+    } catch (_) {
+      return GLOBAL_SEARCH_CONFIG.urlViewerBase;
+    }
+  }
+
+  function pageBaseFromPdfPath(path, options = {}) {
+    const extraParams = [];
+    if (options.appToolbar) extraParams.push(["appToolbar", options.appToolbar]);
+    if (options.doc) extraParams.push(["doc", options.doc]);
+    const extraQuery = extraParams.map(([key, value]) => `&${key}=${encodeURIComponent(value)}`).join("");
+    return `${configuredPdfViewerBase()}?file=${encodeURIComponent(path)}${extraQuery}#page=`;
+  }
+
+  function pdfPathFromViewerPageBase(pageBase) {
+    try {
+      const url = new URL(String(pageBase || ""), location.origin);
+      return url.searchParams.get("file") || "";
+    } catch (_) {
+      const match = String(pageBase || "").match(/[?&]file=([^#&]+)/);
+      return match ? decodeURIComponent(match[1]) : "";
+    }
   }
 
   async function gsFetchJson(url){
@@ -1194,6 +1246,7 @@
       "Meds Calculator": ["medication", "drug", "dose"],
       "Ventilator Settings": ["vent", "respiratory", "airway"],
       "Formulary": ["drug", "medication", "medicine"],
+      "PAT": ["pediatric assessment treatment", "paediatric assessment treatment", "assessment", "treatment guide"],
       "Westley Score": ["croup"],
       "Overtime Calculator": ["pay", "hours", "shift"],
       "Websites": ["links", "resources"],
@@ -1316,10 +1369,48 @@
     return modal;
   }
 
-  function openGlobalPdf(page, title, type){
+  function viewerPageBaseFromPdfUrl(pdfUrl, options = {}) {
+    const raw = String(pdfUrl || "").trim();
+    if (!raw) return "";
+    try {
+      const url = new URL(raw, location.origin);
+      return pageBaseFromPdfPath(url.pathname, options);
+    } catch (_) {
+      const path = raw.startsWith("/") ? raw : `/docs/${raw.replace(/^.*\//, "")}`;
+      return pageBaseFromPdfPath(path, options);
+    }
+  }
+
+  async function documentPageBase(type, options = {}) {
+    const key = String(type || "cpg").toLowerCase();
+    try {
+      const { getDocumentConfig } = await getDocumentDataModule();
+      const config = await getDocumentConfig(key);
+      const pageBase = viewerPageBaseFromPdfUrl(config?.pdfUrl, options);
+      if (pageBase) return pageBase;
+    } catch (_) {}
+    const base = key === "sop"
+      ? GLOBAL_SEARCH_CONFIG.urlSopPageBase
+      : key === "cpm"
+        ? GLOBAL_SEARCH_CONFIG.urlCpmPageBase
+        : key === "pat"
+          ? GLOBAL_SEARCH_CONFIG.urlPatPageBase
+          : GLOBAL_SEARCH_CONFIG.urlPageBase;
+    const extraParams = [];
+    if (options.appToolbar) extraParams.push(["appToolbar", options.appToolbar]);
+    if (options.doc) extraParams.push(["doc", options.doc]);
+    if (!extraParams.length) return base;
+    const pdfPath = pdfPathFromViewerPageBase(base);
+    if (pdfPath) return pageBaseFromPdfPath(pdfPath, options);
+    const extraQuery = extraParams.map(([param, value]) => `&${param}=${encodeURIComponent(value)}`).join("");
+    return base.replace("#page=", `${extraQuery}#page=`);
+  }
+
+  async function openGlobalPdf(page, title, type){
     const modal = ensureGlobalPdfModal();
-    const pageBase = type === "sop" ? GLOBAL_SEARCH_CONFIG.urlSopPageBase : type === "cpm" ? GLOBAL_SEARCH_CONFIG.urlCpmPageBase : GLOBAL_SEARCH_CONFIG.urlPageBase;
-    const defaultTitle = type === "sop" ? "SOP" : type === "cpm" ? "CPM" : "CPG";
+    const key = String(type || "cpg").toLowerCase();
+    const pageBase = await documentPageBase(key);
+    const defaultTitle = key === "sop" ? "SOP" : key === "cpm" ? "CPM" : key === "pat" ? "PAT" : "CPG";
     modal.__open(pageBase + String(page), title || defaultTitle, `${type || "cpg"}:${page}`);
   }
   window.__AMBULANCE_OPEN_DOCUMENT_PAGE = openGlobalPdf;
@@ -1391,8 +1482,8 @@
         return;
       }
       resultsEl.innerHTML = results.map((item, index) => {
-        const label = item.pillLabel || (item.type === "tool" ? "Feature" : item.type === "cpg" ? "CPG" : item.type === "sop" ? "SOP" : item.type === "cpm" ? "CPM" : item.type === "flowchart" ? "Flowchart" : "Formulary");
-        const docName = item.type === "sop" ? "SOP" : item.type === "cpm" ? "CPM" : "CPG";
+        const label = item.pillLabel || (item.type === "tool" ? "Feature" : item.type === "cpg" ? "CPG" : item.type === "sop" ? "SOP" : item.type === "cpm" ? "CPM" : item.type === "pat" ? "PAT" : item.type === "flowchart" ? "Flowchart" : "Formulary");
+        const docName = item.type === "sop" ? "SOP" : item.type === "cpm" ? "CPM" : item.type === "pat" ? "PAT" : "CPG";
         const sub = item.type === "tool"
           ? (item.subtitle || "Open feature")
           : item.subtitle || `Open ${docName} page ${item.page || item.pageStart}`;
@@ -1562,6 +1653,7 @@
     runWhenIdle(() => {
       getSearchDataModule().then(({ preloadSearchData }) => preloadSearchData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
       getWebsitesDataModule().then(({ preloadWebsitesData }) => preloadWebsitesData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
+      getDocumentDataModule().then(({ preloadDocumentConfigs }) => preloadDocumentConfigs()).catch(() => {});
       loadGlobalSearchItems().catch(() => {});
       ["cpg_wizard", "sop", "formulary", "flowcharts", "websites"].forEach(preloadModule);
     }, 400);
@@ -1577,6 +1669,10 @@
     runWhenIdle(() => {
       warmViewer(GLOBAL_SEARCH_CONFIG.urlCpmPageBase + "1");
     }, 9500);
+
+    runWhenIdle(() => {
+      warmViewer(GLOBAL_SEARCH_CONFIG.urlPatPageBase + "1");
+    }, 12000);
   }
 
   function setThemeColorFromCSS(){
@@ -1588,7 +1684,7 @@
     setThemeColorFromCSS();
   }
   function initTheme(){
-    const saved = localStorage.getItem(THEME_KEY) || "auto";
+    const saved = localStorage.getItem(THEME_KEY) || "light";
     document.getElementById("themeSelect").value = saved;
     applyTheme(saved);
     if (saved === "auto"){
@@ -1731,6 +1827,11 @@
     const panel = document.getElementById("panel");
     if (!fromHistory){
       if (!panel.hidden){
+        if (currentTool === "category_guidelines") {
+          history.replaceState(null, "", location.pathname + location.search);
+          closePanel(true);
+          return;
+        }
         history.back();
       }
       return;
@@ -2112,6 +2213,14 @@ function wireCharlieModal(){
     alert(`${title || "This feature"}\n\nComing Soon`);
   }
 
+  function calculatorMenuIcon(name) {
+    const icons = {
+      infusion: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11,5.5H8V4h.5c.55,0 1-.45 1-1s-.45-1-1-1h-3c-.55,0-1,.45-1,1s.45,1 1,1H6v1.5H3c-.55,0-1,.45-1,1s.45,1 1,1V15c0,1.1.9,2 2,2h1v4l2,1.5V17h1c1.1,0 2-.9 2-2V7.5c.55,0 1-.45 1-1s-.45-1-1-1zM9,9H7.25C6.84,9 6.5,9.34 6.5,9.75s.34.75.75.75H9V12H7.25c-.41,0-.75.34-.75.75s.34.75.75.75H9V15H5V7.5h4V9zM19.5,10.5V10c.55,0 1-.45 1-1s-.45-1-1-1h-5c-.55,0-1,.45-1,1s.45,1 1,1v.5c0,.5-1.5,1.16-1.5,3V20c0,1.1.9,2 2,2h4c1.1,0 2-.9 2-2v-6.5c0-1.84-1.5-2.5-1.5-3zM16.5,10.5V10h1v.5c0,1.6 1.5,2 1.5,3V14h-4v-.5c0-1 1.5-1.4 1.5-3zM15,20v-1.5h4V20h-4z"/></svg>`,
+      calculate: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1.9,2 2,2h14c1.1,0 2-.9 2-2V5c0-1.1-.9-2-2-2zM13.03,7.06L14.09,6l1.41,1.41L16.91,6l1.06,1.06l-1.41,1.41l1.41,1.41l-1.06,1.06l-1.41-1.41l-1.41,1.41l-1.06-1.06l1.41-1.41l-1.41-1.41zM6.25,7.72h5v1.5h-5v-1.5zM11.5,16h-2v2H8v-2H6v-1.5h2v-2h1.5v2h2V16zM18,17.25h-5v-1.5h5v1.5zM18,14.75h-5v-1.5h5v1.5z"/></svg>`
+    };
+    return icons[name] || icons.calculate;
+  }
+
   function renderCategoryScreen(mountEl, categoryId){
     const category = CATEGORY_SCREENS[categoryId];
     if (!category) return false;
@@ -2147,21 +2256,114 @@ function wireCharlieModal(){
             </div>
           </section>
         </div>`;
+    } else if (categoryId === "category_guidelines") {
+      const docs = category.sections[0].items;
+      mountEl.innerHTML = `
+        <style>
+          .guidelines-view{min-height:calc(100dvh - 50px);display:flex;flex-direction:column;background:var(--bg);color:var(--text)}
+          .guidelines-tabs{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));height:54px;border-bottom:1px solid var(--border);background:var(--surface)}
+          .guidelines-tab{appearance:none;border:0;border-right:1px solid var(--border);background:transparent;color:#667085;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-weight:950;cursor:pointer;position:relative}
+          .guidelines-tab:last-child{border-right:0}
+          .guidelines-tab::after{content:"";position:absolute;left:22%;right:22%;bottom:0;height:3px;border-radius:999px 999px 0 0;background:transparent}
+          .guidelines-tab.active{color:#0D63B2}
+          .guidelines-tab.active::after{background:#2196F3}
+          .guidelines-tab-title{font-size:13px;line-height:1}
+          .guidelines-tab-version{min-height:10px;font-size:9px;line-height:1;color:#98A2B3;font-weight:900}
+          .guidelines-tab.active .guidelines-tab-version{color:#5B9BD5}
+          .guidelines-frame-wrap{flex:1;min-height:0;background:#fff}
+          .guidelines-frame{width:100%;height:calc(100dvh - 104px - env(safe-area-inset-top));min-height:580px;border:0;background:#fff;display:block}
+          .guidelines-loading{padding:22px;text-align:center;color:var(--muted);font-weight:850}
+          :root[data-theme="dark"] .guidelines-tab{color:#AAB5C4}:root[data-theme="dark"] .guidelines-tab.active{color:#89C8FF}
+          :root[data-theme="dark"] .guidelines-tab.active::after{background:#5FB7F1}:root[data-theme="dark"] .guidelines-frame-wrap{background:#0B0F17}
+          @media(prefers-color-scheme:dark){
+            :root[data-theme="auto"] .guidelines-tab{color:#AAB5C4}:root[data-theme="auto"] .guidelines-tab.active{color:#89C8FF}
+            :root[data-theme="auto"] .guidelines-tab.active::after{background:#5FB7F1}:root[data-theme="auto"] .guidelines-frame-wrap{background:#0B0F17}
+          }
+          @media(max-width:370px){.guidelines-tab-title{font-size:12px}}
+        </style>
+        <div class="guidelines-view">
+          <div class="guidelines-tabs" role="tablist" aria-label="Guidelines documents">
+            ${docs.map((item, index) => `
+              <button class="guidelines-tab${index === 0 ? " active" : ""}" type="button" role="tab" aria-selected="${index === 0 ? "true" : "false"}" data-doc-type="${gsEscape(item.documentType)}" style="--doc-color:${gsEscape(item.color)};--doc-dark-color:${gsEscape(item.darkColor || item.color)}">
+                <span class="guidelines-tab-title">${gsEscape(item.title)}</span>
+                <span class="guidelines-tab-version" data-version-for="${gsEscape(item.documentType)}"></span>
+              </button>
+            `).join("")}
+          </div>
+          <div class="guidelines-frame-wrap">
+            <div class="guidelines-loading" id="guidelinesLoading">Loading CPG...</div>
+            <iframe class="guidelines-frame" id="guidelinesFrame" title="Guidelines PDF" src="about:blank"></iframe>
+          </div>
+        </div>`;
+
+      const tabs = Array.from(mountEl.querySelectorAll(".guidelines-tab"));
+      let frame = mountEl.querySelector("#guidelinesFrame");
+      const loading = mountEl.querySelector("#guidelinesLoading");
+      let docConfigs = new Map();
+
+      function findDoc(type) {
+        const key = String(type || "").toUpperCase();
+        return docs.find((item) => item.documentType?.toUpperCase() === key);
+      }
+
+      async function loadDoc(type) {
+        const key = String(type || "cpg").toLowerCase();
+        const item = findDoc(key) || docs[0];
+        tabs.forEach((tab) => {
+          const active = tab.dataset.docType === key;
+          tab.classList.toggle("active", active);
+          tab.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        if (loading) {
+          loading.hidden = false;
+          loading.textContent = `Loading ${item.title}...`;
+        }
+        try {
+          const config = docConfigs.get(key.toUpperCase()) || null;
+          const docLabel = key.toUpperCase();
+          const pageBase = viewerPageBaseFromPdfUrl(config?.pdfUrl, { appToolbar:"search", doc:docLabel }) || await documentPageBase(key, { appToolbar:"search", doc:docLabel });
+          if (frame) {
+            const nextFrame = frame.cloneNode(false);
+            nextFrame.src = pageBase + "1";
+            frame.replaceWith(nextFrame);
+            frame = nextFrame;
+          }
+          if (loading) loading.hidden = true;
+        } catch (error) {
+          if (loading) loading.textContent = `Unable to load ${item.title}. Check your connection and try again.`;
+        }
+      }
+
+      getDocumentDataModule().then(({ getDocumentConfigs }) => getDocumentConfigs()).then((configs) => {
+        docConfigs = new Map(configs.map((doc) => [doc.type, doc]));
+        configs.forEach((doc) => {
+          const versionEl = mountEl.querySelector(`[data-version-for="${doc.cacheKey}"]`);
+          if (versionEl) versionEl.textContent = `v${doc.version}`;
+        });
+        const active = mountEl.querySelector(".guidelines-tab.active")?.dataset.docType || "cpg";
+        loadDoc(active);
+      }).catch(() => loadDoc("cpg"));
+
+      mountEl.addEventListener("click", (event) => {
+        const tab = event.target.closest(".guidelines-tab");
+        if (!tab) return;
+        loadDoc(tab.dataset.docType || "cpg");
+      });
     } else if (categoryId === "category_calculators") {
       mountEl.innerHTML = `
         <style>
           .calc-menu{max-width:620px;margin:auto;padding:16px 14px 28px;color:var(--text)}
           .calc-menu-intro{text-align:center;margin:0 0 15px;color:var(--muted);font-size:14px}
           .calc-menu-section{display:grid;gap:8px;margin-top:17px}.calc-menu-section h3{margin:0 0 2px;padding-left:4px;color:var(--muted);font-size:14px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
-          .calc-menu-item{display:flex;align-items:center;gap:12px;width:100%;min-height:62px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);text-align:left;box-shadow:0 2px 7px rgba(15,23,42,.07)}
-          .calc-menu-icon{display:grid;place-items:center;flex:0 0 42px;height:42px;border-radius:8px;background:var(--item-color);color:white}.calc-menu-icon .material-symbols-rounded{font-size:27px}
+          .calc-menu-item{display:flex;align-items:center;gap:12px;width:100%;min-height:62px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);text-align:left;box-shadow:0 2px 7px rgba(15,23,42,.07)}
+          .calc-menu-icon{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:8px;background:var(--item-color);color:white}.calc-menu-icon svg{width:22px;height:22px;display:block;fill:#fff}
           .calc-menu-copy{display:grid;gap:2px;min-width:0}.calc-menu-title{font-size:16px;font-weight:950}.calc-menu-subtitle{color:var(--muted);font-size:12px;font-weight:650}
-          :root[data-theme="dark"] .calc-menu-item{box-shadow:none}:root[data-theme="dark"] .calc-menu-icon{filter:saturate(.78) brightness(.88)}
-          @media(prefers-color-scheme:dark){:root[data-theme="auto"] .calc-menu-item{box-shadow:none}:root[data-theme="auto"] .calc-menu-icon{filter:saturate(.78) brightness(.88)}}
+          :root[data-theme="dark"] .calc-menu-item{box-shadow:none}:root[data-theme="dark"] .calc-menu-icon{background:var(--item-dark-color,var(--item-color))}
+          @media(prefers-color-scheme:dark){:root[data-theme="auto"] .calc-menu-item{box-shadow:none}:root[data-theme="auto"] .calc-menu-icon{background:var(--item-dark-color,var(--item-color))}}
         </style><div class="calc-menu"><p class="calc-menu-intro">${gsEscape(category.intro || "")}</p>
         ${category.sections.map((section,sectionIndex)=>`<section class="calc-menu-section"><h3>${gsEscape(section.title)}</h3>${section.items.map((item,itemIndex)=>`
-          <button class="calc-menu-item" type="button" data-section="${sectionIndex}" data-item="${itemIndex}" style="--item-color:${gsEscape(item.color)}">
-            <span class="calc-menu-icon"><span class="material-symbols-rounded">${gsEscape(item.icon)}</span></span>
+          <button class="calc-menu-item" type="button" data-section="${sectionIndex}" data-item="${itemIndex}" style="--item-color:${gsEscape(item.color)};--item-dark-color:${gsEscape(item.darkColor || item.color)}">
+            <span class="calc-menu-icon">${calculatorMenuIcon(item.icon)}</span>
             <span class="calc-menu-copy"><span class="calc-menu-title">${gsEscape(item.title)}</span><span class="calc-menu-subtitle">${gsEscape(item.subtitle)}</span></span>
           </button>`).join("")}</section>`).join("")}</div>`;
     } else {

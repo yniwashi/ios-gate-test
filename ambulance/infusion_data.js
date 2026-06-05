@@ -1,10 +1,11 @@
 // /ambulance/infusion_data.js
 // CHANGELOG (2026-06-05):
+// - Match infusion drug colors to the app source palette.
 // - Port the Android adult and pediatric infusion reference data.
 
 const colors = {
-  Adrenaline:"#EF5350", Amiodarone:"#5C6BC0", Fentanyl:"#8D6E63",
-  Ketamine:"#A5D6A7", "Magnesium Sulphate":"#B39DDB",
+  Adrenaline:"#CE93D8", Amiodarone:"#CE93D8", Fentanyl:"#81D4FA",
+  Ketamine:"#FFF59D", "Magnesium Sulphate":"#AED581",
   Noradrenaline:"#CE93D8", Phenylephrine:"#FF5722",
   Salbutamol:"#AED581", GTN:"#804403"
 };

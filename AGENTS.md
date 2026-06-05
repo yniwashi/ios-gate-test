@@ -79,6 +79,7 @@ CHANGELOG (2026-05-17):
 ## Configuration & Runtime Notes
 - Hash state (`#tool=...`) is used for app routing and must stay consistent across modules.
 - PDF viewers are embedded via iframes and rely on consistent history management for Back navigation.
+- The testing Guidelines category uses the Android-aligned document viewer at `https://docs.niwashibase.com/viewer/android/`; local testing can override it with `?pdfViewerBase=http://<LAN-IP>:3001/viewer/android/`.
 - CPG/SOP/formulary/flowchart modules may fetch helper JSON from `https://docs.niwashibase.com/helpers/`.
 - Stable PDF filenames matter because app links depend on them.
 - WAAFELS CCP energy sequence is 6 steps: weight x 4, x 4, x 4, x 6, x 8, x 10, clamped to 360 J.
@@ -148,3 +149,13 @@ CHANGELOG (2026-05-17):
 - Fixed asynchronous route races that could display the wrong calculator, and corrected nested Back behavior so child screens return to their parent while first-level screens return Home.
 - Preserved CPR and RSI as standalone URL destinations rather than tool modules.
 - Bumped `ASSET_VERSION` to `asset-20260605-gate-test-1` for the GitHub testing deployment; remaining production-readiness checks are documented in the project TODO.
+
+### 2026-06-05 19:24 +03
+- Defaulted new users to Light theme while preserving any saved user theme preference.
+- Matched Calculator menu colors, icons, and descriptions more closely to the Android app and fixed AP/CCP Pediatrics nested page titles for Dose Volume and Pediatric Infusions.
+- Added version-aware document config loading in `ambulance/document_data.js` and included PAT in global document search/cache handling.
+- Rebuilt the testing Guidelines category as Android-style CPG/SOP/CPM/PAT tabs using app-config document versions and PDFs.
+- Removed the extra Guidelines header/status rows, fixed Guidelines Back behavior, and prevented tab switches from trapping Back navigation.
+- Copied the Android custom PDF.js viewer bundle into the shared `pdf-viewer` repo under `viewer/android/` and pointed testing Guidelines to that viewer path.
+- Added local PDF viewer override support through `?pdfViewerBase=...` for testing shared viewer changes before uploading docs-host files.
+- Verified the updated testing App module, search/document modules, and Android-aligned viewer inline script with syntax checks.
