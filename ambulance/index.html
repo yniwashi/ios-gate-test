@@ -1,10 +1,13 @@
 <!--
+  CHANGELOG (2026-06-06):
+  - Rename the Guidelines PDF viewer base from /viewer/android/ to /viewer/ios/ and reset the local viewer override key.
+
   CHANGELOG (2026-06-05):
-  - Point Guidelines document PDFs to the Android-aligned shared PDF viewer path.
+  - Point Guidelines document PDFs to the iOS shared PDF viewer path.
   - Add a local PDF viewer base override for testing shared pdf-viewer changes before upload.
   - Match Guidelines PDF search toolbar to Android and prevent Guidelines tab switches from trapping Back navigation.
   - Remove the extra Guidelines header/status rows and open Guidelines PDFs with the search-only App viewer toolbar.
-  - Add Android-aligned Guidelines tabs for CPG/SOP/CPM/PAT with app-config document versions and PDF URLs.
+  - Add iOS Guidelines tabs for CPG/SOP/CPM/PAT with app-config document versions and PDF URLs.
   - Add PAT to protected search/document handling and warm the Guidelines documents from iOS App config.
   - Default new users to Light theme until they choose another theme.
   - Match calculator menu colors, icons, and descriptions to the app source with dark-mode-safe accents.
@@ -14,7 +17,7 @@
   - Prevent stale asynchronous tool loads from replacing the currently selected tool.
   - Track route depth so Back returns nested tools to their parent and first-level tools to Home.
   - Keep CPR and RSI as standalone URL navigation outside the tool-module router.
-  - Combine Flowcharts and Formulary into the Android-aligned segmented reference screen.
+  - Combine Flowcharts and Formulary into the iOS segmented reference screen.
   - Preload version-aware Flowcharts/Formulary data from iOS App config and API endpoints.
   - Label Pediatric medication pages as AP/CCP Months or Years.
   - Use API/App-config helper endpoints for document indexes, formulary, and flowcharts.
@@ -23,7 +26,7 @@
   - Constrain Pediatrics result and alert windows so they no longer touch the screen edges.
   - Match the Android Pediatrics AP, CCP, and Tools landing sections and wire Pediatric Vital Signs.
   - Fix pediatric medication result sheets failing while formatting concentration guides.
-  - Preload Android-aligned AP/CCP pediatric helper data from the iOS App config.
+  - Preload iOS AP/CCP pediatric helper data from the iOS App config.
   - Load shared iOS App config on startup and resolve the visible version from app.version.
   - Move temporary gate test controls into a hidden triple-tap header menu.
   - Fine-tune pinned header spacing by lifting the title area and adding breathing room before the greeting card.
@@ -52,8 +55,8 @@
   - Route nested Android destinations to existing iOS tool modules and mark unavailable destinations as Coming Soon.
   - Preserve nested browser history so Back returns from a tool to its parent category.
   - Remove Shortcuts Mode, its setup UI, banner, payload routing, and mode-specific messaging.
-  - Make the Android-aligned App Mode home the only application experience.
-  - Add an Android-aligned App Mode home with personalized greeting, status panel, grouped two-column sections, and limited-access reflow.
+  - Make the iOS App Mode home the only application experience.
+  - Add an iOS App Mode home with personalized greeting, status panel, grouped two-column sections, and limited-access reflow.
   - Replace the always-visible App Mode search field with a Search quick-action tile that opens the existing global search view.
 
   CHANGELOG (2026-06-04):
@@ -207,7 +210,7 @@
     }
     .notice-bell .material-symbols-rounded{font-size:30px}
 
-    /* Android-aligned App Mode status */
+    /* iOS App Mode status */
     .app-home-status{
       display:none;overflow:hidden;border:1px solid color-mix(in oklab,var(--border) 72%,#ffffff);
       border-radius:14px;background:var(--surface);box-shadow:0 6px 16px rgba(15,23,42,.14),0 1px 4px rgba(15,23,42,.06);
@@ -1096,7 +1099,7 @@
     urlFormulary: "https://api.niwashibase.com/api/v1/ambulance/app-data/formulary",
     urlWebsites: "https://docs.niwashibase.com/helpers/websites.json",
     urlAsCall: "https://docs.niwashibase.com/helpers/as_call.json",
-    urlViewerBase: "https://docs.niwashibase.com/viewer/android/",
+    urlViewerBase: "https://docs.niwashibase.com/viewer/ios/",
     urlPageBase: "https://docs.niwashibase.com/viewer/web/?file=/docs/cpg-81w9d1f.pdf#page=",
     urlSopPageBase: "https://docs.niwashibase.com/viewer/web/?file=/docs/sop-101qq9f2w.pdf#page=",
     urlCpmPageBase: "https://docs.niwashibase.com/viewer/web/?file=/docs/cpm-202e9d33q.pdf#page=",
@@ -1107,7 +1110,7 @@
        CORE
      ========================= */
   const THEME_KEY = "amb_theme";
-  const PDF_VIEWER_BASE_KEY = "amb_pdf_viewer_base_v2";
+  const PDF_VIEWER_BASE_KEY = "amb_pdf_viewer_base_v3";
   const themeMeta = document.getElementById("theme-color");
   let globalSearchItemsPromise = null;
   let appWarmupStarted = false;

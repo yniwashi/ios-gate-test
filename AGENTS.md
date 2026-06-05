@@ -1,4 +1,7 @@
 <!--
+CHANGELOG (2026-06-06):
+- Rename the shared Guidelines PDF viewer path from `/viewer/android/` to `/viewer/ios/`.
+
 CHANGELOG (2026-06-05):
 - Document the iOS App config, Pediatrics, references, Calculators, and nested router migration.
 
@@ -79,7 +82,7 @@ CHANGELOG (2026-05-17):
 ## Configuration & Runtime Notes
 - Hash state (`#tool=...`) is used for app routing and must stay consistent across modules.
 - PDF viewers are embedded via iframes and rely on consistent history management for Back navigation.
-- The testing Guidelines category uses the Android-aligned document viewer at `https://docs.niwashibase.com/viewer/android/`; local testing can override it with `?pdfViewerBase=http://<LAN-IP>:3001/viewer/android/`.
+- The testing Guidelines category uses the iOS document viewer at `https://docs.niwashibase.com/viewer/ios/`; local testing can override it with `?pdfViewerBase=http://<LAN-IP>:3001/viewer/ios/`.
 - CPG/SOP/formulary/flowchart modules may fetch helper JSON from `https://docs.niwashibase.com/helpers/`.
 - Stable PDF filenames matter because app links depend on them.
 - WAAFELS CCP energy sequence is 6 steps: weight x 4, x 4, x 4, x 6, x 8, x 10, clamped to 360 J.
@@ -143,7 +146,7 @@ CHANGELOG (2026-05-17):
 - Connected the testing Ambulance App to the dedicated iOS App config endpoint and made the displayed app version resolve from `app.version`.
 - Added version-aware API/cache loaders for Pediatrics, Flowcharts, Formulary, and shared reference data.
 - Rebuilt AP and CCP Pediatrics around the Android dosing engine and helper data, including medication calculations, warnings, concentration handling, vital signs, WAAFELSS, result sheets, and direct CPG reference navigation.
-- Combined Flowcharts and Formulary into the Android-aligned segmented reference screen.
+- Combined Flowcharts and Formulary into the iOS segmented reference screen.
 - Ported the Android Infusions & Calculations screen, including Adult/Pediatric Infusions, Burn Surface Area, Infusion Rate, Dose Volume, Proportion, MAP, and RBS with light/dark themes.
 - Copied the Android adult, child, and infant burn assets and zone mappings into the testing App.
 - Fixed asynchronous route races that could display the wrong calculator, and corrected nested Back behavior so child screens return to their parent while first-level screens return Home.
@@ -156,6 +159,6 @@ CHANGELOG (2026-05-17):
 - Added version-aware document config loading in `ambulance/document_data.js` and included PAT in global document search/cache handling.
 - Rebuilt the testing Guidelines category as Android-style CPG/SOP/CPM/PAT tabs using app-config document versions and PDFs.
 - Removed the extra Guidelines header/status rows, fixed Guidelines Back behavior, and prevented tab switches from trapping Back navigation.
-- Copied the Android custom PDF.js viewer bundle into the shared `pdf-viewer` repo under `viewer/android/` and pointed testing Guidelines to that viewer path.
+- Copied the iOS custom PDF.js viewer bundle into the shared `pdf-viewer` repo under `viewer/ios/` and pointed testing Guidelines to that viewer path.
 - Added local PDF viewer override support through `?pdfViewerBase=...` for testing shared viewer changes before uploading docs-host files.
-- Verified the updated testing App module, search/document modules, and Android-aligned viewer inline script with syntax checks.
+- Verified the updated testing App module, search/document modules, and iOS viewer inline script with syntax checks.
