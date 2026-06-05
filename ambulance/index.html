@@ -1,5 +1,6 @@
 <!--
   CHANGELOG (2026-06-05):
+  - Pin the header and greeting/status card together and reduce the installed App safe-area header padding.
   - Nudge the status row/actions upward, add long-label button shrinking, and soften home/header gradients in dark mode.
   - Make the testing home status card sticky, tighten its vertical rhythm, use Android SVG icons on selected home buttons, and align the iOS App status bar color with the blue header.
   - Locally enlarge header/button content, left-align status copy, and add top breathing room above the greeting banner.
@@ -154,7 +155,8 @@
     .wrap{max-width:760px; margin:0 auto; padding:0 clamp(9px,3.6vw,14px) 20px; display:flex; flex-direction:column; gap:8px}
 
     /* Topbar */
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 calc(-1 * clamp(9px,3.6vw,14px)) 2px;padding:calc(env(safe-area-inset-top) + 20px) clamp(17px,5vw,26px) 21px;background:linear-gradient(135deg,#108bf1 0%,#0575da 48%,#0066c8 100%);box-shadow:0 6px 16px rgba(0,91,180,.22)}
+    .home-pinned{position:sticky;top:0;z-index:70;background:var(--bg);padding-bottom:8px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 calc(-1 * clamp(9px,3.6vw,14px)) 2px;padding:calc(env(safe-area-inset-top) + 8px) clamp(17px,5vw,26px) 13px;background:linear-gradient(135deg,#108bf1 0%,#0575da 48%,#0066c8 100%);box-shadow:0 6px 16px rgba(0,91,180,.22)}
     [data-theme="dark"] .topbar{background:linear-gradient(135deg,#2b78d6 0%,#2268c4 52%,#1959ad 100%);box-shadow:0 6px 16px rgba(0,52,112,.34)}
     @media (prefers-color-scheme: dark){
       [data-theme="auto"] .topbar{background:linear-gradient(135deg,#2b78d6 0%,#2268c4 52%,#1959ad 100%);box-shadow:0 6px 16px rgba(0,52,112,.34)}
@@ -183,7 +185,7 @@
       display:none;overflow:hidden;border:1px solid color-mix(in oklab,var(--border) 72%,#ffffff);
       border-radius:14px;background:var(--surface);box-shadow:0 6px 16px rgba(15,23,42,.14),0 1px 4px rgba(15,23,42,.06);
     }
-    .app-home-status{display:block;position:sticky;top:0;z-index:45;margin:0 auto;width:min(100%,720px);padding-top:10px}
+    .app-home-status{display:block;position:relative;margin:0 auto;width:min(100%,720px);padding-top:10px}
     .app-greeting{
       position:relative;min-height:58px;display:flex;align-items:center;justify-content:flex-start;gap:11px;padding:0 21px;
       color:#fff;overflow:hidden;cursor:pointer;isolation:isolate;background:transparent;
@@ -562,47 +564,49 @@
 </section>
 
 <div class="wrap">
-  <!-- Topbar -->
-  <div class="topbar">
-    <div class="brand">
-      <img class="logo" src="images/logo.png" alt="Ambulance Logo">
-      <div class="brand-title">
-        <h1 class="title">Ambulance</h1>
-        <span id="appVersionLabel" class="app-version"></span>
+  <div class="home-pinned">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="brand">
+        <img class="logo" src="images/logo.png" alt="Ambulance Logo">
+        <div class="brand-title">
+          <h1 class="title">Ambulance</h1>
+          <span id="appVersionLabel" class="app-version"></span>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button id="noticesBellBtn" class="notice-bell" type="button" aria-label="Notices">
+          <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+        </button>
       </div>
     </div>
-    <div class="top-actions">
-      <button id="noticesBellBtn" class="notice-bell" type="button" aria-label="Notices">
-        <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
-      </button>
-    </div>
-  </div>
 
-  <section class="app-home-status" id="appHomeStatus" aria-label="App status">
-    <div class="app-greeting" id="appGreeting" role="button" tabindex="0" aria-label="Change greeting">
-      <img class="app-greeting-road" src="images/main_greeting_banner_road.png" alt="">
-      <span class="app-greeting-glow" aria-hidden="true"></span>
-      <img class="app-greeting-icon" id="appGreetingIcon" src="images/ic_greeting_ambulance_flat.png" alt="">
-      <span class="app-greeting-text" id="appGreetingText">Stay safe</span>
-    </div>
-    <div class="app-status-row">
-      <span class="app-status-dot" aria-hidden="true"></span>
-      <span class="app-status-copy" id="appStatusCopy">Up to date · Ambulance v0.3</span>
-      <label class="theme-toggle status-theme">
-        <span>Theme</span>
-        <select id="themeSelect" aria-label="Theme">
-          <option value="auto">Auto</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-      </label>
-    </div>
-    <div class="app-status-actions">
-      <button id="appNoticeBtn" class="updates-btn" type="button">Notice</button>
-      <button id="appUpdatesBtn" class="updates-btn" type="button">Updates</button>
-      <button id="appCharlieBtn" class="updates-btn charlie-btn" type="button">Charlie</button>
-    </div>
-  </section>
+    <section class="app-home-status" id="appHomeStatus" aria-label="App status">
+      <div class="app-greeting" id="appGreeting" role="button" tabindex="0" aria-label="Change greeting">
+        <img class="app-greeting-road" src="images/main_greeting_banner_road.png" alt="">
+        <span class="app-greeting-glow" aria-hidden="true"></span>
+        <img class="app-greeting-icon" id="appGreetingIcon" src="images/ic_greeting_ambulance_flat.png" alt="">
+        <span class="app-greeting-text" id="appGreetingText">Stay safe</span>
+      </div>
+      <div class="app-status-row">
+        <span class="app-status-dot" aria-hidden="true"></span>
+        <span class="app-status-copy" id="appStatusCopy">Up to date · Ambulance v0.3</span>
+        <label class="theme-toggle status-theme">
+          <span>Theme</span>
+          <select id="themeSelect" aria-label="Theme">
+            <option value="auto">Auto</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+      </div>
+      <div class="app-status-actions">
+        <button id="appNoticeBtn" class="updates-btn" type="button">Notice</button>
+        <button id="appUpdatesBtn" class="updates-btn" type="button">Updates</button>
+        <button id="appCharlieBtn" class="updates-btn charlie-btn" type="button">Charlie</button>
+      </div>
+    </section>
+  </div>
 
   <div class="updates-cta">
     <button id="wnShowAgain" class="updates-btn" type="button">Updates</button>
