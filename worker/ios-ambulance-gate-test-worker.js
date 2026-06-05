@@ -1,5 +1,6 @@
 // ios-ambulance-gate-test-worker.js
 // CHANGELOG (2026-06-05):
+// - Keep the startup splash visible for 1.8 seconds before opening the Ambulance App.
 // - Add the existing full-screen Ambulance splash image before access checking and gate UI.
 //
 // CHANGELOG (2026-06-04):
@@ -542,7 +543,7 @@ function gatePageHtml() {
   const otherProfessionLabel = document.getElementById("otherProfessionLabel");
   const startupSplash = document.getElementById("startupSplash");
   const splashStartedAt = Date.now();
-  const MIN_SPLASH_MS = 900;
+  const MIN_SPLASH_MS = 1800;
   let pendingRegistration = null;
   let supportReturnView = "choiceView";
   let currentLockedData = null;
@@ -667,7 +668,14 @@ function gatePageHtml() {
     if (launchTimer) clearInterval(launchTimer);
     launchTimer = null;
   }
-  function launchApp() { stopLaunchMessages(); setTitle("Opening the Ambulance App"); show("loadingView"); loadingText.textContent = "Opening app..."; setTimeout(() => location.replace("/ambulance/"), 320); }
+  function launchApp() {
+    stopLaunchMessages();
+    setTitle("Opening the Ambulance App");
+    show("loadingView");
+    loadingText.textContent = "Opening app...";
+    const delay = Math.max(320, MIN_SPLASH_MS - (Date.now() - splashStartedAt));
+    setTimeout(() => location.replace("/ambulance/"), delay);
+  }
   function showGranted(data) {
     clearLockedRetry();
     const firstName = String(data?.first_name || "").trim();
