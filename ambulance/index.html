@@ -1,5 +1,21 @@
 <!--
   CHANGELOG (2026-06-05):
+  - Bump the testing asset key for deployment of the Pediatrics, references, Calculators, and router updates.
+  - Fix the panel Back button passing its click event as a history-navigation flag.
+  - Prevent stale asynchronous tool loads from replacing the currently selected tool.
+  - Track route depth so Back returns nested tools to their parent and first-level tools to Home.
+  - Keep CPR and RSI as standalone URL navigation outside the tool-module router.
+  - Combine Flowcharts and Formulary into the Android-aligned segmented reference screen.
+  - Preload version-aware Flowcharts/Formulary data from iOS App config and API endpoints.
+  - Label Pediatric medication pages as AP/CCP Months or Years.
+  - Use API/App-config helper endpoints for document indexes, formulary, and flowcharts.
+  - Open Pediatrics formulary and Vital Signs references directly on their resolved CPG pages.
+  - Port the Android Infusions & Calculations menu, calculator routes, infusion references, and burn tool.
+  - Constrain Pediatrics result and alert windows so they no longer touch the screen edges.
+  - Match the Android Pediatrics AP, CCP, and Tools landing sections and wire Pediatric Vital Signs.
+  - Fix pediatric medication result sheets failing while formatting concentration guides.
+  - Preload Android-aligned AP/CCP pediatric helper data from the iOS App config.
+  - Load shared iOS App config on startup and resolve the visible version from app.version.
   - Move temporary gate test controls into a hidden triple-tap header menu.
   - Fine-tune pinned header spacing by lifting the title area and adding breathing room before the greeting card.
   - Pin the header and greeting/status card together and reduce the installed App safe-area header padding.
@@ -454,6 +470,36 @@
       display:inline-flex;width:max-content;padding:2px 6px;border-radius:999px;
       background:var(--surface-2);color:var(--muted);font-size:9px;font-weight:900;text-transform:uppercase;
     }
+    .peds-menu{padding:24px 20px 32px;max-width:620px;margin:0 auto}
+    .peds-menu-title{margin:0;text-align:center;font-size:24px;font-weight:950;color:var(--text)}
+    .peds-menu-subtitle{margin:7px 0 24px;text-align:center;font-size:16px;font-weight:800;color:var(--muted)}
+    .peds-menu-section{
+      margin-top:16px;padding:18px;border:1px solid var(--peds-border);border-radius:12px;
+      background:var(--peds-bg);box-shadow:0 3px 9px rgba(15,23,42,.10);
+    }
+    .peds-menu-section:first-of-type{margin-top:0}
+    .peds-menu-section h3{margin:0;color:var(--peds-title);font-size:22px;font-weight:950}
+    .peds-menu-section p{margin:4px 0 14px;color:var(--peds-copy);font-size:14px;line-height:1.35}
+    .peds-menu-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .peds-menu-button{
+      appearance:none;height:50px;border:0;border-radius:12px;background:var(--peds-button);
+      color:var(--peds-button-text,#fff);font-size:14px;font-weight:900;cursor:pointer;
+      box-shadow:0 4px 9px color-mix(in srgb,var(--peds-button) 28%,transparent);
+      transition:transform .12s ease,filter .12s ease;
+    }
+    .peds-menu-button:active{transform:scale(.975);filter:brightness(.96)}
+    .peds-menu-button.full{grid-column:1/-1}
+    .peds-menu-ap{--peds-bg:#EAF4FF;--peds-border:#B8D6F4;--peds-title:#0D63B2;--peds-copy:#355673}
+    .peds-menu-ccp{--peds-bg:#EEF2F5;--peds-border:#C9D2DA;--peds-title:#495765;--peds-copy:#596774}
+    .peds-menu-tools{--peds-bg:#FFF0F6;--peds-border:#F7B7CF;--peds-title:#B51A55;--peds-copy:#74475A}
+    [data-theme="dark"] .peds-menu-ap{--peds-bg:#17283A;--peds-border:#315878;--peds-title:#7CC4FF;--peds-copy:#A9CCE8}
+    [data-theme="dark"] .peds-menu-ccp{--peds-bg:#22282E;--peds-border:#46515B;--peds-title:#C3CDD6;--peds-copy:#AAB5BF}
+    [data-theme="dark"] .peds-menu-tools{--peds-bg:#38202B;--peds-border:#713D52;--peds-title:#F28AB2;--peds-copy:#D7A3B7}
+    @media(prefers-color-scheme:dark){
+      [data-theme="auto"] .peds-menu-ap{--peds-bg:#17283A;--peds-border:#315878;--peds-title:#7CC4FF;--peds-copy:#A9CCE8}
+      [data-theme="auto"] .peds-menu-ccp{--peds-bg:#22282E;--peds-border:#46515B;--peds-title:#C3CDD6;--peds-copy:#AAB5BF}
+      [data-theme="auto"] .peds-menu-tools{--peds-bg:#38202B;--peds-border:#713D52;--peds-title:#F28AB2;--peds-copy:#D7A3B7}
+    }
     [data-theme="dark"] .section,[data-theme="dark"] .app-home-status{
       box-shadow:0 7px 20px rgba(0,0,0,.28);
     }
@@ -707,10 +753,11 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260604-gate-test-5";
+  const ASSET_VERSION = "asset-20260605-gate-test-1";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
+  let displayedAppVersion = APP_VERSION;
 
   let sharedModulesPromise = null;
   function loadSharedModules() {
@@ -722,9 +769,12 @@
         import(`./search_core.js${ASSET_QUERY}`),
         import(`./search_data.js${ASSET_QUERY}`),
         import(`./websites_data.js${ASSET_QUERY}`),
-        import(`./as_call_data.js${ASSET_QUERY}`)
-      ]).then(([searchCore, searchData, websitesData, asCallData]) => {
-        const shared = { assetVersion: ASSET_VERSION, searchCore, searchData, websitesData, asCallData };
+        import(`./as_call_data.js${ASSET_QUERY}`),
+        import(`./app_config_data.js${ASSET_QUERY}`),
+        import(`./pediatric_data.js${ASSET_QUERY}`),
+        import(`./reference_data.js${ASSET_QUERY}`)
+      ]).then(([searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData]) => {
+        const shared = { assetVersion: ASSET_VERSION, searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData };
         window.__AMBULANCE_SHARED_MODULES = shared;
         return shared;
       }).finally(() => { sharedModulesPromise = null; });
@@ -746,6 +796,33 @@
 
   async function getAsCallDataModule() {
     return (await loadSharedModules()).asCallData;
+  }
+
+  async function getAppConfigDataModule() {
+    return (await loadSharedModules()).appConfigData;
+  }
+
+  async function getPediatricDataModule() {
+    return (await loadSharedModules()).pediatricData;
+  }
+
+  async function getReferenceDataModule() {
+    return (await loadSharedModules()).referenceData;
+  }
+
+  function normalizeAppVersion(value) {
+    const text = String(value || "").trim();
+    return text || APP_VERSION;
+  }
+
+  function setDisplayedAppVersion(value) {
+    displayedAppVersion = normalizeAppVersion(value);
+    const appVersionLabel = document.getElementById("appVersionLabel");
+    if (appVersionLabel) appVersionLabel.textContent = displayedAppVersion;
+    const appStatusCopy = document.getElementById("appStatusCopy");
+    if (appStatusCopy) appStatusCopy.textContent = `Up to date · Ambulance ${displayedAppVersion}`;
+    const versionPill = document.getElementById("wnVersionPill");
+    if (versionPill) versionPill.textContent = `🚑 ${displayedAppVersion} released`;
   }
 
   const ACCESS_TYPES = {
@@ -934,16 +1011,16 @@
       intro: "Choose scope and age, or open a pediatric reference tool.",
       sections: [
         { title: "AP", items: [
-          { title:"Months", subtitle:"AP pediatric medications · 0-12 months", icon:"child_care", color:"#0A96FA", actionId:"ap_peds", params:{ initialGroup:"Months" } },
-          { title:"Years", subtitle:"AP pediatric medications · 1-14 years", icon:"child_care", color:"#0A96FA", actionId:"ap_peds", params:{ initialGroup:"Years" } }
+          { title:"Months", subtitle:"AP pediatric medications · 0-12 months", icon:"child_care", color:"#0A96FA", actionId:"ap_peds", params:{ initialGroup:"Months", title:"AP Months" } },
+          { title:"Years", subtitle:"AP pediatric medications · 1-14 years", icon:"child_care", color:"#0A96FA", actionId:"ap_peds", params:{ initialGroup:"Years", title:"AP Years" } }
         ]},
         { title: "CCP", items: [
-          { title:"Months", subtitle:"CCP pediatric medications · 0-12 months", icon:"vaccines", color:"#81818F", actionId:"ccp_peds", params:{ initialGroup:"Months" } },
-          { title:"Years", subtitle:"CCP pediatric medications · 1-14 years", icon:"vaccines", color:"#81818F", actionId:"ccp_peds", params:{ initialGroup:"Years" } }
+          { title:"Months", subtitle:"CCP pediatric medications · 0-12 months", icon:"vaccines", color:"#81818F", actionId:"ccp_peds", params:{ initialGroup:"Months", title:"CCP Months" } },
+          { title:"Years", subtitle:"CCP pediatric medications · 1-14 years", icon:"vaccines", color:"#81818F", actionId:"ccp_peds", params:{ initialGroup:"Years", title:"CCP Years" } }
         ]},
         { title: "Tools", items: [
           { title:"Est. Weight", subtitle:"Estimate pediatric weight from age", icon:"monitor_weight", color:"#8E34BF", actionId:"estweight" },
-          { title:"Vital Signs", subtitle:"Pediatric normal vital-sign reference", icon:"monitor_heart", color:"#0891B2", comingSoon:true },
+          { title:"Vital Signs", subtitle:"Pediatric normal vital-sign reference", icon:"monitor_heart", color:"#0891B2", documentQuery:"Normal Vital Signs" },
           { title:"Care Tools", subtitle:"Pediatric care references", icon:"widgets", color:"#F78000", actionId:"caretools" }
         ]}
       ]
@@ -960,23 +1037,23 @@
           { title:"PAT", subtitle:"Pediatric Assessment Triangle references", icon:"child_care", color:"#7C3AED", comingSoon:true }
         ]},
         { title: "References", items: [
-          { title:"Formulary", subtitle:"Medication reference", icon:"medication", color:"#2684FF", actionId:"formulary" }
+          { title:"Formulary", subtitle:"Medication reference", icon:"medication", color:"#2684FF", actionId:"flowcharts", params:{ initialMode:"formulary" } }
         ]}
       ]
     },
     category_calculators: {
-      title: "Calculators",
+      title: "Infusions & Calculations",
       intro: "Infusions, calculations, and conversions from the Android Calculators screen.",
       sections: [
         { title: "Infusions", items: [
-          { title:"Adult Infusions", subtitle:"Medication infusion references", icon:"fluid", color:"#2196F3", comingSoon:true },
-          { title:"Pediatric Infusions", subtitle:"Pediatric infusion references", icon:"fluid", color:"#F04FED", comingSoon:true }
+          { title:"Adult Infusions", subtitle:"Adult medication infusion references", icon:"fluid", color:"#2196F3", actionId:"adult_infusions" },
+          { title:"Pediatric Infusions", subtitle:"Pediatric medication infusion references", icon:"fluid", color:"#F04FED", actionId:"pediatric_infusions" }
         ]},
         { title: "Calculations", items: [
-          { title:"Burn Surface Area", subtitle:"Rule of Nines %TBSA calculator", icon:"local_fire_department", color:"#EF4444", comingSoon:true },
-          { title:"Infusion Rate", subtitle:"Calculate rate from dose and concentration", icon:"speed", color:"#06B6D4", actionId:"meds_calculator", params:{ initialMode:"infusion" } },
-          { title:"Dose Volume", subtitle:"Calculate volume from ordered dose", icon:"vaccines", color:"#10B981", actionId:"meds_calculator", params:{ initialMode:"dose" } },
-          { title:"Proportion", subtitle:"Cross-multiply concentration values", icon:"percent", color:"#8B5CF6", comingSoon:true },
+          { title:"Burn Surface Area", subtitle:"Rule of Nines %TBSA calculator", icon:"local_fire_department", color:"#EF4444", actionId:"burn_surface_area" },
+          { title:"Infusion Rate", subtitle:"Calculate rate from dose and concentration", icon:"speed", color:"#06B6D4", actionId:"infusion_rate" },
+          { title:"Dose Volume", subtitle:"Calculate volume from ordered dose", icon:"vaccines", color:"#10B981", actionId:"dose_volume" },
+          { title:"Proportion", subtitle:"Solve proportional medication values", icon:"percent", color:"#8B5CF6", actionId:"proportion" },
           { title:"MAP", subtitle:"Mean arterial pressure calculator", icon:"calculate", color:"#FF6600", actionId:"map" }
         ]},
         { title: "Conversions", items: [
@@ -1001,11 +1078,11 @@
   };
 
   const GLOBAL_SEARCH_CONFIG = {
-    urlIndex: "https://docs.niwashibase.com/helpers/cpg_index.json",
-    urlSopIndex: "https://docs.niwashibase.com/helpers/sop_index.json",
-    urlCpmIndex: "https://docs.niwashibase.com/helpers/cpm_index.json",
-    urlFlowcharts: "https://docs.niwashibase.com/helpers/flowcharts.json",
-    urlFormulary: "https://docs.niwashibase.com/helpers/formulary.json",
+    urlIndex: "https://api.niwashibase.com/api/v1/ambulance/app-data/cpg-index",
+    urlSopIndex: "https://api.niwashibase.com/api/v1/ambulance/app-data/sop-index",
+    urlCpmIndex: "https://api.niwashibase.com/api/v1/ambulance/app-data/cpm-index",
+    urlFlowcharts: "https://api.niwashibase.com/api/v1/ambulance/app-data/flowcharts",
+    urlFormulary: "https://api.niwashibase.com/api/v1/ambulance/app-data/formulary",
     urlWebsites: "https://docs.niwashibase.com/helpers/websites.json",
     urlAsCall: "https://docs.niwashibase.com/helpers/as_call.json",
     urlPageBase: "https://docs.niwashibase.com/viewer/web/?file=/docs/cpg-81w9d1f.pdf#page=",
@@ -1243,6 +1320,23 @@
     const pageBase = type === "sop" ? GLOBAL_SEARCH_CONFIG.urlSopPageBase : type === "cpm" ? GLOBAL_SEARCH_CONFIG.urlCpmPageBase : GLOBAL_SEARCH_CONFIG.urlPageBase;
     const defaultTitle = type === "sop" ? "SOP" : type === "cpm" ? "CPM" : "CPG";
     modal.__open(pageBase + String(page), title || defaultTitle, `${type || "cpg"}:${page}`);
+  }
+  window.__AMBULANCE_OPEN_DOCUMENT_PAGE = openGlobalPdf;
+
+  async function openResolvedReference(query, title) {
+    if (!canOpenProtectedContent()) {
+      showProtectedContentDialog();
+      return;
+    }
+    try {
+      const { resolveReferencePage } = await getSearchDataModule();
+      const item = await resolveReferencePage(query, GLOBAL_SEARCH_CONFIG);
+      if (!item) throw new Error(`Reference not found: ${query}`);
+      openGlobalPdf(item.page || item.pageStart, title || item.title, "cpg");
+    } catch (error) {
+      console.error("Reference navigation failed:", error);
+      alert("The CPG reference could not be opened. Please try again.");
+    }
   }
 
   function initGlobalSearch(){
@@ -1583,7 +1677,7 @@
         }
       });
     }
-    if (status) status.textContent = `Up to date · Ambulance ${APP_VERSION}`;
+    if (status) status.textContent = `Up to date · Ambulance ${displayedAppVersion}`;
   }
 
   function initGateTestMenu(){
@@ -1645,6 +1739,7 @@
     document.getElementById("panel-body").innerHTML = "";
     document.body.classList.remove("panel-open");
     currentTool = null;
+    currentRouteDepth = 0;
     try { sessionStorage.setItem("ambulance_home_url", location.pathname + location.search); } catch (_) {}
   }
 
@@ -1766,14 +1861,19 @@
     await loadGateSession();
     initTheme();
     initPullRefresh();
-    const appVersionLabel = document.getElementById("appVersionLabel");
-    if (appVersionLabel) appVersionLabel.textContent = APP_VERSION;
+    setDisplayedAppVersion(APP_VERSION);
     const globalSearch = initGlobalSearch();
     configureAppHomeStatus();
     initGateTestMenu();
+    getAppConfigDataModule()
+      .then(({ preloadAppConfig, resolveIosVersion }) => preloadAppConfig()
+        .then((data) => setDisplayedAppVersion(resolveIosVersion(data, APP_VERSION))))
+      .catch(() => setDisplayedAppVersion(APP_VERSION));
     getSearchDataModule().then(({ preloadSearchData }) => preloadSearchData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
     getWebsitesDataModule().then(({ preloadWebsitesData }) => preloadWebsitesData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
     getAsCallDataModule().then(({ preloadAsCallData }) => preloadAsCallData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
+    getPediatricDataModule().then(({ preloadPediatricHelpers }) => preloadPediatricHelpers()).catch(() => {});
+    getReferenceDataModule().then(({ preloadReferenceItems }) => preloadReferenceItems()).catch(() => {});
     scheduleAppWarmup();
     document.getElementById("themeSelect").addEventListener("change",(e)=>applyTheme(e.target.value));
 
@@ -1892,7 +1992,7 @@ function handleWhatsNew(){
   const body = document.getElementById("whatsNewBody");
   const versionPill = document.getElementById("wnVersionPill");
   if (!overlay || !body) return;
-  if (versionPill) versionPill.textContent = `🚑 ${APP_VERSION} released`;
+  if (versionPill) versionPill.textContent = `🚑 ${displayedAppVersion} released`;
   const dismissed = localStorage.getItem(WHATS_NEW_KEY) === "1";
   const message = WHATS_NEW_MESSAGE.trim();
   const shouldShow = WHATS_NEW_ENABLED && !dismissed && message;
@@ -1968,7 +2068,7 @@ function wireCharlieModal(){
 }
 
 
-    document.getElementById("panel-back").addEventListener("click", closePanel);
+    document.getElementById("panel-back").addEventListener("click", () => closePanel());
     render();
 
     const { tool, ...params } = parseHash();
@@ -1984,6 +2084,8 @@ function wireCharlieModal(){
   ];
 
   let currentTool = null;
+  let currentRouteDepth = 0;
+  let navigationSequence = 0;
   let baseStateInitialized = false;
 
   function ensureBaseState(){
@@ -1993,15 +2095,16 @@ function wireCharlieModal(){
     }
   }
 
-  function setToolState(actionId, params = {}, replace = false){
+  function setToolState(actionId, params = {}, replace = false, routeDepth = 1){
     ensureBaseState();
     const hashParams = { tool: actionId, ...params };
     const hash = new URLSearchParams(hashParams).toString();
     const url = `${location.pathname}${location.search}${hash ? `#${hash}` : ""}`;
-    const state = { tool: actionId, params };
+    const state = { tool: actionId, params, routeDepth };
     if (replace) history.replaceState(state, "", url);
     else history.pushState(state, "", url);
     currentTool = actionId;
+    currentRouteDepth = routeDepth;
   }
 
   function showComingSoon(title){
@@ -2012,7 +2115,56 @@ function wireCharlieModal(){
     const category = CATEGORY_SCREENS[categoryId];
     if (!category) return false;
 
-    mountEl.innerHTML = `
+    if (categoryId === "category_pediatrics") {
+      mountEl.innerHTML = `
+        <div class="peds-menu">
+          <h2 class="peds-menu-title">Pediatric Medications</h2>
+          <p class="peds-menu-subtitle">Choose scope and age</p>
+          <section class="peds-menu-section peds-menu-ap">
+            <h3>AP</h3>
+            <p>Ambulance Paramedic calculations</p>
+            <div class="peds-menu-buttons">
+              <button class="peds-menu-button" type="button" data-section="0" data-item="0" style="--peds-button:#2196F3">Months</button>
+              <button class="peds-menu-button" type="button" data-section="0" data-item="1" style="--peds-button:#0D63B2">Years</button>
+            </div>
+          </section>
+          <section class="peds-menu-section peds-menu-ccp">
+            <h3>CCP</h3>
+            <p>Critical Care Paramedic calculations</p>
+            <div class="peds-menu-buttons">
+              <button class="peds-menu-button" type="button" data-section="1" data-item="0" style="--peds-button:#708090">Months</button>
+              <button class="peds-menu-button" type="button" data-section="1" data-item="1" style="--peds-button:#495765">Years</button>
+            </div>
+          </section>
+          <section class="peds-menu-section peds-menu-tools">
+            <h3>Tools</h3>
+            <p>Pediatric references and support calculators</p>
+            <div class="peds-menu-buttons">
+              <button class="peds-menu-button" type="button" data-section="2" data-item="0" style="--peds-button:#F44336">Est. Weight</button>
+              <button class="peds-menu-button" type="button" data-section="2" data-item="1" style="--peds-button:#FB7185;--peds-button-text:#1F2937">Vital Signs</button>
+              <button class="peds-menu-button full" type="button" data-section="2" data-item="2" style="--peds-button:#FDBA74;--peds-button-text:#1F2937">Care Tools</button>
+            </div>
+          </section>
+        </div>`;
+    } else if (categoryId === "category_calculators") {
+      mountEl.innerHTML = `
+        <style>
+          .calc-menu{max-width:620px;margin:auto;padding:16px 14px 28px;color:var(--text)}
+          .calc-menu-intro{text-align:center;margin:0 0 15px;color:var(--muted);font-size:14px}
+          .calc-menu-section{display:grid;gap:8px;margin-top:17px}.calc-menu-section h3{margin:0 0 2px;padding-left:4px;color:var(--muted);font-size:14px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
+          .calc-menu-item{display:flex;align-items:center;gap:12px;width:100%;min-height:62px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);text-align:left;box-shadow:0 2px 7px rgba(15,23,42,.07)}
+          .calc-menu-icon{display:grid;place-items:center;flex:0 0 42px;height:42px;border-radius:8px;background:var(--item-color);color:white}.calc-menu-icon .material-symbols-rounded{font-size:27px}
+          .calc-menu-copy{display:grid;gap:2px;min-width:0}.calc-menu-title{font-size:16px;font-weight:950}.calc-menu-subtitle{color:var(--muted);font-size:12px;font-weight:650}
+          :root[data-theme="dark"] .calc-menu-item{box-shadow:none}:root[data-theme="dark"] .calc-menu-icon{filter:saturate(.78) brightness(.88)}
+          @media(prefers-color-scheme:dark){:root[data-theme="auto"] .calc-menu-item{box-shadow:none}:root[data-theme="auto"] .calc-menu-icon{filter:saturate(.78) brightness(.88)}}
+        </style><div class="calc-menu"><p class="calc-menu-intro">${gsEscape(category.intro || "")}</p>
+        ${category.sections.map((section,sectionIndex)=>`<section class="calc-menu-section"><h3>${gsEscape(section.title)}</h3>${section.items.map((item,itemIndex)=>`
+          <button class="calc-menu-item" type="button" data-section="${sectionIndex}" data-item="${itemIndex}" style="--item-color:${gsEscape(item.color)}">
+            <span class="calc-menu-icon"><span class="material-symbols-rounded">${gsEscape(item.icon)}</span></span>
+            <span class="calc-menu-copy"><span class="calc-menu-title">${gsEscape(item.title)}</span><span class="calc-menu-subtitle">${gsEscape(item.subtitle)}</span></span>
+          </button>`).join("")}</section>`).join("")}</div>`;
+    } else {
+      mountEl.innerHTML = `
       <div class="category-wrap">
         <p class="category-intro">${gsEscape(category.intro || "")}</p>
         ${category.sections.map((section, sectionIndex) => `
@@ -2041,15 +2193,20 @@ function wireCharlieModal(){
           </section>
         `).join("")}
       </div>
-    `;
+      `;
+    }
 
     mountEl.addEventListener("click", (event) => {
-      const button = event.target.closest(".category-item");
+      const button = event.target.closest(".category-item, .peds-menu-button, .calc-menu-item");
       if (!button) return;
       const item = category.sections[Number(button.dataset.section)]?.items[Number(button.dataset.item)];
       if (!item) return;
       if (item.comingSoon) {
         showComingSoon(item.title);
+        return;
+      }
+      if (item.documentQuery) {
+        openResolvedReference(item.documentQuery, item.title);
         return;
       }
       if (item.documentType) {
@@ -2069,6 +2226,12 @@ function wireCharlieModal(){
 
   // Router / action loader
   async function runAction(actionId, params = {}, options = {}) {
+    const navigationId = ++navigationSequence;
+    const routeDepth = options.fromHistory
+      ? Math.max(1, Number(options.routeDepth) || 1)
+      : options.nested
+        ? Math.max(2, currentRouteDepth + 1)
+        : 1;
     try {
       if (isProtectedAction(actionId) && !canOpenProtectedContent()) {
         showProtectedContentDialog();
@@ -2077,18 +2240,32 @@ function wireCharlieModal(){
         }
         return;
       }
-      const mountEl = document.getElementById("panel-body");
-      mountEl.innerHTML = "";
+      const panelBody = document.getElementById("panel-body");
+      const mountEl = document.createElement("div");
+      mountEl.className = "tool-route-host";
+      mountEl.dataset.navigationId = String(navigationId);
+      panelBody.replaceChildren(mountEl);
       const category = CATEGORY_SCREENS[actionId];
       openPanel(params.title || category?.title || (actionId === "community" ? "Join the Community" : actionId.toUpperCase()));
+
+      if (!category && actionId !== "community") {
+        if (options.fromHistory) {
+          currentTool = actionId;
+          currentRouteDepth = routeDepth;
+        } else if (options.pushState !== false) {
+          const replace = currentTool != null && !options.nested;
+          setToolState(actionId, params, replace, routeDepth);
+        }
+      }
 
       if (category) {
         renderCategoryScreen(mountEl, actionId);
         if (options.fromHistory) {
           currentTool = actionId;
+          currentRouteDepth = routeDepth;
         } else if (options.pushState !== false) {
           const replace = currentTool != null && !options.nested;
-          setToolState(actionId, { ...params, title: category.title }, replace);
+          setToolState(actionId, { ...params, title: category.title }, replace, routeDepth);
         }
         return;
       }
@@ -2134,12 +2311,13 @@ function wireCharlieModal(){
         });
         if (options.fromHistory) {
           currentTool = actionId;
+          currentRouteDepth = routeDepth;
         } else if (options.pushState !== false) {
           if (options.initialLoad) {
-            setToolState(actionId, params, false);
+            setToolState(actionId, params, false, routeDepth);
           } else {
             const replace = currentTool != null && !options.nested;
-            setToolState(actionId, params, replace);
+            setToolState(actionId, params, replace, routeDepth);
           }
         }
         return;
@@ -2148,30 +2326,31 @@ function wireCharlieModal(){
       // Default: load tool module. APP_VERSION controls cache refresh between releases.
       const ver = encodeURIComponent(TOOL_MODULE_VERSION);
       const mod = await import(`./tools/${actionId}.js?ver=${ver}`);
+      if (navigationId !== navigationSequence) return;
       await mod.run(mountEl, { ...params, accessType: gateAccessType });
-      if (options.fromHistory) {
-        currentTool = actionId;
-      } else if (options.pushState !== false) {
-        if (options.initialLoad) {
-          setToolState(actionId, params, false);
-        } else {
-          const replace = currentTool != null && !options.nested;
-          setToolState(actionId, params, replace);
-        }
-      }
+      if (navigationId !== navigationSequence) return;
     } catch (e) {
+      if (navigationId !== navigationSequence) return;
       alert(`Could not load tool: ${actionId}\n${e.message || e}`);
       console.error(e);
     }
   }
+  window.__AMBULANCE_NAVIGATE_TOOL = (actionId, params = {}) => {
+    runAction(actionId, params, { pushState:true, nested:true });
+  };
 
   function parseHash(){ const h = new URLSearchParams((location.hash||"").replace(/^#/, "")); const obj = {}; for (const [k,v] of h.entries()) obj[k]=v; return obj; }
   window.addEventListener("popstate", (event) => {
     if (window.__modalPopHandled){ window.__modalPopHandled = false; return; }
     const state = event.state;
     if (state && state.tool){
-      runAction(state.tool, state.params || {}, { fromHistory: true, pushState: false });
+      runAction(state.tool, state.params || {}, {
+        fromHistory:true,
+        pushState:false,
+        routeDepth:state.routeDepth
+      });
     } else {
+      navigationSequence += 1;
       closePanel(true);
     }
   });

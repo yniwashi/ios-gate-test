@@ -1,4 +1,7 @@
 <!--
+CHANGELOG (2026-06-05):
+- Document the iOS App config, Pediatrics, references, Calculators, and nested router migration.
+
 CHANGELOG (2026-05-17):
 - Add iOS input behavior rule: scrolling must dismiss the keyboard in searchable/input-heavy views.
 - Remove obsolete TEMP README reference after confirming its docs-host notes are covered in the README Files/iOS and pdf-viewer README files.
@@ -127,3 +130,21 @@ CHANGELOG (2026-05-17):
 - Added AS-Call App-mode support with shared helper loader/cache `ambulance/as_call_data.js`, new tool `ambulance/tools/as_call.js`, startup preload, search, filters, copy feedback, and `tel:` call buttons.
 - Updated `AGENTS.md` with the iOS input behavior rule that scrolling search/input-heavy views should dismiss the keyboard.
 - Bumped `ASSET_VERSION` through the deployment refreshes, ending at `asset-20260518-4`.
+
+### 2026-06-05 09:56 +03
+- Added the first testing App config loader draft in `ambulance/app_config_data.js` and wired it into `ambulance/index.html` without changing `ASSET_VERSION`.
+- Confirmed the shared testing app-config endpoint returned `ios_app.version`, then changed direction to separate iOS-only app config files.
+- Created iOS-only testing, production, and backup config drafts in TEMP with Android-style shared helper blocks and iOS-specific `app`/`assets` metadata.
+- Updated the project TODO to continue from the iOS-only config route/upload step.
+- No files were pushed to GitHub.
+
+### 2026-06-05 17:12 +03
+- Connected the testing Ambulance App to the dedicated iOS App config endpoint and made the displayed app version resolve from `app.version`.
+- Added version-aware API/cache loaders for Pediatrics, Flowcharts, Formulary, and shared reference data.
+- Rebuilt AP and CCP Pediatrics around the Android dosing engine and helper data, including medication calculations, warnings, concentration handling, vital signs, WAAFELSS, result sheets, and direct CPG reference navigation.
+- Combined Flowcharts and Formulary into the Android-aligned segmented reference screen.
+- Ported the Android Infusions & Calculations screen, including Adult/Pediatric Infusions, Burn Surface Area, Infusion Rate, Dose Volume, Proportion, MAP, and RBS with light/dark themes.
+- Copied the Android adult, child, and infant burn assets and zone mappings into the testing App.
+- Fixed asynchronous route races that could display the wrong calculator, and corrected nested Back behavior so child screens return to their parent while first-level screens return Home.
+- Preserved CPR and RSI as standalone URL destinations rather than tool modules.
+- Bumped `ASSET_VERSION` to `asset-20260605-gate-test-1` for the GitHub testing deployment; remaining production-readiness checks are documented in the project TODO.
