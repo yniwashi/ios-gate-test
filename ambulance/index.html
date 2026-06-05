@@ -1,5 +1,6 @@
 <!--
   CHANGELOG (2026-06-05):
+  - Fine-tune pinned header spacing by lifting the title area and adding breathing room before the greeting card.
   - Pin the header and greeting/status card together and reduce the installed App safe-area header padding.
   - Nudge the status row/actions upward, add long-label button shrinking, and soften home/header gradients in dark mode.
   - Make the testing home status card sticky, tighten its vertical rhythm, use Android SVG icons on selected home buttons, and align the iOS App status bar color with the blue header.
@@ -156,7 +157,7 @@
 
     /* Topbar */
     .home-pinned{position:sticky;top:0;z-index:70;background:var(--bg);padding-bottom:8px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 calc(-1 * clamp(9px,3.6vw,14px)) 2px;padding:calc(env(safe-area-inset-top) + 8px) clamp(17px,5vw,26px) 13px;background:linear-gradient(135deg,#108bf1 0%,#0575da 48%,#0066c8 100%);box-shadow:0 6px 16px rgba(0,91,180,.22)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 calc(-1 * clamp(9px,3.6vw,14px)) 0;padding:calc(env(safe-area-inset-top) + 4px) clamp(17px,5vw,26px) 12px;background:linear-gradient(135deg,#108bf1 0%,#0575da 48%,#0066c8 100%);box-shadow:0 6px 16px rgba(0,91,180,.22)}
     [data-theme="dark"] .topbar{background:linear-gradient(135deg,#2b78d6 0%,#2268c4 52%,#1959ad 100%);box-shadow:0 6px 16px rgba(0,52,112,.34)}
     @media (prefers-color-scheme: dark){
       [data-theme="auto"] .topbar{background:linear-gradient(135deg,#2b78d6 0%,#2268c4 52%,#1959ad 100%);box-shadow:0 6px 16px rgba(0,52,112,.34)}
@@ -185,7 +186,7 @@
       display:none;overflow:hidden;border:1px solid color-mix(in oklab,var(--border) 72%,#ffffff);
       border-radius:14px;background:var(--surface);box-shadow:0 6px 16px rgba(15,23,42,.14),0 1px 4px rgba(15,23,42,.06);
     }
-    .app-home-status{display:block;position:relative;margin:0 auto;width:min(100%,720px);padding-top:10px}
+    .app-home-status{display:block;position:relative;margin:8px auto 0;width:min(100%,720px);padding-top:10px}
     .app-greeting{
       position:relative;min-height:58px;display:flex;align-items:center;justify-content:flex-start;gap:11px;padding:0 21px;
       color:#fff;overflow:hidden;cursor:pointer;isolation:isolate;background:transparent;
