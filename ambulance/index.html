@@ -1,5 +1,6 @@
 <!--
   CHANGELOG (2026-06-05):
+  - Move temporary gate test controls into a hidden triple-tap header menu.
   - Fine-tune pinned header spacing by lifting the title area and adding breathing room before the greeting card.
   - Pin the header and greeting/status card together and reduce the installed App safe-area header padding.
   - Nudge the status row/actions upward, add long-label button shrinking, and soften home/header gradients in dark mode.
@@ -486,7 +487,7 @@
     body.panel-open .wrap{ transition: transform 300ms ease, opacity 300ms ease; }
 
     /* What's New trigger */
-    .updates-cta{display:flex;justify-content:flex-start;gap:7px;margin:2px 0 0}
+    .updates-cta{display:none}
     .updates-btn{appearance:none;border:1px solid color-mix(in oklab,var(--accent) 40%,transparent);background:color-mix(in oklab,var(--accent) 12%,var(--surface));color:var(--accent);font:800 11px/1 system-ui;padding:5px 10px;border-radius:999px;cursor:pointer}
     .updates-btn:hover{background:color-mix(in oklab,var(--accent) 18%,var(--surface));}
     .updates-cta #wnShowAgain,
@@ -497,6 +498,13 @@
     .gate-reset-btn:hover{background:color-mix(in oklab,#c0392b 16%,var(--surface))}
     .gate-recheck-btn{color:#7b4d00;border-color:color-mix(in oklab,#d99a00 44%,transparent);background:color-mix(in oklab,#d99a00 12%,var(--surface))}
     .gate-recheck-btn:hover{background:color-mix(in oklab,#d99a00 18%,var(--surface))}
+    .gate-test-overlay{position:fixed;inset:0;z-index:99998;display:none;align-items:flex-end;justify-content:center;padding:18px;background:rgba(2,5,11,.42);backdrop-filter:blur(8px)}
+    .gate-test-overlay.show{display:flex}
+    .gate-test-menu{width:min(360px,calc(100vw - 36px));margin-bottom:calc(env(safe-area-inset-bottom) + 8px);padding:14px;border-radius:16px;border:1px solid var(--border);background:var(--surface);box-shadow:0 20px 50px rgba(0,0,0,.38)}
+    .gate-test-title{margin:0 0 10px;color:var(--text);font-size:15px;font-weight:950}
+    .gate-test-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .gate-test-actions .updates-btn{flex:1;min-height:40px;font-size:12px}
+    .gate-test-close{width:100%;margin-top:9px;color:var(--muted);border-color:var(--border);background:var(--surface-2)}
 
     /* What's New modal */
     .wn-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:color-mix(in oklab,var(--bg) 55%,#02050bed);backdrop-filter:blur(10px);z-index:99998}
@@ -609,13 +617,6 @@
     </section>
   </div>
 
-  <div class="updates-cta">
-    <button id="wnShowAgain" class="updates-btn" type="button">Updates</button>
-    <button id="charlieBtn" class="updates-btn charlie-btn" type="button">Charlie</button>
-    <button id="gateRecheckBtn" class="updates-btn gate-recheck-btn" type="button">Recheck Access</button>
-    <button id="gateResetBtn" class="updates-btn gate-reset-btn" type="button">Reset Test</button>
-  </div>
-
   <!-- Global Search -->
   <div class="global-search" id="globalSearch">
     <div class="global-search-head">
@@ -646,6 +647,17 @@
       <h3 id="panel-title" class="panel-title">Tool</h3>
     </div>
     <div id="panel-body"></div>
+  </div>
+</section>
+
+<section id="gateTestOverlay" class="gate-test-overlay" hidden aria-modal="true" role="dialog" aria-label="Test access menu">
+  <div class="gate-test-menu">
+    <p class="gate-test-title">Test access menu</p>
+    <div class="gate-test-actions">
+      <button id="gateRecheckBtn" class="updates-btn gate-recheck-btn" type="button">Recheck Access</button>
+      <button id="gateResetBtn" class="updates-btn gate-reset-btn" type="button">Reset Test</button>
+    </div>
+    <button id="gateTestCloseBtn" class="updates-btn gate-test-close" type="button">Close</button>
   </div>
 </section>
 
@@ -1574,6 +1586,47 @@
     if (status) status.textContent = `Up to date · Ambulance ${APP_VERSION}`;
   }
 
+  function initGateTestMenu(){
+    const header = document.querySelector(".topbar");
+    const overlay = document.getElementById("gateTestOverlay");
+    const closeBtn = document.getElementById("gateTestCloseBtn");
+    if (!header || !overlay || header.dataset.testMenuBound === "1") return;
+    header.dataset.testMenuBound = "1";
+    let tapCount = 0;
+    let tapTimer = 0;
+
+    function openMenu(){
+      overlay.hidden = false;
+      overlay.classList.add("show");
+      tapCount = 0;
+      clearTimeout(tapTimer);
+    }
+
+    function closeMenu(){
+      overlay.classList.remove("show");
+      overlay.hidden = true;
+    }
+
+    header.addEventListener("click", (event) => {
+      if (event.target.closest("button, select, a")) return;
+      tapCount += 1;
+      clearTimeout(tapTimer);
+      if (tapCount >= 3) {
+        openMenu();
+        return;
+      }
+      tapTimer = setTimeout(() => { tapCount = 0; }, 1200);
+    });
+
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) closeMenu();
+    });
+    closeBtn?.addEventListener("click", closeMenu);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !overlay.hidden) closeMenu();
+    });
+  }
+
   function openPanel(title){
     document.getElementById("panel-title").textContent = title || "Tool";
     document.getElementById("panel").hidden = false;
@@ -1717,6 +1770,7 @@
     if (appVersionLabel) appVersionLabel.textContent = APP_VERSION;
     const globalSearch = initGlobalSearch();
     configureAppHomeStatus();
+    initGateTestMenu();
     getSearchDataModule().then(({ preloadSearchData }) => preloadSearchData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
     getWebsitesDataModule().then(({ preloadWebsitesData }) => preloadWebsitesData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
     getAsCallDataModule().then(({ preloadAsCallData }) => preloadAsCallData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
