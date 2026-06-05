@@ -1,5 +1,8 @@
 <!--
   CHANGELOG (2026-06-05):
+  - Polish Android-style home and nested buttons with stronger hierarchy, spacing, icon treatment, and theme-aware surfaces.
+  - Use the Android road banner and greeting icon assets with the complete Android greeting message rotation.
+  - Change the greeting on tap with the Android press/glow interaction.
   - Mirror the Android home button hierarchy and add nested Pediatrics, Guidelines, Calculators, and Scores menus.
   - Route nested Android destinations to existing iOS tool modules and mark unavailable destinations as Coming Soon.
   - Preserve nested browser history so Back returns from a tool to its parent category.
@@ -132,7 +135,7 @@
       background:var(--bg); color:var(--text); -webkit-tap-highlight-color:transparent;
       padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
-    .wrap{max-width:980px; margin:0 auto; padding:12px clamp(8px,4vw,16px) 18px; display:flex; flex-direction:column; gap:10px}
+    .wrap{max-width:760px; margin:0 auto; padding:10px clamp(10px,4vw,16px) 22px; display:flex; flex-direction:column; gap:10px}
 
     /* Topbar */
     .topbar{display:flex; align-items:center; justify-content:space-between; gap:10px}
@@ -153,22 +156,36 @@
 
     /* Android-aligned App Mode status */
     .app-home-status{
-      display:none; overflow:hidden; border:1px solid var(--border); border-radius:8px;
-      background:var(--surface); box-shadow:0 5px 14px rgba(0,0,0,.10);
+      display:none; overflow:hidden; border:1px solid color-mix(in oklab,var(--border) 82%,#94a3b8);
+      border-radius:8px;background:var(--surface);box-shadow:0 6px 18px rgba(15,23,42,.12);
     }
     .app-home-status{display:block}
     .app-greeting{
-      position:relative; min-height:58px; display:flex; align-items:center; gap:12px;
-      padding:0 18px; color:#fff; overflow:hidden;
-      background:linear-gradient(105deg,#075985 0%,#0369a1 48%,#0f766e 100%);
+      position:relative;min-height:66px;display:flex;align-items:center;gap:12px;padding:0 22px;
+      color:#fff;overflow:hidden;cursor:pointer;isolation:isolate;background:#075985;
+      transition:transform 180ms ease,filter 180ms ease;
     }
-    .app-greeting::after{
-      content:""; position:absolute; inset:auto -26px -42px 28%;
-      height:86px; border-radius:50%; background:rgba(255,255,255,.08);
-      transform:rotate(-5deg); pointer-events:none;
+    .app-greeting:active{transform:scale(.992);filter:brightness(1.04)}
+    .app-greeting-road{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+    .app-greeting-shade{
+      position:absolute;inset:0;z-index:-1;
+      background:linear-gradient(90deg,rgba(2,18,38,.72),rgba(2,35,64,.35) 58%,rgba(2,18,38,.12));
     }
-    .app-greeting .material-symbols-rounded{position:relative;z-index:1;font-size:30px}
-    .app-greeting-text{position:relative;z-index:1;font-size:15px;font-weight:850;line-height:1.2}
+    .app-greeting-glow{
+      position:absolute;inset:0 0 0 auto;width:42%;opacity:0;pointer-events:none;
+      background:radial-gradient(circle at 72% 48%,rgba(247,253,255,.85),rgba(223,244,255,.34) 38%,transparent 72%);
+    }
+    .app-greeting.tap .app-greeting-glow{animation:greetingGlow 350ms ease-out}
+    @keyframes greetingGlow{0%{opacity:0}28%{opacity:1}100%{opacity:0}}
+    .app-greeting-icon{width:34px;height:34px;object-fit:contain;position:relative;z-index:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.34))}
+    .app-greeting-text{
+      position:relative;z-index:1;min-width:0;font-size:15px;font-weight:900;line-height:1.2;
+      text-shadow:0 1px 4px rgba(0,0,0,.75);
+    }
+    .app-greeting-hint{
+      position:absolute;right:12px;bottom:6px;z-index:1;color:rgba(255,255,255,.76);
+      font-size:9px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.65);
+    }
     .app-status-row{display:flex;align-items:center;gap:9px;padding:10px 16px 8px}
     .app-status-dot{width:9px;height:9px;border-radius:50%;background:#16a34a;box-shadow:0 0 0 3px color-mix(in oklab,#16a34a 15%,transparent)}
     .app-status-copy{font-size:13px;font-weight:800;color:color-mix(in oklab,var(--text) 82%,var(--muted))}
@@ -239,10 +256,10 @@
     .section{display:flex; flex-direction:column; gap:4px}
     .section-head{ display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; padding:4px 2px 0 }
     .section-head::after{content:""; height:1px; background:var(--border); flex:1}
-    .sections{gap:10px}
+    .sections{gap:11px}
     .section{
-      gap:7px;padding:9px 8px 5px;border:1px solid var(--border);border-radius:8px;
-      background:var(--surface);box-shadow:0 5px 14px rgba(0,0,0,.09);
+      gap:8px;padding:10px 9px 7px;border:1px solid color-mix(in oklab,var(--border) 86%,#94a3b8);
+      border-radius:8px;background:var(--surface);box-shadow:0 6px 17px rgba(15,23,42,.10);
     }
     .section-head{
       padding:0 2px;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.08em;
@@ -250,14 +267,25 @@
 
     /* Grid & buttons */
     .grid{display:grid; gap:8px; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); grid-auto-flow:dense}
-    .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+    .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
     @media (orientation:landscape){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
     .btn{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-decoration:none; color:var(--btn-fg,#fff); border-radius:12px; padding:10px 10px; min-height:72px; font-size:13px; font-weight:800; letter-spacing:.2px; text-align:center; box-shadow:var(--shadow); transition:transform var(--speed), box-shadow var(--speed), filter var(--speed)}
     .btn{
-      min-height:52px;border-radius:8px;padding:7px 9px;flex-direction:row;gap:9px;
-      justify-content:flex-start;text-align:left;font-size:13px;box-shadow:0 3px 8px rgba(0,0,0,.16);
+      position:relative;overflow:hidden;min-height:56px;border-radius:8px;padding:8px 11px;
+      flex-direction:row;gap:9px;justify-content:flex-start;text-align:left;font-size:13px;
+      border:1px solid rgba(255,255,255,.22);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 2px 0 rgba(15,23,42,.18),0 5px 11px rgba(15,23,42,.16);
     }
-    .btn .material-symbols-rounded{font-size:23px;flex:none}
+    .btn::after{
+      content:"";position:absolute;left:0;right:0;top:0;height:45%;
+      background:linear-gradient(180deg,rgba(255,255,255,.14),transparent);pointer-events:none;
+    }
+    .btn .material-symbols-rounded{
+      position:relative;z-index:1;width:32px;height:32px;border-radius:9px;display:flex;
+      align-items:center;justify-content:center;font-size:21px;flex:none;
+      background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);
+    }
+    .btn .label{position:relative;z-index:1;min-width:0;overflow-wrap:anywhere}
     .btn.app-wide-tile{grid-column:1/-1;justify-content:center}
     .btn:hover{ transform:translateY(-2px); box-shadow:var(--shadow-2) }
     .btn:active{ transform:translateY(0) scale(.98) }
@@ -269,9 +297,9 @@
     #care-tools,#rbs-converter,#map-calculator,#as-call{ --btn-fg:#000 }
 
     /* Button gradients */
-    .btn-cpr{background:linear-gradient(180deg,#ff5757,#e23b3b)}
-    .btn-rsi{background:linear-gradient(180deg,#0D5BB5,#0D3AB5)}
-    .btn-waafelss{background:linear-gradient(180deg,#D660C6,#D936BE)}
+    .btn-cpr{background:linear-gradient(180deg,#F45B5B,#B91C1C)}
+    .btn-rsi{background:linear-gradient(180deg,#AFC0D7,#687C98)}
+    .btn-waafelss{background:linear-gradient(180deg,#F472D8,#D936BE)}
     .btn-ccp{background:linear-gradient(180deg,#9F9FB5,#81818F)}
     .btn-ap{background:linear-gradient(180deg,#4DB3FF,#0A96FA)}
     .btn-caretools{background:linear-gradient(180deg,#FFB36B,#F78000)}
@@ -279,63 +307,80 @@
     .btn-gcs{background:linear-gradient(180deg,#6BE65A,#1CCC0C)}
     .btn-apgar{background:linear-gradient(180deg,#FF94EB,#FF5CE2)}
     .btn-sat{background:linear-gradient(180deg,#FFBE82,#FF8A00)}
-    .btn-flowcharts{background:linear-gradient(180deg,#66D9FF,#00B3FF)}
+    .btn-flowcharts{background:linear-gradient(180deg,#56D364,#22863A)}
     .btn-rbs{background:linear-gradient(180deg,#FFF9A6,#FFF200)}
     .btn-cpg{background:linear-gradient(180deg,#7AEB7A,#02C202)}
     .btn-sop{background:#FF4040}
     .btn-map{background:linear-gradient(180deg,#FFAC75,#FF6600)}
-    .btn-ascall{background:linear-gradient(180deg,#FFEA94,#FFDB00)}
-    .btn-hos{background:linear-gradient(180deg,#577CE6,#003DEB)}
+    .btn-ascall{background:linear-gradient(180deg,#FFED78,#FFD000)}
+    .btn-hos{background:linear-gradient(180deg,#6B8BFF,#003DEB)}
     .btn-websites{background:linear-gradient(180deg,#64748b,#475569)}
     .btn-westley{background:linear-gradient(180deg,#FFE26D,#FFC107); --btn-fg:#000}
-    .btn-overtime{background:linear-gradient(180deg,#4CAF50,#2E7D32); --btn-fg:#fff}
+    .btn-overtime{background:linear-gradient(180deg,#75C0FF,#2F6FED); --btn-fg:#fff}
     .btn-address{background:linear-gradient(180deg,#2FD7A7,#12A085); --btn-fg:#fff}
-    .btn-shifts{background:linear-gradient(180deg,#9AD9FF,#57B6FF); --btn-fg:#000}
-    .btn-meds{background:linear-gradient(180deg,#8EA4B8,#5E7A92); --btn-fg:#fff}
-    .btn-vent{background:linear-gradient(180deg,#7EC8FF,#3FA9FF); --btn-fg:#fff}
+    .btn-shifts{background:linear-gradient(180deg,#7DD3FC,#0EA5E9); --btn-fg:#fff}
+    .btn-meds{background:linear-gradient(180deg,#9AB0C5,#5E7A92); --btn-fg:#fff}
+    .btn-vent{background:linear-gradient(180deg,#7DD3FC,#0EA5E9); --btn-fg:#fff}
     .btn-formulary{background:linear-gradient(180deg,#5EB0EF,#2684FF); --btn-fg:#fff}
     .btn-community{background:linear-gradient(180deg,#24d366,#128c7e); --btn-fg:#fff}
-    .btn-search{background:linear-gradient(180deg,#1677e8,#005FCB);--btn-fg:#fff}
-    .btn-pediatrics{background:linear-gradient(180deg,#e0529a,#D63384);--btn-fg:#fff}
-    .btn-guidelines{background:linear-gradient(180deg,#1677e8,#005FCB);--btn-fg:#fff}
-    .btn-calculators{background:linear-gradient(180deg,#7890a4,#5E7A92);--btn-fg:#fff}
-    .btn-visual-guides{background:linear-gradient(180deg,#20a8c5,#0891B2);--btn-fg:#fff}
-    .btn-scores{background:linear-gradient(180deg,#16a7df,#0284C7);--btn-fg:#fff}
+    .btn-search{background:linear-gradient(180deg,#3BA7FF,#005FCB);--btn-fg:#fff}
+    .btn-pediatrics{background:linear-gradient(180deg,#FF7AB8,#D63384);--btn-fg:#fff}
+    .btn-guidelines{background:linear-gradient(180deg,#3BA7FF,#005FCB);--btn-fg:#fff}
+    .btn-calculators{background:linear-gradient(180deg,#9AB0C5,#5E7A92);--btn-fg:#fff}
+    .btn-visual-guides{background:linear-gradient(180deg,#2DD4BF,#0891B2);--btn-fg:#fff}
+    .btn-scores{background:linear-gradient(180deg,#38BDF8,#0284C7);--btn-fg:#fff}
 
     /* Android-style nested menus */
-    .category-wrap{padding:12px}
+    .category-wrap{padding:14px 12px 24px;max-width:760px;margin:0 auto}
     .category-intro{
-      margin:0 0 12px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;
-      background:var(--surface);color:var(--muted);font-size:13px;font-weight:700;line-height:1.4;
+      margin:0 0 14px;padding:13px 15px;border:1px solid var(--border);border-radius:8px;
+      background:color-mix(in oklab,var(--surface) 88%,var(--surface-2));color:var(--muted);
+      font-size:13px;font-weight:750;line-height:1.45;box-shadow:0 3px 10px rgba(15,23,42,.07);
     }
-    .category-section{margin-bottom:12px}
+    .category-section{margin-bottom:16px}
     .category-heading{
       display:flex;align-items:center;gap:8px;margin:0 0 7px;color:var(--muted);
       font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
     }
     .category-heading::after{content:"";height:1px;flex:1;background:var(--border)}
-    .category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
     .category-item{
-      appearance:none;width:100%;min-height:64px;border:1px solid var(--border);border-radius:8px;
-      padding:10px;background:var(--surface);color:var(--text);text-align:left;cursor:pointer;
-      display:flex;align-items:center;gap:10px;box-shadow:0 3px 9px rgba(0,0,0,.10);
+      appearance:none;position:relative;width:100%;min-height:78px;border:1px solid
+      color-mix(in oklab,var(--item-color,var(--accent)) 22%,var(--border));border-radius:8px;
+      padding:11px 32px 11px 10px;background:linear-gradient(145deg,
+      color-mix(in oklab,var(--item-color,var(--accent)) 8%,var(--surface)),var(--surface) 55%);
+      color:var(--text);text-align:left;cursor:pointer;display:flex;align-items:center;gap:11px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 4px 11px rgba(15,23,42,.09);
+      transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease;
     }
-    .category-item:active{transform:scale(.985)}
+    .category-item::after{
+      content:"chevron_right";font-family:"Material Symbols Rounded";position:absolute;right:9px;top:50%;
+      transform:translateY(-50%);font-size:20px;color:color-mix(in oklab,var(--item-color,var(--accent)) 65%,var(--muted));
+    }
+    .category-item:active{transform:scale(.985);box-shadow:0 2px 6px rgba(15,23,42,.10)}
     .category-icon{
-      width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;
-      flex:none;background:color-mix(in oklab,var(--item-color,var(--accent)) 15%,var(--surface));
-      color:var(--item-color,var(--accent));
+      width:43px;height:43px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+      flex:none;background:linear-gradient(145deg,color-mix(in oklab,var(--item-color,var(--accent)) 22%,var(--surface)),
+      color-mix(in oklab,var(--item-color,var(--accent)) 10%,var(--surface)));
+      color:var(--item-color,var(--accent));box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--item-color,var(--accent)) 20%,transparent);
     }
     .category-icon .material-symbols-rounded{font-size:23px}
     .category-copy{min-width:0;display:flex;flex-direction:column;gap:3px}
-    .category-title{font-size:14px;font-weight:900;line-height:1.15}
-    .category-subtitle{font-size:11px;font-weight:700;line-height:1.25;color:var(--muted)}
-    .category-item.coming-soon{opacity:.72}
+    .category-title{font-size:14px;font-weight:900;line-height:1.18}
+    .category-subtitle{font-size:11px;font-weight:700;line-height:1.3;color:var(--muted)}
+    .category-item.coming-soon{opacity:.74;filter:saturate(.6)}
+    .category-item.coming-soon::after{content:"schedule"}
     .category-badge{
       display:inline-flex;width:max-content;padding:2px 6px;border-radius:999px;
       background:var(--surface-2);color:var(--muted);font-size:9px;font-weight:900;text-transform:uppercase;
     }
-    @media(max-width:370px){.category-grid{grid-template-columns:1fr}}
+    [data-theme="dark"] .section,[data-theme="dark"] .app-home-status{
+      box-shadow:0 7px 20px rgba(0,0,0,.28);
+    }
+    @media(max-width:370px){
+      .category-grid{grid-template-columns:1fr}
+      .btn{font-size:12px;padding-inline:8px}
+    }
 
     /* Panel */
     #panel{ position: fixed; inset: 0; background: transparent; z-index: 9999; }
@@ -451,9 +496,13 @@
   </div>
 
   <section class="app-home-status" id="appHomeStatus" aria-label="App status">
-    <div class="app-greeting" id="appGreeting">
-      <span class="material-symbols-rounded" id="appGreetingIcon" aria-hidden="true">emergency</span>
+    <div class="app-greeting" id="appGreeting" role="button" tabindex="0" aria-label="Change greeting">
+      <img class="app-greeting-road" src="images/main_greeting_banner_road.png" alt="">
+      <span class="app-greeting-shade" aria-hidden="true"></span>
+      <span class="app-greeting-glow" aria-hidden="true"></span>
+      <img class="app-greeting-icon" id="appGreetingIcon" src="images/ic_greeting_ambulance_flat.png" alt="">
       <span class="app-greeting-text" id="appGreetingText">Stay safe</span>
+      <span class="app-greeting-hint">Tap for another</span>
     </div>
     <div class="app-status-row">
       <span class="app-status-dot" aria-hidden="true"></span>
@@ -1350,35 +1399,84 @@
   function configureAppHomeStatus(){
     const firstName = (localStorage.getItem("ambulance_ios_first_name") || "").trim() || "there";
     const hour = new Date().getHours();
-    const greetingOptions = hour >= 5 && hour <= 11
+    const timeOfDayMessages = hour >= 5 && hour <= 11
       ? [
-          ["Good morning", "wb_sunny"],
-          ["Stay hydrated", "water_drop"],
-          ["Drive safe", "local_taxi"]
+          ["Good morning", "ic_greeting_sun_face.png"],
+          ["Morning", "ic_greeting_sun_cloud.png"],
+          ["Coffee ready", "ic_greeting_coffee.png"],
+          ["Stay hydrated", "ic_greeting_water_glass.png"],
+          ["Stay safe", "ic_greeting_shield.png"],
+          ["Drive safe", "ic_greeting_steering_wheel.png"],
+          ["Equipment check", "ic_greeting_first_aid_kit.png"]
         ]
       : hour >= 12 && hour <= 16
         ? [
-            ["Good afternoon", "wb_sunny"],
-            ["Stay sharp", "my_location"],
-            ["Keep cool", "water_drop"]
+            ["Good afternoon", "ic_greeting_sun_face.png"],
+            ["Stay hydrated", "ic_greeting_water_glass.png"],
+            ["Keep cool", "ic_greeting_cold_drink.png"],
+            ["Hydrate often", "ic_greeting_water_glass.png"],
+            ["Pace yourself", "ic_greeting_clock.png"],
+            ["Drive safe", "ic_greeting_steering_wheel.png"],
+            ["Stay sharp", "ic_greeting_target.png"]
           ]
         : hour >= 17 && hour <= 20
           ? [
-              ["Good evening", "dark_mode"],
-              ["Stay safe", "health_and_safety"],
-              ["One call at a time", "emergency"]
+              ["Good evening", "ic_greeting_moon_crescent.png"],
+              ["Stay safe", "ic_greeting_shield.png"],
+              ["Drive safe", "ic_greeting_steering_wheel.png"],
+              ["Stay sharp", "ic_greeting_target.png"],
+              ["Keep steady", "ic_greeting_stethoscope.png"]
             ]
           : [
-              ["Good evening", "dark_mode"],
-              ["Stay alert tonight", "coffee"],
-              ["Finish strong", "sports_score"]
+              ["Good evening", "ic_greeting_moon_crescent.png"],
+              ["Stay alert", "ic_greeting_coffee.png"],
+              ["Stay safe tonight", "ic_greeting_shield.png"],
+              ["Keep steady tonight", "ic_greeting_moon_new.png"],
+              ["Stay alert tonight", "ic_greeting_coffee.png"],
+              ["Almost there", "ic_greeting_finish_flag.png"],
+              ["Finish strong", "ic_greeting_finish_flag.png"]
             ];
-    const selected = greetingOptions[Math.floor(Math.random() * greetingOptions.length)];
+    const shiftMessages = [
+      ["Stay safe", "ic_greeting_shield.png"],
+      ["Drive safe", "ic_greeting_steering_wheel.png"],
+      ["Stay sharp", "ic_greeting_target.png"],
+      ["One call at a time", "ic_greeting_ambulance_flat.png"]
+    ];
+    const greetingOptions = [...timeOfDayMessages, ...shiftMessages];
+    let greetingIndex = Math.floor(Math.random() * greetingOptions.length);
+    const banner = document.getElementById("appGreeting");
     const text = document.getElementById("appGreetingText");
     const icon = document.getElementById("appGreetingIcon");
     const status = document.getElementById("appStatusCopy");
-    if (text) text.textContent = `${selected[0]}, ${firstName}`;
-    if (icon) icon.textContent = selected[1];
+
+    function applyGreeting(index, animate = false){
+      const selected = greetingOptions[index] || greetingOptions[0];
+      if (text) text.textContent = `${selected[0]}, ${firstName}`;
+      if (icon) icon.src = `images/${selected[1]}`;
+      if (animate && banner) {
+        banner.classList.remove("tap");
+        void banner.offsetWidth;
+        banner.classList.add("tap");
+        setTimeout(() => banner.classList.remove("tap"), 380);
+      }
+    }
+
+    function nextGreeting(){
+      greetingIndex = (greetingIndex + 1) % greetingOptions.length;
+      applyGreeting(greetingIndex, true);
+    }
+
+    applyGreeting(greetingIndex);
+    if (banner && banner.dataset.greetingBound !== "1") {
+      banner.dataset.greetingBound = "1";
+      banner.addEventListener("click", nextGreeting);
+      banner.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          nextGreeting();
+        }
+      });
+    }
     if (status) status.textContent = `Ambulance ${APP_VERSION} · App Mode`;
   }
 
