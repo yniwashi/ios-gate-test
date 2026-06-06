@@ -1,4 +1,7 @@
 <!--
+  CHANGELOG (2026-06-07):
+  - Remove the Charlie home button and stop/reset its video whenever the modal closes, navigation changes, or the App is backgrounded.
+
   CHANGELOG (2026-06-06):
   - Enable HOS as an App tool and preload its helper data through the iOS App config.
   - Wire the Visual Guides home tile to the new iOS Visual Guides tool.
@@ -675,7 +678,6 @@
       <div class="app-status-actions">
         <button id="appNoticeBtn" class="updates-btn" type="button">Notice</button>
         <button id="appUpdatesBtn" class="updates-btn" type="button">Updates</button>
-        <button id="appCharlieBtn" class="updates-btn charlie-btn" type="button">Charlie</button>
       </div>
     </section>
   </div>
@@ -747,7 +749,7 @@
     <div class="wn-body">
       <p style="margin:0 0 6px;font-size:14px;line-height:1.5">He knows the Ambulance app inside-out, never off duty, never low on battery, and strongly believes <strong style="color:#C8935A;font-size:16px">SHAWARMA</strong> is a vital sign. Ask him anything about the app - just don’t ask him for clinical advice, he’s not that kind of paramedic.</p>
       <p style="margin:0 0 10px;font-size:13px;color:var(--muted)">🌐 I can speak English and Arabic &nbsp;·&nbsp; أتحدث العربية والإنجليزية</p>
-      <video src="images/charlie_introduction.mp4" autoplay loop playsinline controls style="width:100%;border-radius:12px;margin-bottom:10px;display:block"></video>
+      <video src="images/charlie_introduction.mp4" preload="metadata" loop playsinline controls style="width:100%;border-radius:12px;margin-bottom:10px;display:block"></video>
       <p style="margin:0 0 8px;font-size:13px;color:var(--muted)">Tap <strong>Discord</strong> or <strong>Telegram</strong> below to find Charlie and ask him anything about the app.</p>
       <div class="wn-links">
         <a class="wn-link" style="background:linear-gradient(180deg,#5c64f4,#3b42c9)" href="https://discord.gg/qc8fK3yd92" target="_blank" rel="noopener">
@@ -2001,7 +2003,6 @@
     document.getElementById("appUpdatesBtn")?.addEventListener("click", () => {
       location.href = "https://www.niwashibase.com/whats-new/?platform=ios";
     });
-    document.getElementById("appCharlieBtn")?.addEventListener("click", openCharlieModal);
     document.getElementById("appNoticeBtn")?.addEventListener("click", () => {
       localStorage.removeItem(WHATS_NEW_KEY);
       handleWhatsNew();
@@ -2165,14 +2166,23 @@ function openCharlieModal(){
   if (video) video.play().catch(() => {});
 }
 
+function stopCharlieVideo(reset = true){
+  const video = document.querySelector("#charlieOverlay video");
+  if (!video) return;
+  video.pause();
+  if (reset) {
+    try { video.currentTime = 0; } catch (_) {}
+  }
+}
+
 function closeCharlieModal(){
   const overlay = document.getElementById("charlieOverlay");
   if (!overlay) return;
+  stopCharlieVideo();
+  if (overlay.hidden) return;
   overlay.hidden = true;
   overlay.style.display = "none";
   document.body.classList.remove("wn-open");
-  const video = overlay.querySelector("video");
-  if (video) { video.pause(); video.currentTime = 0; }
 }
 
 function wireCharlieModal(){
@@ -2183,6 +2193,12 @@ function wireCharlieModal(){
   overlay.addEventListener("click", (e) => { if (e.target === overlay) closeCharlieModal(); });
   document.getElementById("charlieBtn")?.addEventListener("click", openCharlieModal);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !overlay.hidden) closeCharlieModal(); });
+  window.addEventListener("hashchange", closeCharlieModal);
+  window.addEventListener("popstate", closeCharlieModal);
+  window.addEventListener("pagehide", () => stopCharlieVideo());
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible") stopCharlieVideo();
+  });
 }
 
 
