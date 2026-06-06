@@ -1,5 +1,6 @@
 // /ambulance/tools/as_call.js
 // CHANGELOG (2026-06-07):
+// - Use the native dialog top layer so call confirmation remains visible in the installed Ambulance App.
 // - Raise the document-level call overlay above the App tool panel.
 // - Mount the call confirmation overlay at document level so it stays viewport-centered after scrolling.
 //
@@ -59,7 +60,7 @@ export async function run(root) {
       .as-contact:active{transform:translateY(1px)}.as-copy{flex:1;min-width:0}.as-name{display:block;color:var(--text);font-size:15px;font-weight:950;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.as-number{display:block;margin-top:6px;color:#667085;font-size:13px;font-weight:750}
       .as-phone-badge{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:12px;background:linear-gradient(180deg,#fff6bd,#ffdb00);border:1px solid rgba(138,101,0,.20);color:var(--as-accent)}.as-phone-badge .material-symbols-rounded{font-size:22px}
       .as-empty{display:none;margin-top:18px;text-align:center;color:var(--muted);font-size:15px;font-weight:850}.as-empty.show{display:block}
-      .as-modal{position:fixed;inset:0;z-index:11000;display:grid;place-items:center;background:rgba(15,23,42,.58);padding:18px}.as-dialog{width:min(420px,100%);overflow:hidden;border-radius:18px;background:var(--surface);box-shadow:0 22px 54px rgba(2,6,23,.36);border:1px solid var(--border)}
+      .as-modal{box-sizing:border-box;width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;border:0;background:rgba(15,23,42,.58);padding:18px;place-items:center}.as-modal[open]{display:grid}.as-modal::backdrop{background:transparent}.as-dialog{width:min(420px,100%);overflow:hidden;border-radius:18px;background:var(--surface);box-shadow:0 22px 54px rgba(2,6,23,.36);border:1px solid var(--border)}
       .as-dialog-head{display:flex;align-items:center;gap:14px;background:linear-gradient(180deg,#fff3a6,#ffdb00);padding:18px}.as-dialog-badge{display:grid;place-items:center;flex:0 0 52px;width:52px;height:52px;border-radius:15px;background:rgba(255,255,255,.45);border:1px solid rgba(138,101,0,.18);color:var(--as-accent)}.as-dialog-badge .material-symbols-rounded{font-size:29px}
       .as-dialog-title{margin:0;color:var(--as-dark);font-size:21px;font-weight:950;line-height:1.15}.as-dialog-subtitle{margin:5px 0 0;color:#6D4B00;font-size:13px;font-weight:750}.as-dialog-body{padding:18px}
       .as-dialog-number{border-radius:14px;background:var(--surface-2);border:1px solid var(--border);padding:14px;text-align:center;color:var(--text);font-size:18px;font-weight:950}.as-dialog-actions{display:grid;gap:10px;margin-top:16px}.as-confirm,.as-cancel{height:48px;border:0;border-radius:14px;font-size:14px;font-weight:950}.as-confirm{background:linear-gradient(180deg,#fff0a0,#ffdb00);color:var(--as-dark)}.as-cancel{background:var(--surface-2);border:1px solid var(--border);color:var(--text)}
@@ -128,16 +129,16 @@ export async function run(root) {
 
   function closeDialog() {
     selectedContact = null;
+    const dialog = modalHost.querySelector("dialog");
+    if (dialog?.open) dialog.close();
     modalHost.innerHTML = "";
-    document.body.style.overflow = "";
   }
 
   function showCallConfirmation(contact) {
     dismissKeyboard();
     selectedContact = contact;
-    document.body.style.overflow = "hidden";
     modalHost.innerHTML = `
-      <div class="as-modal" role="dialog" aria-modal="true" aria-label="Confirm AS-Call">
+      <dialog class="as-modal" aria-label="Confirm AS-Call">
         <div class="as-dialog">
           <div class="as-dialog-head">
             <div class="as-dialog-badge" aria-hidden="true"><span class="material-symbols-rounded">call</span></div>
@@ -154,16 +155,23 @@ export async function run(root) {
             </div>
           </div>
         </div>
-      </div>
+      </dialog>
     `;
+    const dialog = modalHost.querySelector("dialog");
+    if (typeof dialog?.showModal === "function") dialog.showModal();
+    else dialog?.setAttribute("open", "");
     modalHost.querySelector("#asConfirmCall")?.addEventListener("click", () => {
       const target = selectedContact;
       closeDialog();
       if (target) window.location.href = telUrl(target.number);
     });
     modalHost.querySelector("#asCancelCall")?.addEventListener("click", closeDialog);
-    modalHost.querySelector(".as-modal")?.addEventListener("click", event => {
-      if (event.target.classList.contains("as-modal")) closeDialog();
+    dialog?.addEventListener("click", event => {
+      if (event.target === dialog) closeDialog();
+    });
+    dialog?.addEventListener("cancel", event => {
+      event.preventDefault();
+      closeDialog();
     });
   }
 
