@@ -1,5 +1,6 @@
 <!--
   CHANGELOG (2026-06-07):
+  - Bump the testing asset key so installed Apps load the Charlie and AS-Call fixes.
   - Remove the Charlie home button and stop/reset its video whenever the modal closes, navigation changes, or the App is backgrounded.
 
   CHANGELOG (2026-06-06):
@@ -772,7 +773,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260605-gate-test-1";
+  const ASSET_VERSION = "asset-20260607-gate-test-1";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
