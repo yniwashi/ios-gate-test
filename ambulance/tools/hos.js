@@ -1,5 +1,6 @@
 // /ambulance/tools/hos.js
 // CHANGELOG (2026-06-07):
+// - Force a fresh location on Refresh and animate the refresh arrow for visible feedback.
 // - Open map HTTPS universal links in a separate external context so the Ambulance App page stays intact.
 //
 // CHANGELOG (2026-06-06):
@@ -80,7 +81,7 @@ export async function run(root) {
       .hos-site{display:none}.hos-site.show{display:block}.hos-pill{display:inline-flex;align-items:center;min-height:28px;padding:4px 12px;border-radius:999px;background:var(--hos-blue);color:#fff;font-size:14px;font-weight:950}
       .hos-name{margin:12px 0 0;color:var(--text);font-size:20px;font-weight:950;line-height:1.25;white-space:pre-line}.hos-details{margin:8px 0 0;color:var(--muted);font-size:13px;font-weight:850;line-height:1.4;white-space:pre-line}
       .hos-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:14px}.hos-nav{min-height:54px;border:0;border-radius:14px;color:#fff;font-size:14px;font-weight:950}.hos-nav[hidden]{display:none}.hos-google{background:#DF2B1E}.hos-waze{background:#03A9F4}.hos-nav span{display:inline-flex;align-items:center;justify-content:center;gap:8px}.hos-nav img{box-sizing:border-box;width:34px;height:34px;object-fit:contain;display:block}.hos-google img{padding:3px;border:1px solid rgba(255,255,255,.95);border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 1px 4px rgba(0,0,0,.18)}
-      .hos-distance-head{display:flex;align-items:center;gap:8px}.hos-pin{display:grid;place-items:center;width:24px;height:24px;color:var(--hos-accent)}.hos-distance-title{flex:1;font-size:17px;font-weight:950}.hos-refresh{display:inline-flex;align-items:center;gap:5px;border:1px solid color-mix(in oklab,var(--hos-accent) 30%,var(--border));border-radius:999px;background:color-mix(in oklab,var(--hos-accent) 8%,var(--surface));color:var(--hos-accent);padding:9px 11px;font-size:12px;font-weight:950}
+      .hos-distance-head{display:flex;align-items:center;gap:8px}.hos-pin{display:grid;place-items:center;width:24px;height:24px;color:var(--hos-accent)}.hos-distance-title{flex:1;font-size:17px;font-weight:950}.hos-refresh{display:inline-flex;align-items:center;gap:5px;border:1px solid color-mix(in oklab,var(--hos-accent) 30%,var(--border));border-radius:999px;background:color-mix(in oklab,var(--hos-accent) 8%,var(--surface));color:var(--hos-accent);padding:9px 11px;font-size:12px;font-weight:950}.hos-refresh:disabled{opacity:.72}.hos-refresh.refreshing .material-symbols-rounded{animation:hos-refresh-spin .75s linear infinite}
       .hos-spinner{width:20px;height:20px;border:3px solid color-mix(in oklab,var(--hos-accent) 20%,transparent);border-top-color:var(--hos-accent);border-radius:50%;animation:hos-spin .8s linear infinite}.hos-spinner[hidden]{display:none}
       .hos-selected-distance{margin-top:12px;border-radius:13px;background:color-mix(in oklab,var(--hos-accent) 9%,var(--surface));border:1px solid color-mix(in oklab,var(--hos-accent) 20%,var(--border));color:#1E3A8A;padding:12px 14px;font-size:15px;font-weight:950;line-height:1.45;white-space:pre-line}
       .hos-nearest-title{margin-top:10px;border-radius:13px;background:var(--surface-2);border:1px solid var(--border);color:#334155;padding:10px 14px;font-size:14px;font-weight:950;line-height:1.45;white-space:pre-line}
@@ -88,7 +89,7 @@ export async function run(root) {
       :root[data-theme="dark"] .hos-card,:root[data-theme="dark"] .hos-row{box-shadow:none}:root[data-theme="dark"] .hos-selected-distance{color:#93C5FD}:root[data-theme="dark"] .hos-nearest-title{color:#CBD5E1}
       @media(prefers-color-scheme:dark){:root[data-theme="auto"] .hos-card,:root[data-theme="auto"] .hos-row{box-shadow:none}:root[data-theme="auto"] .hos-selected-distance{color:#93C5FD}:root[data-theme="auto"] .hos-nearest-title{color:#CBD5E1}}
       @media(max-width:380px){.hos{padding:12px 10px}.hos-actions{gap:8px}.hos-nav{font-size:13px}.hos-name{font-size:18px}}
-      @keyframes hos-spin{to{transform:rotate(360deg)}}
+      @keyframes hos-spin{to{transform:rotate(360deg)}}@keyframes hos-refresh-spin{to{transform:rotate(360deg)}}
     </style>
     <section class="hos">
       <section class="hos-card">
@@ -169,6 +170,8 @@ export async function run(root) {
   function setLoading(loading, message) {
     loadingLocation = loading;
     spinner.hidden = !loading;
+    refreshBtn.disabled = loading;
+    refreshBtn.classList.toggle("refreshing", loading);
     if (loading) {
       locationMessage = message || "Nearest available HOS\nAcquiring location...";
       nearestTitle.textContent = locationMessage;
@@ -230,7 +233,7 @@ export async function run(root) {
     rows.hidden = true;
   }
 
-  function getLocation() {
+  function getLocation(forceRefresh = false) {
     if (!window.isSecureContext) {
       handleLocationError("Location unavailable. Please open the Ambulance App and allow location access.");
       return;
@@ -239,18 +242,27 @@ export async function run(root) {
       handleLocationError("Location is not available on this device.");
       return;
     }
-    setLoading(true, "Nearest available HOS\nAcquiring location...");
+    const startedAt = performance.now();
+    const finishAfterFeedback = callback => {
+      const remaining = Math.max(0, 650 - (performance.now() - startedAt));
+      window.setTimeout(callback, remaining);
+    };
+    setLoading(true, forceRefresh ? "Nearest available HOS\nRefreshing location..." : "Nearest available HOS\nAcquiring location...");
     navigator.geolocation.getCurrentPosition(
       position => {
-        lastLocation = { lat: position.coords.latitude, lon: position.coords.longitude };
-        setLoading(false);
-        renderDistances();
+        finishAfterFeedback(() => {
+          lastLocation = { lat: position.coords.latitude, lon: position.coords.longitude };
+          setLoading(false);
+          renderDistances();
+        });
       },
       error => {
-        const denied = error?.code === error?.PERMISSION_DENIED;
-        handleLocationError(denied ? "Location permission is needed to calculate nearby sites." : "Location unavailable. Enable GPS and refresh.");
+        finishAfterFeedback(() => {
+          const denied = error?.code === error?.PERMISSION_DENIED;
+          handleLocationError(denied ? "Location permission is needed to calculate nearby sites." : "Location unavailable. Enable GPS and refresh.");
+        });
       },
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: forceRefresh ? 0 : 60000 }
     );
   }
 
@@ -264,8 +276,8 @@ export async function run(root) {
   }, { passive: true });
 
   refreshBtn.addEventListener("click", () => {
-    setLoading(true, "Nearest available HOS\nRefreshing location...");
-    getLocation();
+    if (loadingLocation) return;
+    getLocation(true);
   });
 
   googleBtn.addEventListener("click", () => {

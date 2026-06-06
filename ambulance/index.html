@@ -1,5 +1,9 @@
 <!--
   CHANGELOG (2026-06-07):
+  - Refresh the testing asset key for Overtime, HOS refresh feedback, and home spacing updates.
+  - Refine home status action/theme alignment and tighten menu row spacing.
+  - Use the Android Overtime icon on the renamed home tile.
+  - Rename the home Overtime tile to match the Android App.
   - Refresh the testing asset key for the native AS-Call dialog fix.
   - Bump the testing asset key so installed Apps load the Charlie and AS-Call fixes.
   - Remove the Charlie home button and stop/reset its video whenever the modal closes, navigation changes, or the App is backgrounded.
@@ -211,7 +215,7 @@
     .status-theme{flex:none;padding:2px 7px;font-size:10px;gap:4px;background:var(--surface-2);box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
     .status-theme span{font-weight:800;color:var(--muted)}
     .status-theme select{max-width:44px;font-weight:850}
-    .app-status-row .status-theme{position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:2}
+    .app-status-row .status-theme{position:absolute;right:20px;top:50%;transform:translateY(-50%);z-index:2}
     .top-actions{display:flex;align-items:center;gap:7px}
     .notice-bell{
       appearance:none;width:51px;height:51px;border:1px solid rgba(255,255,255,.32);border-radius:50%;
@@ -247,8 +251,8 @@
     .app-status-row{position:relative;display:flex;align-items:center;justify-content:flex-start;gap:8px;min-height:30px;padding:6px 92px 2px 20px;transform:translateY(-6px)}
     .app-status-dot{width:9px;height:9px;border-radius:50%;background:#16a34a;box-shadow:0 0 0 3px color-mix(in oklab,#16a34a 15%,transparent)}
     .app-status-copy{flex:0 1 auto;min-width:0;font-size:12px;font-weight:900;color:color-mix(in oklab,var(--accent) 72%,var(--text));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
-    .app-status-actions{display:flex;gap:10px;padding:0 12px 10px;transform:translateY(-6px)}
-    .app-status-actions .updates-btn{flex:1;min-height:30px;border-radius:999px;font-size:11px;font-weight:950;letter-spacing:.06em}
+    .app-status-actions{display:flex;gap:10px;padding:0 20px 10px;transform:translateY(-6px)}
+    .app-status-actions .updates-btn{flex:1;min-height:30px;border-radius:999px;font-size:12.5px;font-weight:950;letter-spacing:.04em}
     .app-status-actions #appNoticeBtn{color:#5b35d6;border-color:#b89cff;background:linear-gradient(180deg,#fbf8ff,#efe8ff)}
     .app-status-actions #appUpdatesBtn{color:#168bd6;border-color:#72c4ee;background:linear-gradient(180deg,#f7fdff,#e6f7ff)}
     [data-theme="dark"] .app-status-actions #appNoticeBtn{color:#bca7ff;border-color:#5d4f91;background:linear-gradient(180deg,#211d31,#171a24)}
@@ -322,9 +326,9 @@
     .section{display:flex; flex-direction:column; gap:4px}
     .section-head{ display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; padding:4px 2px 0 }
     .section-head::after{content:""; height:1px; background:var(--border); flex:1}
-    .sections{gap:11px;align-items:center}
+    .sections{gap:8px;align-items:center}
     .section{
-      width:min(90%,680px);gap:11px;padding:14px 15px 14px;border:1px solid color-mix(in oklab,var(--border) 72%,#ffffff);
+      width:min(90%,680px);gap:8px;padding:12px 15px;border:1px solid color-mix(in oklab,var(--border) 72%,#ffffff);
       border-radius:16px;background:var(--surface);box-shadow:0 6px 15px rgba(15,23,42,.11),0 1px 4px rgba(15,23,42,.05);
     }
     .section-head{
@@ -333,7 +337,7 @@
 
     /* Grid & buttons */
     .grid{display:grid; gap:8px; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); grid-auto-flow:dense}
-    .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .grid{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px;row-gap:6px}
     @media (orientation:landscape){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
     .btn{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-decoration:none; color:var(--btn-fg,#fff); border-radius:12px; padding:10px 10px; min-height:72px; font-size:13px; font-weight:800; letter-spacing:.2px; text-align:center; box-shadow:var(--shadow); transition:transform var(--speed), box-shadow var(--speed), filter var(--speed)}
     .btn{
@@ -535,7 +539,7 @@
       .status-theme span{display:none}
       .status-theme select{max-width:38px}
       .app-status-row{padding-right:62px;padding-left:16px}
-      .app-status-row .status-theme{right:10px}
+      .app-status-row .status-theme{right:20px}
       .section{width:min(92%,680px)}
     }
     @media(max-width:370px){
@@ -774,7 +778,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260607-gate-test-2";
+  const ASSET_VERSION = "asset-20260607-gate-test-3";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -1026,7 +1030,7 @@
 
     { text:"Stay Connected",   iconType:"material", icon:"maps_ugc",      color:"btn-community",
       href:"#", showDefault:true, actionId:"community" },
-    { text:"Overtime Calculator", iconType:"material", icon:"schedule",   color:"btn-overtime",
+    { text:"Overtime", iconType:"image", icon:"images/ic_main_overtime.svg", color:"btn-overtime",
       href:"#", showDefault:true, actionId:"overtime", appLabel:"Overtime" },
 
     { text:"Shifts",           iconType:"material", icon:"calendar_month",color:"btn-shifts",
@@ -1267,7 +1271,7 @@
       "Formulary": ["drug", "medication", "medicine"],
       "PAT": ["pediatric assessment treatment", "paediatric assessment treatment", "assessment", "treatment guide"],
       "Westley Score": ["croup"],
-      "Overtime Calculator": ["pay", "hours", "shift"],
+      "Overtime": ["overtime calculator", "ot", "pay", "hours", "shift", "history", "logger"],
       "Websites": ["links", "resources"],
       "AS-Call": ["phone", "call", "contacts", "directory", "numbers"],
       "Stay Connected": ["community", "discord", "telegram", "whatsapp"]
@@ -2216,7 +2220,7 @@ function wireCharlieModal(){
     { title: "Quick Actions", items: ["Search","Stay Connected"] },
     { title: "Resuscitation & Timers", items: ["CPR","WAAFELSS","RSI Checklist","Ventilator Settings"] },
     { title: "Clinical · Calculators", items: ["Pediatrics","Guidelines","Flowcharts","Calculators","Visual Guides","Scores"] },
-    { title: "Operations", items: ["Overtime Calculator","HOS","AS-Call","Websites","Shifts"] }
+    { title: "Operations", items: ["Overtime","HOS","AS-Call","Websites","Shifts"] }
   ];
 
   let currentTool = null;
