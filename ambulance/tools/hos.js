@@ -1,4 +1,7 @@
 // /ambulance/tools/hos.js
+// CHANGELOG (2026-06-07):
+// - Open map HTTPS universal links in a separate external context so the Ambulance App page stays intact.
+//
 // CHANGELOG (2026-06-06):
 // - Open HOS map directions through HTTPS Safari handoff in the installed App to avoid blank return screens.
 // - Launch map app URL schemes without replacing the Ambulance App page, preventing blank return screens.
@@ -37,17 +40,16 @@ function coordinatePair(site) {
   };
 }
 
-function isInstalledIosApp() {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent || "") &&
-    (navigator.standalone === true || window.matchMedia?.("(display-mode: standalone)")?.matches);
-}
-
 function openMapLink(url) {
-  if (isInstalledIosApp() && /^https:\/\//i.test(url)) {
-    window.location.href = `x-safari-${url}`;
-    return;
-  }
-  window.location.href = url;
+  if (!/^https:\/\//i.test(url)) return;
+  const link = document.createElement("a");
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "external noopener noreferrer";
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 }
 
 function normalizeClosedText(text) {

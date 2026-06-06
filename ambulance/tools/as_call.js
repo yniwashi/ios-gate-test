@@ -1,4 +1,7 @@
 // /ambulance/tools/as_call.js
+// CHANGELOG (2026-06-07):
+// - Mount the call confirmation overlay at document level so it stays viewport-centered after scrolling.
+//
 // CHANGELOG (2026-06-06):
 // - Rebuild AS-Call to match Android: search-only directory, contact rows, keyboard dismissal, and call confirmation dialog.
 //
@@ -77,7 +80,6 @@ export async function run(root) {
       </div>
       <section id="asList" class="as-list"></section>
       <div id="asEmpty" class="as-empty">No contacts found</div>
-      <div id="asModalHost"></div>
     </section>
   `;
 
@@ -86,7 +88,10 @@ export async function run(root) {
   const countEl = root.querySelector("#asCount");
   const listEl = root.querySelector("#asList");
   const emptyEl = root.querySelector("#asEmpty");
-  const modalHost = root.querySelector("#asModalHost");
+  document.querySelector("[data-as-call-modal-host]")?.remove();
+  const modalHost = document.createElement("div");
+  modalHost.dataset.asCallModalHost = "";
+  document.body.appendChild(modalHost);
 
   function dismissKeyboard() {
     if (document.activeElement === searchEl) searchEl.blur();
@@ -123,11 +128,13 @@ export async function run(root) {
   function closeDialog() {
     selectedContact = null;
     modalHost.innerHTML = "";
+    document.body.style.overflow = "";
   }
 
   function showCallConfirmation(contact) {
     dismissKeyboard();
     selectedContact = contact;
+    document.body.style.overflow = "hidden";
     modalHost.innerHTML = `
       <div class="as-modal" role="dialog" aria-modal="true" aria-label="Confirm AS-Call">
         <div class="as-dialog">
@@ -158,6 +165,8 @@ export async function run(root) {
       if (event.target.classList.contains("as-modal")) closeDialog();
     });
   }
+
+  window.addEventListener("hashchange", closeDialog, { once: true });
 
   searchEl.addEventListener("input", () => filterContacts(searchEl.value));
   searchEl.addEventListener("keydown", event => {
