@@ -1,5 +1,6 @@
 // /ambulance/tools/hos.js
 // CHANGELOG (2026-06-06):
+// - Open Google Maps and Waze with iOS app schemes instead of blank windows to preserve the Ambulance App page.
 // - Equalize the rendered Waze and Google Maps icon box sizes.
 // - Replace technical HTTPS location wording with a user-facing location unavailable message.
 // - Enlarge and equalize HOS navigation logos and add a visible backing for Google Maps on red.
@@ -26,9 +27,27 @@ function distanceKm(a, b) {
   return 2 * earthKm * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
 }
 
-function mapsQuery(site) {
-  if (!site?.location) return "";
-  return `${site.location.lat.toFixed(6)}%2C${site.location.lon.toFixed(6)}`;
+function coordinatePair(site) {
+  if (!site?.location) return null;
+  return {
+    lat: site.location.lat.toFixed(6),
+    lon: site.location.lon.toFixed(6)
+  };
+}
+
+function openExternalApp(primaryUrl, fallbackUrl) {
+  let cancelled = false;
+  const cancelFallback = () => {
+    if (document.visibilityState === "hidden") cancelled = true;
+  };
+  document.addEventListener("visibilitychange", cancelFallback, { once: true });
+  window.setTimeout(() => {
+    document.removeEventListener("visibilitychange", cancelFallback);
+    if (!cancelled && document.visibilityState === "visible") {
+      window.location.href = fallbackUrl;
+    }
+  }, 900);
+  window.location.href = primaryUrl;
 }
 
 function normalizeClosedText(text) {
@@ -249,16 +268,18 @@ export async function run(root) {
 
   googleBtn.addEventListener("click", () => {
     const site = selectedSite();
-    const query = mapsQuery(site);
-    if (!query) return;
-    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, "_blank", "noopener");
+    const coords = coordinatePair(site);
+    if (!coords) return;
+    const fallback = `https://www.google.com/maps/search/?api=1&query=${coords.lat}%2C${coords.lon}`;
+    openExternalApp(`comgooglemaps://?q=${coords.lat},${coords.lon}&center=${coords.lat},${coords.lon}&zoom=17`, fallback);
   });
 
   wazeBtn.addEventListener("click", () => {
     const site = selectedSite();
-    const query = mapsQuery(site);
-    if (!query) return;
-    window.open(`https://www.waze.com/ul?ll=${query}&zoom=17&navigate=yes`, "_blank", "noopener");
+    const coords = coordinatePair(site);
+    if (!coords) return;
+    const fallback = `https://www.waze.com/ul?ll=${coords.lat}%2C${coords.lon}&zoom=17&navigate=yes`;
+    openExternalApp(`waze://?ll=${coords.lat},${coords.lon}&zoom=17&navigate=yes`, fallback);
   });
 
   try {
