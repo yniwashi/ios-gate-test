@@ -1,5 +1,6 @@
 <!--
   CHANGELOG (2026-06-06):
+  - Enable HOS as an App tool and preload its helper data through the iOS App config.
   - Wire the Visual Guides home tile to the new iOS Visual Guides tool.
   - Center and enlarge the local chevron-down SVG in the Scores selector.
   - Make the Scores category open as an Android-style selector screen that defaults to GCS.
@@ -789,9 +790,10 @@
         import(`./app_config_data.js${ASSET_QUERY}`),
         import(`./pediatric_data.js${ASSET_QUERY}`),
         import(`./reference_data.js${ASSET_QUERY}`),
-        import(`./document_data.js${ASSET_QUERY}`)
-      ]).then(([searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData, documentData]) => {
-        const shared = { assetVersion: ASSET_VERSION, searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData, documentData };
+        import(`./document_data.js${ASSET_QUERY}`),
+        import(`./hos_data.js${ASSET_QUERY}`)
+      ]).then(([searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData, documentData, hosData]) => {
+        const shared = { assetVersion: ASSET_VERSION, searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData, documentData, hosData };
         window.__AMBULANCE_SHARED_MODULES = shared;
         return shared;
       }).finally(() => { sharedModulesPromise = null; });
@@ -813,6 +815,10 @@
 
   async function getAsCallDataModule() {
     return (await loadSharedModules()).asCallData;
+  }
+
+  async function getHosDataModule() {
+    return (await loadSharedModules()).hosData;
   }
 
   async function getAppConfigDataModule() {
@@ -1009,7 +1015,7 @@
       href:"#", showDefault:true, actionId:"as_call" },
 
     { text:"HOS",              iconType:"image",    icon:"images/ic_main_hos.svg", color:"btn-hos",
-      href:"#", showDefault:true, protectedHome:true, comingSoon:true },
+      href:"#", showDefault:true, protectedHome:true, actionId:"hos" },
 
     { text:"Websites",         iconType:"material", icon:"language",      color:"btn-websites",
       href:"https://example.com", showDefault:true, actionId:"websites" },
@@ -1663,8 +1669,9 @@
       getSearchDataModule().then(({ preloadSearchData }) => preloadSearchData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
       getWebsitesDataModule().then(({ preloadWebsitesData }) => preloadWebsitesData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
       getDocumentDataModule().then(({ preloadDocumentConfigs }) => preloadDocumentConfigs()).catch(() => {});
+      getHosDataModule().then(({ preloadHosSites }) => preloadHosSites()).catch(() => {});
       loadGlobalSearchItems().catch(() => {});
-      ["cpg_wizard", "sop", "formulary", "flowcharts", "websites"].forEach(preloadModule);
+      ["cpg_wizard", "sop", "formulary", "flowcharts", "websites", "hos"].forEach(preloadModule);
     }, 400);
 
     runWhenIdle(() => {
