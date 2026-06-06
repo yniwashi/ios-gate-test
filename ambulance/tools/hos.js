@@ -1,5 +1,6 @@
 // /ambulance/tools/hos.js
 // CHANGELOG (2026-06-06):
+// - Launch map app URL schemes without replacing the Ambulance App page, preventing blank return screens.
 // - Open Google Maps and Waze with iOS app schemes instead of blank windows to preserve the Ambulance App page.
 // - Equalize the rendered Waze and Google Maps icon box sizes.
 // - Replace technical HTTPS location wording with a user-facing location unavailable message.
@@ -41,13 +42,19 @@ function openExternalApp(primaryUrl, fallbackUrl) {
     if (document.visibilityState === "hidden") cancelled = true;
   };
   document.addEventListener("visibilitychange", cancelFallback, { once: true });
+  const frame = document.createElement("iframe");
+  frame.setAttribute("aria-hidden", "true");
+  frame.tabIndex = -1;
+  frame.style.cssText = "position:absolute;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none;";
+  document.body.appendChild(frame);
   window.setTimeout(() => {
     document.removeEventListener("visibilitychange", cancelFallback);
+    try { frame.remove(); } catch (_) {}
     if (!cancelled && document.visibilityState === "visible") {
       window.location.href = fallbackUrl;
     }
   }, 900);
-  window.location.href = primaryUrl;
+  frame.src = primaryUrl;
 }
 
 function normalizeClosedText(text) {

@@ -1,4 +1,7 @@
-// /tools/as_call.js
+// /ambulance/tools/as_call.js
+// CHANGELOG (2026-06-06):
+// - Rebuild AS-Call to match Android: search-only directory, contact rows, keyboard dismissal, and call confirmation dialog.
+//
 // CHANGELOG (2026-05-18):
 // - Restore dark-mode call button green and replace yellow dark header with neutral dark styling.
 // - Adjust AS-Call dark-mode palette from brown amber to muted yellow.
@@ -16,224 +19,177 @@ async function loadAsCallModule() {
   return shared.asCallData || import(`../as_call_data.js${assetQuery()}`);
 }
 
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
+}
+
+function norm(value) {
+  return String(value || "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function displayNumber(number) {
+  return String(number || "").trim();
+}
+
+function telUrl(number) {
+  return `tel:${String(number || "").replace(/[^\d+#*+]/g, "")}`;
+}
+
 export async function run(root) {
   const { getAsCallContacts } = await loadAsCallModule();
+  let contacts = [];
+  let visibleContacts = [];
+  let selectedContact = null;
+
   root.innerHTML = `
     <style>
-      .as-wrap{padding:12px}
-      .as-shell{display:flex;flex-direction:column;gap:12px}
-      .as-hero{color:#161000;border:1px solid rgba(245,158,11,.35);border-radius:16px;background:linear-gradient(135deg,#fff7b8 0%,#ffdb00 45%,#f59e0b 100%);box-shadow:0 12px 28px rgba(245,158,11,.22);padding:14px}
-      .as-hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-      .as-title{margin:0;font-size:20px;font-weight:950;letter-spacing:0;line-height:1.05}
-      .as-count{flex:none;background:rgba(255,255,255,.52);border:1px solid rgba(255,255,255,.58);border-radius:999px;padding:6px 9px;font-size:12px;font-weight:950}
-      .as-note{margin:7px 0 0;font-size:12px;font-weight:800;line-height:1.35;color:rgba(22,16,0,.74)}
-      .as-controls{background:var(--surface,#fff);border:1px solid var(--border,#e7ecf3);border-radius:14px;padding:10px;box-shadow:0 8px 18px rgba(0,0,0,.10);display:flex;flex-direction:column;gap:9px}
-      .as-search{display:flex;align-items:center;gap:9px;background:var(--surface,#f6f8fd);border:1px solid var(--border,#e7ecf3);border-radius:12px;padding:0 10px;min-height:44px}
-      .as-search .material-symbols-rounded{font-size:22px;color:var(--muted,#6e7b91)}
-      .as-search input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:var(--text,#0c1230);font:800 16px/1.2 system-ui;appearance:none}
-      .as-search input::placeholder{color:var(--muted,#6e7b91);font-weight:650;font-size:14px}
-      .as-clear{display:none;border:0;background:var(--surface,#f3f6fb);color:var(--muted,#6e7b91);width:28px;height:28px;border-radius:999px;font:900 16px/1 system-ui;align-items:center;justify-content:center}
-      .as-clear.show{display:flex}
-      .as-copy-note{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 18px);z-index:100000;transform:translate(-50%,14px);opacity:0;pointer-events:none;background:#111827;color:#fff;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:9px 13px;font:900 13px/1 system-ui;box-shadow:0 12px 28px rgba(0,0,0,.28);transition:opacity .18s ease,transform .18s ease}
-      .as-copy-note.show{opacity:1;transform:translate(-50%,0)}
-      .as-filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:1px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-      .as-filters::-webkit-scrollbar{display:none}
-      .as-chip{flex:none;border:1px solid var(--border,#e7ecf3);background:var(--surface,#f6f8fd);color:var(--text,#0c1230);border-radius:999px;padding:7px 10px;font-size:12px;font-weight:950;white-space:nowrap}
-      .as-chip[data-active="true"]{background:linear-gradient(180deg,#ffea94,#ffdb00);border-color:rgba(245,158,11,.48);color:#161000}
-      .as-list{display:flex;flex-direction:column;gap:8px}
-      .as-card{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface,#fff);border:1px solid var(--border,#e7ecf3);border-radius:14px;padding:11px;box-shadow:0 6px 14px rgba(0,0,0,.08)}
-      .as-main{display:flex;align-items:center;gap:10px;min-width:0}
-      .as-avatar{flex:none;width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#ffea94,#ffdb00);color:#161000;border:1px solid rgba(245,158,11,.35);font-weight:950;font-size:13px}
-      .as-text{min-width:0;display:flex;flex-direction:column;gap:4px}
-      .as-name{font-size:15px;font-weight:950;color:var(--text,#0c1230);line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      .as-number{font-size:13px;font-weight:850;color:var(--muted,#6e7b91);line-height:1.2}
-      .as-actions{display:flex;gap:8px;flex:none}
-      .as-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;border:1px solid var(--border,#dbe0ea);background:var(--surface,#f3f6fb);color:var(--text,#0c1230);text-decoration:none;cursor:pointer}
-      .as-btn.call{background:linear-gradient(180deg,#16a34a,#15803d);border-color:transparent;color:#fff;box-shadow:0 8px 18px rgba(22,163,74,.26)}
-      .as-btn .material-symbols-rounded{font-size:22px}
-      .as-empty{background:var(--surface,#fff);border:1px dashed var(--border,#e7ecf3);border-radius:14px;padding:14px;color:var(--muted,#6e7b91);font-weight:850;line-height:1.35}
-      :root[data-theme="dark"] .as-hero{color:#eef2ff;border-color:#232a37;background:linear-gradient(135deg,#171a21 0%,#151921 62%,#191d25 100%);box-shadow:0 12px 28px rgba(0,0,0,.24)}
-      :root[data-theme="dark"] .as-title{color:#facc15}
-      :root[data-theme="dark"] .as-note{color:#aab4cd}
-      :root[data-theme="dark"] .as-count{background:rgba(0,0,0,.24);border-color:rgba(255,255,255,.16)}
-      :root[data-theme="dark"] .as-controls,:root[data-theme="dark"] .as-card,:root[data-theme="dark"] .as-empty{background:#151921;border-color:#232a37}
-      :root[data-theme="dark"] .as-search,:root[data-theme="dark"] .as-chip,:root[data-theme="dark"] .as-btn{background:#12151c;border-color:#232a37;color:#eef2ff}
-      :root[data-theme="dark"] .as-avatar{background:rgba(250,204,21,.14);color:#fde68a;border-color:rgba(250,204,21,.24)}
-      :root[data-theme="dark"] .as-chip[data-active="true"]{background:rgba(250,204,21,.16);color:#fde68a;border-color:rgba(250,204,21,.32)}
-      :root[data-theme="dark"] .as-btn.call{background:linear-gradient(180deg,#16a34a,#15803d);border-color:transparent;color:#fff;box-shadow:0 8px 18px rgba(22,163,74,.26)}
-      @media (prefers-color-scheme: dark){
-        :root[data-theme="auto"] .as-hero{color:#eef2ff;border-color:#232a37;background:linear-gradient(135deg,#171a21 0%,#151921 62%,#191d25 100%);box-shadow:0 12px 28px rgba(0,0,0,.24)}
-        :root[data-theme="auto"] .as-title{color:#facc15}
-        :root[data-theme="auto"] .as-note{color:#aab4cd}
-        :root[data-theme="auto"] .as-count{background:rgba(0,0,0,.24);border-color:rgba(255,255,255,.16)}
-        :root[data-theme="auto"] .as-controls,:root[data-theme="auto"] .as-card,:root[data-theme="auto"] .as-empty{background:#151921;border-color:#232a37}
-        :root[data-theme="auto"] .as-search,:root[data-theme="auto"] .as-chip,:root[data-theme="auto"] .as-btn{background:#12151c;border-color:#232a37;color:#eef2ff}
-        :root[data-theme="auto"] .as-avatar{background:rgba(250,204,21,.14);color:#fde68a;border-color:rgba(250,204,21,.24)}
-        :root[data-theme="auto"] .as-chip[data-active="true"]{background:rgba(250,204,21,.16);color:#fde68a;border-color:rgba(250,204,21,.32)}
-        :root[data-theme="auto"] .as-btn.call{background:linear-gradient(180deg,#16a34a,#15803d);border-color:transparent;color:#fff;box-shadow:0 8px 18px rgba(22,163,74,.26)}
-      }
+      .as-wrap{max-width:760px;margin:0 auto;padding:14px;color:var(--text);--as-yellow:#FFDB00;--as-dark:#241A00;--as-accent:#8A6500}
+      .as-card{border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:0 8px 18px rgba(15,23,42,.10);padding:14px;margin-bottom:14px}
+      .as-search-shell{position:relative}
+      .as-search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:22px;color:var(--as-accent)}
+      .as-search{box-sizing:border-box;width:100%;min-height:54px;border:1px solid #C7D0DD;border-radius:14px;background:var(--surface);color:var(--text);font-size:15px;font-weight:850;outline:none;padding:12px 44px}
+      .as-search::placeholder{color:#667085;font-weight:700}.as-search:focus{border-color:var(--as-accent);box-shadow:0 0 0 3px rgba(255,219,0,.22)}
+      .as-clear{position:absolute;right:9px;top:50%;transform:translateY(-50%);display:none;width:30px;height:30px;border:0;border-radius:50%;background:var(--surface-2);color:var(--muted);font-size:16px;font-weight:950}.as-clear.show{display:block}
+      .as-dir-row{display:flex;align-items:center;gap:10px;margin:14px 0 10px}.as-dir-title{flex:1;color:var(--text);font-size:17px;font-weight:950}.as-count{color:var(--as-accent);font-size:12px;font-weight:950}
+      .as-list{display:grid;gap:8px}.as-contact{display:flex;align-items:center;gap:12px;width:100%;min-height:62px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:0 5px 12px rgba(15,23,42,.08);padding:10px 14px;text-align:left;color:var(--text)}
+      .as-contact:active{transform:translateY(1px)}.as-copy{flex:1;min-width:0}.as-name{display:block;color:var(--text);font-size:15px;font-weight:950;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.as-number{display:block;margin-top:6px;color:#667085;font-size:13px;font-weight:750}
+      .as-phone-badge{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:12px;background:linear-gradient(180deg,#fff6bd,#ffdb00);border:1px solid rgba(138,101,0,.20);color:var(--as-accent)}.as-phone-badge .material-symbols-rounded{font-size:22px}
+      .as-empty{display:none;margin-top:18px;text-align:center;color:var(--muted);font-size:15px;font-weight:850}.as-empty.show{display:block}
+      .as-modal{position:fixed;inset:0;z-index:1300;display:grid;place-items:center;background:rgba(15,23,42,.58);padding:18px}.as-dialog{width:min(420px,100%);overflow:hidden;border-radius:18px;background:var(--surface);box-shadow:0 22px 54px rgba(2,6,23,.36);border:1px solid var(--border)}
+      .as-dialog-head{display:flex;align-items:center;gap:14px;background:linear-gradient(180deg,#fff3a6,#ffdb00);padding:18px}.as-dialog-badge{display:grid;place-items:center;flex:0 0 52px;width:52px;height:52px;border-radius:15px;background:rgba(255,255,255,.45);border:1px solid rgba(138,101,0,.18);color:var(--as-accent)}.as-dialog-badge .material-symbols-rounded{font-size:29px}
+      .as-dialog-title{margin:0;color:var(--as-dark);font-size:21px;font-weight:950;line-height:1.15}.as-dialog-subtitle{margin:5px 0 0;color:#6D4B00;font-size:13px;font-weight:750}.as-dialog-body{padding:18px}
+      .as-dialog-number{border-radius:14px;background:var(--surface-2);border:1px solid var(--border);padding:14px;text-align:center;color:var(--text);font-size:18px;font-weight:950}.as-dialog-actions{display:grid;gap:10px;margin-top:16px}.as-confirm,.as-cancel{height:48px;border:0;border-radius:14px;font-size:14px;font-weight:950}.as-confirm{background:linear-gradient(180deg,#fff0a0,#ffdb00);color:var(--as-dark)}.as-cancel{background:var(--surface-2);border:1px solid var(--border);color:var(--text)}
+      :root[data-theme="dark"] .as-card,:root[data-theme="dark"] .as-contact{box-shadow:none}:root[data-theme="dark"] .as-contact{background:#151921;border-color:#232a37}:root[data-theme="dark"] .as-number{color:#aab4cd}:root[data-theme="dark"] .as-phone-badge{background:rgba(250,204,21,.14);color:#fde68a;border-color:rgba(250,204,21,.24)}:root[data-theme="dark"] .as-dialog-head{background:linear-gradient(180deg,#2b2614,#1f1b10)}:root[data-theme="dark"] .as-dialog-title{color:#fde68a}:root[data-theme="dark"] .as-dialog-subtitle{color:#d6c177}:root[data-theme="dark"] .as-confirm{background:linear-gradient(180deg,#facc15,#d9a80f)}
+      @media(prefers-color-scheme:dark){:root[data-theme="auto"] .as-card,:root[data-theme="auto"] .as-contact{box-shadow:none}:root[data-theme="auto"] .as-contact{background:#151921;border-color:#232a37}:root[data-theme="auto"] .as-number{color:#aab4cd}:root[data-theme="auto"] .as-phone-badge{background:rgba(250,204,21,.14);color:#fde68a;border-color:rgba(250,204,21,.24)}:root[data-theme="auto"] .as-dialog-head{background:linear-gradient(180deg,#2b2614,#1f1b10)}:root[data-theme="auto"] .as-dialog-title{color:#fde68a}:root[data-theme="auto"] .as-dialog-subtitle{color:#d6c177}:root[data-theme="auto"] .as-confirm{background:linear-gradient(180deg,#facc15,#d9a80f)}}
+      @media(max-width:380px){.as-wrap{padding:12px 10px}.as-contact{padding:10px 12px}.as-dialog-head{padding:16px}.as-dialog-body{padding:16px}}
     </style>
-    <div class="as-wrap">
-      <div class="as-shell">
-        <section class="as-hero">
-          <div class="as-hero-top">
-            <h2 class="as-title">AS-Call</h2>
-            <div class="as-count" id="asCount">Loading</div>
-          </div>
-          <p class="as-note">Tap the green phone button to call. iPhone will ask you to confirm before placing the call.</p>
-        </section>
-        <section class="as-controls">
-          <label class="as-search" for="asSearch">
-            <span class="material-symbols-rounded" aria-hidden="true">search</span>
-            <input id="asSearch" type="search" inputmode="search" placeholder="Search name or number" autocomplete="off">
-            <button id="asClear" class="as-clear" type="button" aria-label="Clear search">x</button>
-          </label>
-          <div id="asFilters" class="as-filters" aria-label="AS-Call categories"></div>
-        </section>
-        <section id="asList" class="as-list"><div class="as-empty">Loading AS-Call contacts...</div></section>
-        <div id="asCopyNote" class="as-copy-note" role="status" aria-live="polite">Phone number copied</div>
+    <section class="as-wrap">
+      <section class="as-card">
+        <label class="as-search-shell" for="asSearch">
+          <span class="material-symbols-rounded as-search-icon" aria-hidden="true">search</span>
+          <input id="asSearch" class="as-search" type="search" inputmode="search" placeholder="Search name or number" autocomplete="off">
+          <button id="asClear" class="as-clear" type="button" aria-label="Clear search">x</button>
+        </label>
+      </section>
+      <div class="as-dir-row">
+        <div class="as-dir-title">Directory</div>
+        <div id="asCount" class="as-count">0 contacts</div>
       </div>
-    </div>
+      <section id="asList" class="as-list"></section>
+      <div id="asEmpty" class="as-empty">No contacts found</div>
+      <div id="asModalHost"></div>
+    </section>
   `;
 
-  const listEl = root.querySelector("#asList");
   const searchEl = root.querySelector("#asSearch");
   const clearEl = root.querySelector("#asClear");
-  const filtersEl = root.querySelector("#asFilters");
   const countEl = root.querySelector("#asCount");
-  const copyNoteEl = root.querySelector("#asCopyNote");
-  let contacts = [];
-  let activeCategory = "All";
-  let copyNoteTimer = 0;
-
-  function escapeHtml(value) {
-    return String(value || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
-  }
-
-  function norm(value) {
-    return String(value || "").toLowerCase().replace(/\s+/g, " ").trim();
-  }
-
-  function initials(title) {
-    return String(title || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "?";
-  }
-
-  function displayNumber(number) {
-    const raw = String(number || "");
-    if (raw.length === 8) return `${raw.slice(0, 4)} ${raw.slice(4)}`;
-    if (raw.length === 7) return `${raw.slice(0, 3)} ${raw.slice(3)}`;
-    return raw;
-  }
-
-  function telUrl(number) {
-    return `tel:${String(number || "").replace(/[^\d+]/g, "")}`;
-  }
+  const listEl = root.querySelector("#asList");
+  const emptyEl = root.querySelector("#asEmpty");
+  const modalHost = root.querySelector("#asModalHost");
 
   function dismissKeyboard() {
     if (document.activeElement === searchEl) searchEl.blur();
   }
 
-  function showCopyNote(message = "Phone number copied") {
-    clearTimeout(copyNoteTimer);
-    copyNoteEl.textContent = message;
-    copyNoteEl.classList.add("show");
-    copyNoteTimer = setTimeout(() => {
-      copyNoteEl.classList.remove("show");
-    }, 1500);
+  function updateCount(count) {
+    countEl.textContent = `${count} contacts`;
   }
 
-  function renderFilters(items) {
-    const categories = ["All", ...Array.from(new Set(items.map((item) => item.category || "Other"))).sort((a, b) => String(a).localeCompare(String(b)))];
-    if (!categories.includes(activeCategory)) activeCategory = "All";
-    filtersEl.innerHTML = categories.map((category) => `
-      <button class="as-chip" type="button" data-category="${escapeHtml(category)}" data-active="${category === activeCategory ? "true" : "false"}">${escapeHtml(category)}</button>
+  function filterContacts(query) {
+    const q = norm(query);
+    visibleContacts = q
+      ? contacts.filter(contact => norm(contact.title).includes(q) || norm(contact.number).includes(q))
+      : contacts;
+    renderContacts();
+  }
+
+  function renderContacts() {
+    updateCount(visibleContacts.length);
+    clearEl.classList.toggle("show", !!searchEl.value.trim());
+    emptyEl.textContent = contacts.length ? "No contacts found" : "Unable to load contacts";
+    emptyEl.classList.toggle("show", !visibleContacts.length);
+    listEl.innerHTML = visibleContacts.map(contact => `
+      <button class="as-contact" type="button" data-contact="${esc(contact.id)}">
+        <span class="as-copy">
+          <span class="as-name">${esc(contact.title)}</span>
+          <span class="as-number">${esc(displayNumber(contact.number))}</span>
+        </span>
+        <span class="as-phone-badge" aria-hidden="true"><span class="material-symbols-rounded">call</span></span>
+      </button>
     `).join("");
   }
 
-  function render(items, query = "") {
-    countEl.textContent = `${items.length} ${items.length === 1 ? "contact" : "contacts"}`;
-    if (!items.length) {
-      listEl.innerHTML = `<div class="as-empty">${query || activeCategory !== "All" ? "No contacts match your filters." : "No AS-Call contacts are available right now."}</div>`;
-      return;
-    }
-    listEl.innerHTML = items.map((item) => `
-      <article class="as-card">
-        <div class="as-main">
-          <div class="as-avatar" aria-hidden="true">${escapeHtml(initials(item.title))}</div>
-          <div class="as-text">
-            <div class="as-name">${escapeHtml(item.title)}</div>
-            <div class="as-number">${escapeHtml(displayNumber(item.number))}</div>
+  function closeDialog() {
+    selectedContact = null;
+    modalHost.innerHTML = "";
+  }
+
+  function showCallConfirmation(contact) {
+    dismissKeyboard();
+    selectedContact = contact;
+    modalHost.innerHTML = `
+      <div class="as-modal" role="dialog" aria-modal="true" aria-label="Confirm AS-Call">
+        <div class="as-dialog">
+          <div class="as-dialog-head">
+            <div class="as-dialog-badge" aria-hidden="true"><span class="material-symbols-rounded">call</span></div>
+            <div>
+              <h3 class="as-dialog-title">Call ${esc(contact.title)}?</h3>
+              <p class="as-dialog-subtitle">Confirm before opening the dialer</p>
+            </div>
+          </div>
+          <div class="as-dialog-body">
+            <div class="as-dialog-number">${esc(displayNumber(contact.number))}</div>
+            <div class="as-dialog-actions">
+              <button id="asConfirmCall" class="as-confirm" type="button">Call</button>
+              <button id="asCancelCall" class="as-cancel" type="button">Cancel</button>
+            </div>
           </div>
         </div>
-        <div class="as-actions">
-          <button class="as-btn" type="button" data-copy="${escapeHtml(item.number)}" aria-label="Copy ${escapeHtml(item.title)} number">
-            <span class="material-symbols-rounded" aria-hidden="true">content_copy</span>
-          </button>
-          <a class="as-btn call" href="${escapeHtml(telUrl(item.number))}" aria-label="Call ${escapeHtml(item.title)}">
-            <span class="material-symbols-rounded" aria-hidden="true">call</span>
-          </a>
-        </div>
-      </article>
-    `).join("");
+      </div>
+    `;
+    modalHost.querySelector("#asConfirmCall")?.addEventListener("click", () => {
+      const target = selectedContact;
+      closeDialog();
+      if (target) window.location.href = telUrl(target.number);
+    });
+    modalHost.querySelector("#asCancelCall")?.addEventListener("click", closeDialog);
+    modalHost.querySelector(".as-modal")?.addEventListener("click", event => {
+      if (event.target.classList.contains("as-modal")) closeDialog();
+    });
   }
 
-  function applyFilters() {
-    const q = norm(searchEl.value);
-    clearEl.classList.toggle("show", !!q);
-    let filtered = contacts;
-    if (activeCategory !== "All") filtered = filtered.filter((item) => (item.category || "Other") === activeCategory);
-    if (q) filtered = filtered.filter((item) => norm(`${item.title} ${item.number} ${displayNumber(item.number)} ${item.category}`).includes(q));
-    render(filtered, q);
-  }
-
-  searchEl.addEventListener("input", applyFilters);
-  searchEl.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      searchEl.blur();
+  searchEl.addEventListener("input", () => filterContacts(searchEl.value));
+  searchEl.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      dismissKeyboard();
     }
+  });
+  clearEl.addEventListener("click", () => {
+    searchEl.value = "";
+    filterContacts("");
+    searchEl.focus();
+  });
+  listEl.addEventListener("click", event => {
+    const button = event.target.closest(".as-contact");
+    if (!button) return;
+    const contact = contacts.find(item => item.id === button.dataset.contact);
+    if (contact) showCallConfirmation(contact);
   });
   listEl.addEventListener("touchstart", dismissKeyboard, { passive: true });
   listEl.addEventListener("wheel", dismissKeyboard, { passive: true });
-  filtersEl.addEventListener("touchstart", dismissKeyboard, { passive: true });
-  filtersEl.addEventListener("wheel", dismissKeyboard, { passive: true });
-  clearEl.addEventListener("click", () => {
-    searchEl.value = "";
-    applyFilters();
-    searchEl.focus();
-  });
-  filtersEl.addEventListener("click", (e) => {
-    const chip = e.target.closest(".as-chip");
-    if (!chip) return;
-    activeCategory = chip.dataset.category || "All";
-    renderFilters(contacts);
-    applyFilters();
-  });
-  listEl.addEventListener("click", async (e) => {
-    const copyBtn = e.target.closest("[data-copy]");
-    if (!copyBtn) return;
-    e.preventDefault();
-    const number = copyBtn.dataset.copy || "";
-    showCopyNote("Phone number copied");
-    copyBtn.innerHTML = `<span class="material-symbols-rounded" aria-hidden="true">check</span>`;
-    setTimeout(() => {
-      copyBtn.innerHTML = `<span class="material-symbols-rounded" aria-hidden="true">content_copy</span>`;
-    }, 1100);
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(number);
-      }
-    } catch (_) {
-      console.debug("Could not copy phone number:", number);
-    }
-  });
+  root.addEventListener("touchmove", dismissKeyboard, { passive: true });
 
   try {
     contacts = await getAsCallContacts();
-    renderFilters(contacts);
-    applyFilters();
-  } catch (err) {
-    countEl.textContent = "Unavailable";
-    listEl.innerHTML = `<div class="as-empty">Could not load AS-Call contacts. Please try again later. (${escapeHtml(err?.message || "Unknown error")})</div>`;
+    visibleContacts = contacts;
+    renderContacts();
+  } catch (_) {
+    contacts = [];
+    visibleContacts = [];
+    updateCount(0);
+    emptyEl.textContent = "Unable to load contacts";
+    emptyEl.classList.add("show");
   }
 }
