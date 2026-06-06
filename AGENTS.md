@@ -1,5 +1,6 @@
 <!--
 CHANGELOG (2026-06-06):
+- Document HOS, AS-Call, and Websites testing App migration work and HOS external navigation workaround.
 - Document Scores, Ventilator Settings, and Visual Guides testing App migration work.
 - Rename the shared Guidelines PDF viewer path from `/viewer/android/` to `/viewer/ios/`.
 
@@ -173,3 +174,12 @@ CHANGELOG (2026-05-17):
 - Matched the Android Visual Guides categories, paired/single image layout, placement animation, pulse behavior, tap-to-enlarge modal, marker detail cards, and burn zone selection structure.
 - Left Visual Guides pad/electrode positions as a manual tuning task; the tool now includes editable placement comments and an optional local grid toggle.
 - Verified updated JavaScript modules with `node --check`.
+
+### 2026-06-06 20:24 +03
+- Completed Visual Guides manual tuning support follow-ups, including lead label sizing/centering, optional person-image zoom controls in code, Mason-Likar/12-lead animation fixes, one-row button sizing, and RA border contrast.
+- Implemented HOS with iOS App config `hos_sites`, helper cache, selected site details, nearest-site distance calculations, Waze/Google Maps icon buttons, and user-facing location messages.
+- Updated HOS external navigation to use HTTPS map links with installed-App Safari handoff so returning from Waze or Google Maps should not leave the Ambulance App on a blank page.
+- Implemented AS-Call using iOS App config `as_call`, Android-style helper decoding, search, contact rows, and a call confirmation dialog.
+- Migrated Websites to iOS App config `websites`, versioned helper cache validation, Android-aligned directory/search/category/card UI, and preserved the iOS Open/Share behavior and approved Ambulance App tip wording.
+- Updated the project TODO with remaining manual verification for HOS, AS-Call, and Websites.
+- Verified changed JavaScript modules with `node --check` and `git diff --check`.
