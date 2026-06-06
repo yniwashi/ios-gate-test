@@ -1,5 +1,9 @@
 <!--
   CHANGELOG (2026-06-06):
+  - Wire the Visual Guides home tile to the new iOS Visual Guides tool.
+  - Center and enlarge the local chevron-down SVG in the Scores selector.
+  - Make the Scores category open as an Android-style selector screen that defaults to GCS.
+  - Add qSOFA and Pediatric GCS score tools to the Scores category.
   - Rename the Guidelines PDF viewer base from /viewer/android/ to /viewer/ios/ and reset the local viewer override key.
 
   CHANGELOG (2026-06-05):
@@ -995,7 +999,7 @@
       href:"#", showDefault:true, actionId:"category_calculators" },
 
     { text:"Visual Guides",    iconType:"image",    icon:"images/ic_main_visual_guides.svg", color:"btn-visual-guides",
-      href:"#", showDefault:true, comingSoon:true },
+      href:"#", showDefault:true, actionId:"visual_guides" },
 
     { text:"Scores",           iconType:"image",    icon:"images/ic_main_scores.svg", color:"btn-scores",
       href:"#", showDefault:true, actionId:"category_scores" },
@@ -1083,9 +1087,9 @@
           { title:"GCS", subtitle:"Adult Glasgow Coma Scale", icon:"psychology_alt", color:"#1CCC0C", actionId:"gcs" },
           { title:"APGAR", subtitle:"Newborn assessment", icon:"child_care", color:"#FF5CE2", actionId:"apgar" },
           { title:"SAT Score", subtitle:"Sedation Assessment Tool", icon:"syringe", color:"#FF8A00", actionId:"sat" },
-          { title:"qSOFA", subtitle:"Quick Sequential Organ Failure Assessment", icon:"medical_information", color:"#DC2626", comingSoon:true },
+          { title:"qSOFA", subtitle:"Quick Sequential Organ Failure Assessment", icon:"medical_information", color:"#DC2626", actionId:"qsofa" },
           { title:"Westley Croup", subtitle:"Croup severity", icon:"stethoscope", color:"#FFC107", actionId:"westley" },
-          { title:"Pediatric GCS", subtitle:"Pediatric Glasgow Coma Scale", icon:"child_care", color:"#0284C7", comingSoon:true }
+          { title:"Pediatric GCS", subtitle:"Pediatric Glasgow Coma Scale", icon:"child_care", color:"#0284C7", actionId:"pgcs" }
         ]}
       ]
     }
@@ -1239,8 +1243,10 @@
       "Care Tools": ["tools", "checklists"],
       "Estimated Weight": ["weight", "paediatric weight", "pediatric weight"],
       "GCS Score": ["glasgow coma scale", "consciousness", "neuro"],
+      "Pediatric GCS": ["pgcs", "pediatric glasgow coma scale", "paediatric glasgow coma scale", "child consciousness"],
       "APGAR Score": ["newborn", "neonate", "delivery"],
       "SAT Score": ["sedation", "agitation"],
+      "qSOFA": ["quick sofa", "sepsis", "infection", "mortality", "respiratory rate", "systolic"],
       "Flowcharts": ["protocol", "algorithm", "cpg"],
       "RBS Converter": ["blood sugar", "glucose", "mmol", "mg dl"],
       "CPG": ["cpg wizard", "guideline", "protocol", "smart search"],
@@ -2352,6 +2358,78 @@ function wireCharlieModal(){
         if (!tab) return;
         loadDoc(tab.dataset.docType || "cpg");
       });
+    } else if (categoryId === "category_scores") {
+      const scores = category.sections[0].items.filter((item) => item.actionId);
+      mountEl.innerHTML = `
+        <style>
+          .scores-screen{min-height:calc(100dvh - 50px);background:#f8fafc;color:var(--text);padding:12px}
+          .scores-selector{position:relative;max-width:760px;margin:0 auto 10px}
+          .scores-select-label{margin:0 0 6px 2px;color:#64748b;font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
+          .scores-select-shell{position:relative}
+          .scores-select{
+            width:100%;min-height:58px;padding:9px 54px 9px 14px;border:1px solid #cbd5e1;border-radius:13px;
+            background:linear-gradient(180deg,#ffffff,#f4f8fc);color:#075985;
+            font-size:16px;font-weight:950;appearance:none;outline:none;
+            box-shadow:0 3px 10px rgba(15,23,42,.08);
+          }
+          .scores-select-shell::after{
+            content:"";position:absolute;right:13px;top:50%;width:32px;height:32px;transform:translateY(-50%);
+            background:url("images/chevron-down.svg") center/32px 32px no-repeat;
+            pointer-events:none;
+          }
+          .scores-current-subtitle{margin:6px 2px 0;color:#64748b;font-size:12px;font-weight:750}
+          .scores-tool{max-width:760px;margin:0 auto}
+          .scores-loading{padding:18px;text-align:center;color:var(--muted);font-weight:850}
+          :root[data-theme="dark"] .scores-screen{background:#0b0f17}
+          :root[data-theme="dark"] .scores-select{background:linear-gradient(180deg,#151b26,#101620);border-color:#2b3546;color:#89c8ff;box-shadow:none}
+          :root[data-theme="dark"] .scores-select-shell::after{filter:brightness(1.25) saturate(1.1)}
+          :root[data-theme="dark"] .scores-select-label,:root[data-theme="dark"] .scores-current-subtitle{color:#aab5c4}
+          @media(prefers-color-scheme:dark){
+            :root[data-theme="auto"] .scores-screen{background:#0b0f17}
+            :root[data-theme="auto"] .scores-select{background:linear-gradient(180deg,#151b26,#101620);border-color:#2b3546;color:#89c8ff;box-shadow:none}
+            :root[data-theme="auto"] .scores-select-shell::after{filter:brightness(1.25) saturate(1.1)}
+            :root[data-theme="auto"] .scores-select-label,:root[data-theme="auto"] .scores-current-subtitle{color:#aab5c4}
+          }
+        </style>
+        <div class="scores-screen">
+          <div class="scores-selector">
+            <p class="scores-select-label">Score</p>
+            <div class="scores-select-shell">
+              <select id="scoresSelect" class="scores-select" aria-label="Select score">
+                ${scores.map((item) => `<option value="${gsEscape(item.actionId)}">${gsEscape(item.title)}</option>`).join("")}
+              </select>
+            </div>
+            <p id="scoresCurrentSubtitle" class="scores-current-subtitle">${gsEscape(scores[0]?.subtitle || "")}</p>
+          </div>
+          <div id="scoresTool" class="scores-tool"><div class="scores-loading">Loading GCS...</div></div>
+        </div>`;
+
+      const select = mountEl.querySelector("#scoresSelect");
+      const subtitle = mountEl.querySelector("#scoresCurrentSubtitle");
+      const toolMount = mountEl.querySelector("#scoresTool");
+      let scoreLoadToken = 0;
+
+      async function loadScore(actionId) {
+        const item = scores.find((score) => score.actionId === actionId) || scores[0];
+        if (!item) return;
+        const token = ++scoreLoadToken;
+        if (select.value !== item.actionId) select.value = item.actionId;
+        if (subtitle) subtitle.textContent = item.subtitle || "";
+        if (toolMount) toolMount.innerHTML = `<div class="scores-loading">Loading ${gsEscape(item.title)}...</div>`;
+        try {
+          const ver = encodeURIComponent(TOOL_MODULE_VERSION || "v");
+          const mod = await import(`./tools/${item.actionId}.js?ver=${ver}`);
+          if (token !== scoreLoadToken || !toolMount) return;
+          await mod.run(toolMount, { embedded:true, title:item.title, parentCategory:categoryId });
+        } catch (error) {
+          if (token === scoreLoadToken && toolMount) {
+            toolMount.innerHTML = `<div class="scores-loading">Could not load ${gsEscape(item.title)}.</div>`;
+          }
+        }
+      }
+
+      select?.addEventListener("change", () => loadScore(select.value));
+      loadScore(scores[0]?.actionId || "gcs");
     } else if (categoryId === "category_calculators") {
       mountEl.innerHTML = `
         <style>

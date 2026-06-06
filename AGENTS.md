@@ -1,5 +1,6 @@
 <!--
 CHANGELOG (2026-06-06):
+- Document Scores, Ventilator Settings, and Visual Guides testing App migration work.
 - Rename the shared Guidelines PDF viewer path from `/viewer/android/` to `/viewer/ios/`.
 
 CHANGELOG (2026-06-05):
@@ -25,7 +26,8 @@ CHANGELOG (2026-05-17):
   - Install guide/profile page: `install/index.html`.
 - Tool modules live in `ambulance/tools/` as plain JavaScript modules:
   - Calculators & tools: `ap_peds.js`, `ccp_peds.js`, `meds_calculator.js`, `map.js`, `rbs.js`, `overtime.js`, `ventilator_settings.js`, `waafels.js`, `estweight.js`, `caretools.js`.
-  - Scores: `gcs.js`, `apgar.js`, `sat.js`, `westley.js`.
+  - Scores: `gcs.js`, `pgcs.js`, `qsofa.js`, `apgar.js`, `sat.js`, `westley.js`.
+  - Visual reference tools: `visual_guides.js`.
   - Pickers + PDF viewers: `cpg_wizard.js`, `sop.js`, `formulary.js`, `flowcharts.js`.
   - Links: `websites.js`.
 - Helper pages and data live in `helpers/`, including Shortcuts helpers, RSI checklist pages, manifests, and JSON data.
@@ -162,3 +164,12 @@ CHANGELOG (2026-05-17):
 - Copied the iOS custom PDF.js viewer bundle into the shared `pdf-viewer` repo under `viewer/ios/` and pointed testing Guidelines to that viewer path.
 - Added local PDF viewer override support through `?pdfViewerBase=...` for testing shared viewer changes before uploading docs-host files.
 - Verified the updated testing App module, search/document modules, and iOS viewer inline script with syntax checks.
+
+### 2026-06-06 04:05 +03
+- Updated Ventilator Settings to match the newer Android field set, validation, descriptions, and dark-mode behavior.
+- Rebuilt the Scores tools around a shared score UI module, added Pediatric GCS and qSOFA, and changed the Scores home route to land on GCS with an Android-style selector.
+- Added the shared chevron icon used by the Scores selector.
+- Added the Visual Guides tool and Android visual-guide assets for pads, ECG lead placement, and burn surface area.
+- Matched the Android Visual Guides categories, paired/single image layout, placement animation, pulse behavior, tap-to-enlarge modal, marker detail cards, and burn zone selection structure.
+- Left Visual Guides pad/electrode positions as a manual tuning task; the tool now includes editable placement comments and an optional local grid toggle.
+- Verified updated JavaScript modules with `node --check`.
