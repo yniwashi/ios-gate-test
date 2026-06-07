@@ -1,5 +1,8 @@
 <!--
   CHANGELOG (2026-06-07):
+  - Restore the original simple Notice modal layout while keeping its text sourced from App Config `announcement`.
+  - Rebuild Stay Connected as the Android-aligned Feedback & Updates action list.
+  - Add App Config-driven Notice and notices inbox behavior with persistent unread state and bell badge.
   - Refresh the testing asset key for completed Overtime and Shift Schedule updates.
   - Enable the Android-aligned Shift Schedule tool, icon, and search terms.
   - Refresh the testing asset key for Overtime, HOS refresh feedback, and home spacing updates.
@@ -222,9 +225,11 @@
     .notice-bell{
       appearance:none;width:51px;height:51px;border:1px solid rgba(255,255,255,.32);border-radius:50%;
       display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.13);color:#fff;
-      cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 4px 12px rgba(0,46,95,.22);
+      cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 4px 12px rgba(0,46,95,.22);position:relative;
     }
     .notice-bell .material-symbols-rounded{font-size:30px}
+    .notice-badge{position:absolute;top:-4px;right:-5px;display:none;min-width:18px;height:18px;box-sizing:border-box;padding:0 5px;border:1.5px solid #fff;border-radius:999px;background:#dc2626;color:#fff;font:900 10px/15px system-ui;text-align:center;box-shadow:0 2px 5px rgba(82,0,0,.35)}
+    .notice-badge.show{display:block}
 
     /* iOS App Mode status */
     .app-home-status{
@@ -597,6 +602,23 @@
     .wn-link img{width:36px;height:36px;object-fit:contain;margin-bottom:4px}
     body.wn-open{overflow:hidden}
     @keyframes wnpop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+    .notices-card{padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:min(88dvh,760px)}
+    .notices-head{flex:none;padding:18px 20px 14px;background:linear-gradient(135deg,#655eea,#4f46e5);color:#fff}
+    .notices-head-row{display:flex;align-items:center;gap:12px}.notices-head-icon{display:grid;place-items:center;width:38px;height:38px;border:1px solid rgba(255,255,255,.38);border-radius:50%;background:rgba(255,255,255,.14)}
+    .notices-head-copy{min-width:0;flex:1}.notices-head-copy h2{margin:0;font-size:22px}.notices-head-copy p{margin:3px 0 0;color:#edebff;font-size:12px;font-weight:800}
+    .notices-head .wn-close{background:rgba(255,255,255,.14);color:#fff}.notices-head .wn-close:hover{background:rgba(255,255,255,.22)}
+    .notices-toolbar{display:flex;justify-content:flex-end;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--surface)}
+    .notices-read-all{appearance:none;border:1px solid color-mix(in oklab,#4f46e5 52%,var(--border));border-radius:999px;background:color-mix(in oklab,#4f46e5 9%,var(--surface));color:#4f46e5;padding:7px 12px;font-size:12px;font-weight:900}.notices-read-all:disabled{opacity:.42}
+    .notices-list{min-height:160px;overflow-y:auto;padding:14px;background:var(--bg);display:grid;gap:10px;-webkit-overflow-scrolling:touch}
+    .notice-item{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px;box-shadow:0 3px 10px rgba(15,23,42,.08)}.notice-item.unread{background:#fffbeb;border-color:#f3d68a}
+    .notice-item-title-row{display:flex;align-items:flex-start;gap:10px}.notice-item-title{min-width:0;flex:1;margin:0;color:var(--text);font-size:16px;font-weight:950;line-height:1.25}
+    .notice-new{flex:none;border-radius:999px;background:#dc2626;color:#fff;padding:3px 8px;font-size:10px;font-weight:950}.notice-date{margin:5px 0 0;color:var(--muted);font-size:11px;font-weight:800}
+    .notice-divider{height:1px;margin:9px 0;background:var(--border)}.notice-message{margin:0;color:color-mix(in oklab,var(--text) 84%,var(--muted));font-size:13px;line-height:1.5;white-space:pre-line}
+    .notice-mark-read{display:block;margin:10px 0 0 auto;appearance:none;border:1px solid color-mix(in oklab,#4f46e5 58%,var(--border));border-radius:999px;background:transparent;color:#4f46e5;padding:7px 11px;font-size:11px;font-weight:900}
+    .notices-empty{display:grid;place-items:center;min-height:180px;color:var(--muted);font-size:14px;font-weight:800;text-align:center}
+    .notice-detail-message{white-space:pre-line}
+    [data-theme="dark"] .notices-head{background:linear-gradient(135deg,#514bb3,#39358d)}[data-theme="dark"] .notice-item.unread{background:#302918;border-color:#6f5d2d}[data-theme="dark"] .notices-read-all,[data-theme="dark"] .notice-mark-read{color:#aaa5ff;border-color:#625daa;background:color-mix(in oklab,#4f46e5 10%,var(--surface))}
+    @media(prefers-color-scheme:dark){[data-theme="auto"] .notices-head{background:linear-gradient(135deg,#514bb3,#39358d)}[data-theme="auto"] .notice-item.unread{background:#302918;border-color:#6f5d2d}[data-theme="auto"] .notices-read-all,[data-theme="auto"] .notice-mark-read{color:#aaa5ff;border-color:#625daa;background:color-mix(in oklab,#4f46e5 10%,var(--surface))}}
 
     /* T&C Gate */
     #tacGate{ position:fixed; inset:0; z-index:99999; display:none; background: color-mix(in oklab, var(--bg) 90%, #000); backdrop-filter: blur(6px) }
@@ -660,6 +682,7 @@
       <div class="top-actions">
         <button id="noticesBellBtn" class="notice-bell" type="button" aria-label="Notices">
           <span class="material-symbols-rounded" aria-hidden="true">notifications</span>
+          <span id="noticesBadge" class="notice-badge" aria-hidden="true"></span>
         </button>
       </div>
     </div>
@@ -746,6 +769,38 @@
   </article>
 </section>
 
+<!-- Notices Inbox -->
+<section id="noticesOverlay" class="wn-overlay" hidden aria-modal="true" role="dialog" aria-label="Notices">
+  <article class="wn-card notices-card" role="document">
+    <header class="notices-head">
+      <div class="notices-head-row">
+        <span class="notices-head-icon material-symbols-rounded" aria-hidden="true">notifications</span>
+        <div class="notices-head-copy">
+          <h2>Notices</h2>
+          <p id="noticesUnreadText">Loading notices...</p>
+        </div>
+        <button id="noticesClose" class="wn-close" type="button" aria-label="Close notices">Close</button>
+      </div>
+    </header>
+    <div class="notices-toolbar">
+      <button id="noticesReadAll" class="notices-read-all" type="button">Read all</button>
+    </div>
+    <div id="noticesList" class="notices-list"></div>
+  </article>
+</section>
+
+<!-- Notice Detail -->
+<section id="noticeDetailOverlay" class="wn-overlay" hidden aria-modal="true" role="dialog" aria-label="Notice">
+  <article class="wn-card" role="document">
+    <div class="wn-header">
+      <p class="wn-pill">Notice</p>
+      <button id="noticeDetailClose" class="wn-close" type="button">Close</button>
+    </div>
+    <h2 id="noticeDetailTitle" class="wn-title">Notice</h2>
+    <div id="noticeDetailMessage" class="wn-body notice-detail-message"></div>
+  </article>
+</section>
+
 <!-- Charlie Modal -->
 <section id="charlieOverlay" class="wn-overlay" hidden aria-modal="true" role="dialog">
   <article class="wn-card" role="document">
@@ -780,7 +835,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260607-gate-test-4";
+  const ASSET_VERSION = "asset-20260607-gate-test-5";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -986,6 +1041,11 @@
     WHATS_NEW_KEY,
     WHATS_NEW_MESSAGE
   } = MESSAGING_CONFIG;
+  const NOTICE_READ_IDS_KEY = "ambulance_ios_notice_read_ids_v1";
+  let latestAnnouncement = null;
+  let latestNotices = [];
+  let noticesReady = false;
+  let noticesLoadPromise = null;
 
   const BUTTONS = [
     { text:"Search",           iconType:"material", icon:"search",        color:"btn-search",
@@ -1030,7 +1090,7 @@
     { text:"Websites",         iconType:"material", icon:"language",      color:"btn-websites",
       href:"https://example.com", showDefault:true, actionId:"websites" },
 
-    { text:"Stay Connected",   iconType:"material", icon:"maps_ugc",      color:"btn-community",
+    { text:"Stay Connected",   iconType:"image", icon:"images/ic_main_stay_connected.svg", color:"btn-community",
       href:"#", showDefault:true, actionId:"community" },
     { text:"Overtime", iconType:"image", icon:"images/ic_main_overtime.svg", color:"btn-overtime",
       href:"#", showDefault:true, actionId:"overtime", appLabel:"Overtime" },
@@ -1996,7 +2056,10 @@
     initGateTestMenu();
     getAppConfigDataModule()
       .then(({ preloadAppConfig, resolveIosVersion }) => preloadAppConfig()
-        .then((data) => setDisplayedAppVersion(resolveIosVersion(data, APP_VERSION))))
+        .then((data) => {
+          setDisplayedAppVersion(resolveIosVersion(data, APP_VERSION));
+          return loadNoticesFromConfig(data);
+        }))
       .catch(() => setDisplayedAppVersion(APP_VERSION));
     getSearchDataModule().then(({ preloadSearchData }) => preloadSearchData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
     getWebsitesDataModule().then(({ preloadWebsitesData }) => preloadWebsitesData(GLOBAL_SEARCH_CONFIG)).catch(() => {});
@@ -2008,15 +2071,13 @@
 
     const sectionsEl  = document.getElementById("sections");
     wireWhatsNewControls();
+    wireNoticesControls();
     wireCharlieModal();
     document.getElementById("appUpdatesBtn")?.addEventListener("click", () => {
       location.href = "https://www.niwashibase.com/whats-new/?platform=ios";
     });
-    document.getElementById("appNoticeBtn")?.addEventListener("click", () => {
-      localStorage.removeItem(WHATS_NEW_KEY);
-      handleWhatsNew();
-    });
-    document.getElementById("noticesBellBtn")?.addEventListener("click", () => showComingSoon("Notices"));
+    document.getElementById("appNoticeBtn")?.addEventListener("click", openCurrentAnnouncement);
+    document.getElementById("noticesBellBtn")?.addEventListener("click", openNoticesInbox);
     document.getElementById("gateRecheckBtn")?.addEventListener("click", recheckGateTestAccess);
     document.getElementById("gateResetBtn")?.addEventListener("click", resetGateTestState);
     const whatsNewTrigger = document.getElementById("wnShowAgain");
@@ -2113,6 +2174,200 @@ function render(){
     secEl.appendChild(grid);
     sectionsEl.appendChild(secEl);
   }
+}
+
+function noticeEscape(value){
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[char]));
+}
+
+function readNoticeIds(){
+  try {
+    const ids = JSON.parse(localStorage.getItem(NOTICE_READ_IDS_KEY) || "[]");
+    return new Set(Array.isArray(ids) ? ids.filter(id => typeof id === "string" && id) : []);
+  } catch (_) {
+    return new Set();
+  }
+}
+
+function saveNoticeIds(ids){
+  try {
+    localStorage.setItem(NOTICE_READ_IDS_KEY, JSON.stringify([...ids]));
+  } catch (_) {}
+}
+
+function unreadNoticeCount(){
+  const readIds = readNoticeIds();
+  return latestNotices.filter(notice => !readIds.has(notice.id)).length;
+}
+
+function updateNoticeBadge(){
+  const badge = document.getElementById("noticesBadge");
+  if (!badge) return;
+  const unread = unreadNoticeCount();
+  badge.textContent = unread > 99 ? "99+" : String(unread);
+  badge.classList.toggle("show", unread > 0);
+  badge.setAttribute("aria-hidden", unread > 0 ? "false" : "true");
+}
+
+function configureNoticeButton(){
+  const noticeButton = document.getElementById("appNoticeBtn");
+  const updatesButton = document.getElementById("appUpdatesBtn");
+  if (!noticeButton || !updatesButton) return;
+  const usable = !!latestAnnouncement;
+  noticeButton.hidden = !usable;
+  updatesButton.style.flex = usable ? "1" : "2";
+}
+
+async function loadNoticesFromConfig(configData = null){
+  if (configData) {
+    const module = await getAppConfigDataModule();
+    latestAnnouncement = module.resolveIosAnnouncement(configData);
+    latestNotices = module.resolveIosNotices(configData);
+    noticesReady = true;
+    configureNoticeButton();
+    updateNoticeBadge();
+    return latestNotices;
+  }
+  if (noticesLoadPromise) return noticesLoadPromise;
+  noticesLoadPromise = getAppConfigDataModule()
+    .then(async module => {
+      const data = await module.getAppConfig();
+      latestAnnouncement = module.resolveIosAnnouncement(data);
+      latestNotices = module.resolveIosNotices(data);
+      noticesReady = true;
+      configureNoticeButton();
+      updateNoticeBadge();
+      return latestNotices;
+    })
+    .finally(() => { noticesLoadPromise = null; });
+  return noticesLoadPromise;
+}
+
+function showNoticeOverlay(overlay){
+  if (!overlay) return;
+  overlay.hidden = false;
+  overlay.style.display = "flex";
+  document.body.classList.add("wn-open");
+}
+
+function hideNoticeOverlay(overlay){
+  if (!overlay) return;
+  overlay.hidden = true;
+  overlay.style.display = "none";
+  const anyOpen = [...document.querySelectorAll(".wn-overlay")].some(item => !item.hidden);
+  if (!anyOpen) document.body.classList.remove("wn-open");
+}
+
+function renderNoticesInbox(message = ""){
+  const list = document.getElementById("noticesList");
+  const unreadText = document.getElementById("noticesUnreadText");
+  const readAll = document.getElementById("noticesReadAll");
+  if (!list || !unreadText || !readAll) return;
+  const unread = unreadNoticeCount();
+  unreadText.textContent = unread === 0 ? "No unread notices" : `${unread} unread`;
+  readAll.disabled = unread === 0;
+  if (message) {
+    list.innerHTML = `<div class="notices-empty">${noticeEscape(message)}</div>`;
+    return;
+  }
+  if (!latestNotices.length) {
+    list.innerHTML = `<div class="notices-empty">No notices yet.</div>`;
+    return;
+  }
+  const readIds = readNoticeIds();
+  list.innerHTML = latestNotices.map(notice => {
+    const read = readIds.has(notice.id);
+    return `
+      <article class="notice-item${read ? "" : " unread"}" data-notice-id="${noticeEscape(notice.id)}">
+        <div class="notice-item-title-row">
+          <h3 class="notice-item-title">${noticeEscape(notice.title)}</h3>
+          ${read ? "" : `<span class="notice-new">NEW</span>`}
+        </div>
+        <p class="notice-date">Published: ${noticeEscape(notice.date || "Date not set")}</p>
+        <div class="notice-divider"></div>
+        <p class="notice-message">${noticeEscape(notice.message)}</p>
+        ${read ? "" : `<button class="notice-mark-read" type="button" data-mark-notice="${noticeEscape(notice.id)}">Mark read</button>`}
+      </article>`;
+  }).join("");
+}
+
+async function openNoticesInbox(){
+  const overlay = document.getElementById("noticesOverlay");
+  renderNoticesInbox(noticesReady ? "" : "Loading notices...");
+  showNoticeOverlay(overlay);
+  if (noticesReady) return;
+  try {
+    await loadNoticesFromConfig();
+    renderNoticesInbox();
+  } catch (_) {
+    renderNoticesInbox("Unable to load notices. Check your connection and try again.");
+  }
+}
+
+function openNoticeDetail(notice){
+  if (!notice) return;
+  const overlay = document.getElementById("noticeDetailOverlay");
+  const title = document.getElementById("noticeDetailTitle");
+  const message = document.getElementById("noticeDetailMessage");
+  if (!overlay || !title || !message) return;
+  title.textContent = notice.title;
+  message.textContent = notice.message;
+  showNoticeOverlay(overlay);
+}
+
+async function openCurrentAnnouncement(){
+  if (!noticesReady) {
+    try {
+      await loadNoticesFromConfig();
+    } catch (_) {
+      alert("Unable to load the current notice. Check your connection and try again.");
+      return;
+    }
+  }
+  if (latestAnnouncement) openNoticeDetail(latestAnnouncement);
+}
+
+function wireNoticesControls(){
+  const inbox = document.getElementById("noticesOverlay");
+  const detail = document.getElementById("noticeDetailOverlay");
+  const list = document.getElementById("noticesList");
+  const readAll = document.getElementById("noticesReadAll");
+  const closeInbox = document.getElementById("noticesClose");
+  const closeDetail = document.getElementById("noticeDetailClose");
+  if (!inbox || !detail || inbox.dataset.bound === "1") return;
+  inbox.dataset.bound = "1";
+
+  closeInbox?.addEventListener("click", () => hideNoticeOverlay(inbox));
+  closeDetail?.addEventListener("click", () => hideNoticeOverlay(detail));
+  inbox.addEventListener("click", event => {
+    if (event.target === inbox) hideNoticeOverlay(inbox);
+  });
+  detail.addEventListener("click", event => {
+    if (event.target === detail) hideNoticeOverlay(detail);
+  });
+  readAll?.addEventListener("click", () => {
+    const ids = readNoticeIds();
+    latestNotices.forEach(notice => ids.add(notice.id));
+    saveNoticeIds(ids);
+    updateNoticeBadge();
+    renderNoticesInbox();
+  });
+  list?.addEventListener("click", event => {
+    const button = event.target.closest("[data-mark-notice]");
+    if (!button) return;
+    const ids = readNoticeIds();
+    ids.add(button.dataset.markNotice);
+    saveNoticeIds(ids);
+    updateNoticeBadge();
+    renderNoticesInbox();
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key !== "Escape") return;
+    if (!detail.hidden) hideNoticeOverlay(detail);
+    else if (!inbox.hidden) hideNoticeOverlay(inbox);
+  });
 }
 
 function handleWhatsNew(){
@@ -2589,40 +2844,95 @@ function wireCharlieModal(){
       // Inline: Community hub
       if (actionId === "community") {
         const links = [
-          { name:"Suggest Feature", href:"mailto:yniwashi@hamad.qa?subject=Ambulance%20App%20Feature%20Suggestion", img:"images/email.png", color:"#f44434" },
-          { name:"Report Issue", href:"mailto:yniwashi@hamad.qa?subject=Ambulance%20iOS%20App%20Issue", icon:"bug_report", color:"#dc2626" },
-          { name:"App Intro", icon:"slideshow", color:"#0ea5e9", comingSoon:true },
-          { name:"Discord",  href:"https://discord.gg/qc8fK3yd92",                                img:"images/discord.png",  color:"#5c64f4" },
-          { name:"Telegram", href:"https://t.me/+EAcWKnoaRq05YzY0",                               img:"images/telegram.png", color:"#24b4e3" },
-          { name:"WhatsApp", href:"https://whatsapp.com/channel/0029VadgCTH0QeamMlpEvX0x",       img:"images/whatsapp.png", color:"#24ac04" }
+          {
+            name:"Discord Server",
+            subtitle:"Join the app discussion community.",
+            href:"https://discord.gg/qc8fK3yd92",
+            img:"images/discord.png"
+          },
+          {
+            name:"Telegram Channel",
+            subtitle:"Follow app news and reminders.",
+            href:"https://t.me/+EAcWKnoaRq05YzY0",
+            img:"images/telegram.png"
+          },
+          {
+            name:"WhatsApp Channel",
+            subtitle:"Get channel updates in WhatsApp.",
+            href:"https://whatsapp.com/channel/0029VadgCTH0QeamMlpEvX0x",
+            img:"images/whatsapp.png"
+          },
+          {
+            name:"Suggest Feature",
+            subtitle:"Send an idea or improvement request.",
+            href:"mailto:yniwashi@hamad.qa?subject=Ambulance%20App%20Feature%20Suggestion",
+            img:"images/email.png"
+          },
+          {
+            name:"App Intro",
+            subtitle:"Replay the quick app walkthrough.",
+            icon:"info",
+            action:"intro"
+          },
+          {
+            name:"Report Issue",
+            subtitle:"Send a bug report with app status.",
+            icon:"bug_report",
+            action:"report"
+          }
         ];
         mountEl.innerHTML = `
-          <div style="padding:16px; display:grid; gap:16px;">
-            <p style="margin:0; text-align:center; font-size:18px; font-weight:800">👇💡 Stay Connected! 💡👇</p>
-            <p style="margin:4px 0 0; text-align:center; font-size:14px; color:var(--muted)">
-              Join <strong>Discord</strong> and other platforms to stay up to date with real-time news, feature updates, and tips.
-            </p>
-            <div style="display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));">
-              ${links.map((l, index) => `
-                <a href="${l.href || "#"}" ${l.comingSoon ? `data-community-coming="${index}"` : `target="_blank" rel="noopener"`}
-                   style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-decoration:none; padding:12px;
-                          min-height:92px;background:linear-gradient(180deg,${l.color}cc,${l.color}); border-radius:8px; color:#fff; font-weight:700;
-                          box-shadow:0 4px 14px rgba(0,0,0,.2);">
-                  ${l.img
-                    ? `<img src="${l.img}" alt="" class="community-icon">`
-                    : `<span class="material-symbols-rounded" aria-hidden="true" style="font-size:42px;margin-bottom:4px">${l.icon}</span>`}
-                  <span>${l.name}</span>
-                  ${l.comingSoon ? `<small style="margin-top:4px;opacity:.85">Coming Soon</small>` : ""}
-                </a>
-              `).join("")}
+          <style>
+            .connected-screen{min-height:calc(100dvh - 50px);padding:14px;background:var(--bg);box-sizing:border-box}
+            .connected-dialog{width:min(100%,520px);margin:0 auto;overflow:hidden;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:0 12px 30px rgba(15,23,42,.18)}
+            .connected-header{padding:13px 18px;background:linear-gradient(135deg,#31c75a,#20ba49);color:#fff}
+            .connected-header h2{margin:0;font-size:18px;font-weight:950;line-height:1.2}.connected-header p{margin:4px 0 0;color:#eafbef;font-size:12px;line-height:1.35}
+            .connected-options{display:grid;gap:7px;padding:10px 12px 5px}
+            .connected-row{appearance:none;box-sizing:border-box;width:100%;min-height:58px;display:flex;align-items:center;gap:10px;padding:9px;border:1px solid #e5e7eb;border-radius:8px;background:#f8fafc;color:#111827;text-decoration:none;text-align:left;font:inherit;cursor:pointer}
+            .connected-row:active{transform:scale(.992);background:#eff6ff}.connected-icon-frame{display:grid;place-items:center;flex:none;width:44px;height:44px;box-sizing:border-box;padding:7px;border-radius:50%;background:#e3f2fd}
+            .connected-icon-frame img{display:block;width:100%;height:100%;object-fit:contain}.connected-icon-frame .material-symbols-rounded{font-size:29px;color:#0a96fa}.connected-row.report .connected-icon-frame{background:#fee2e2}.connected-row.report .material-symbols-rounded{color:#dc2626}
+            .connected-copy{min-width:0;flex:1;display:grid;gap:2px}.connected-copy strong{color:inherit;font-size:14px;font-weight:950;line-height:1.2}.connected-copy span{color:#6b7280;font-size:11px;line-height:1.3}
+            .connected-chevron{flex:none;color:#94a3b8;font-size:22px}
+            :root[data-theme="dark"] .connected-dialog{box-shadow:none}:root[data-theme="dark"] .connected-header{background:linear-gradient(135deg,#279847,#187f34)}:root[data-theme="dark"] .connected-row{border-color:#3b4552;background:#1c232d;color:#f1f5f9}:root[data-theme="dark"] .connected-row:active{background:#243242}:root[data-theme="dark"] .connected-copy span{color:#aeb9c7}:root[data-theme="dark"] .connected-icon-frame{background:#18384d}
+            @media(prefers-color-scheme:dark){:root[data-theme="auto"] .connected-dialog{box-shadow:none}:root[data-theme="auto"] .connected-header{background:linear-gradient(135deg,#279847,#187f34)}:root[data-theme="auto"] .connected-row{border-color:#3b4552;background:#1c232d;color:#f1f5f9}:root[data-theme="auto"] .connected-row:active{background:#243242}:root[data-theme="auto"] .connected-copy span{color:#aeb9c7}:root[data-theme="auto"] .connected-icon-frame{background:#18384d}}
+          </style>
+          <section class="connected-screen">
+            <div class="connected-dialog">
+              <header class="connected-header">
+                <h2>Feedback &amp; Updates</h2>
+                <p>Choose how you want to contact or follow updates.</p>
+              </header>
+              <div class="connected-options">
+                ${links.map((item, index) => `
+                  <${item.href ? "a" : "button"}
+                    class="connected-row${item.action === "report" ? " report" : ""}"
+                    ${item.href ? `href="${item.href}" target="_blank" rel="external noopener noreferrer"` : `type="button" data-connected-action="${item.action}"`}
+                    data-connected-index="${index}">
+                    <span class="connected-icon-frame">
+                      ${item.img
+                        ? `<img src="${item.img}" alt="">`
+                        : `<span class="material-symbols-rounded" aria-hidden="true">${item.icon}</span>`}
+                    </span>
+                    <span class="connected-copy">
+                      <strong>${item.name}</strong>
+                      <span>${item.subtitle}</span>
+                    </span>
+                    <span class="connected-chevron material-symbols-rounded" aria-hidden="true">chevron_right</span>
+                  </${item.href ? "a" : "button"}>
+                `).join("")}
+              </div>
             </div>
-          </div>
+          </section>
         `;
-        mountEl.querySelectorAll("[data-community-coming]").forEach((link) => {
-          link.addEventListener("click", (event) => {
-            event.preventDefault();
-            const item = links[Number(link.dataset.communityComing)];
-            showComingSoon(item?.name);
+        mountEl.querySelectorAll("[data-connected-action]").forEach((button) => {
+          button.addEventListener("click", () => {
+            if (button.dataset.connectedAction === "intro") {
+              showComingSoon("App Intro");
+              return;
+            }
+            if (button.dataset.connectedAction === "report") {
+              location.href = "mailto:yniwashi@hamad.qa?subject=Ambulance%20iOS%20App%20Issue";
+            }
           });
         });
         if (options.fromHistory) {

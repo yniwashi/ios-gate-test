@@ -1,4 +1,7 @@
 // /ambulance/app_config_data.js
+// CHANGELOG (2026-06-07):
+// - Expose Android-compatible iOS announcement and notices parsing from the shared App config.
+//
 // CHANGELOG (2026-06-05):
 // - Add shared iOS App config loader with memory/cache/remote/backup fallback behavior.
 // - Switch to the dedicated iOS App config endpoints and resolve app.version.
@@ -131,4 +134,38 @@ export function getSharedConfigBlock(name, data = appConfig) {
 export function resolveIosVersion(data = appConfig, fallbackVersion = "v0.3") {
   const version = String(data?.app?.version || "").trim();
   return version || fallbackVersion;
+}
+
+function normalizeNotice(value, defaultTitle = "Notice") {
+  const item = toObject(value);
+  if (!item) return null;
+  const notice = {
+    enabled: item.enabled !== false,
+    id: String(item.id || "").trim(),
+    title: String(item.title || defaultTitle).trim() || defaultTitle,
+    message: String(item.message || "").trim(),
+    buttonText: String(item.button_text || item.buttonText || "OK").trim() || "OK",
+    date: String(item.date || item.published_at || "").trim()
+  };
+  return notice.enabled && notice.id && notice.message ? notice : null;
+}
+
+export function resolveIosAnnouncement(data = appConfig) {
+  return normalizeNotice(data?.announcement);
+}
+
+export function resolveIosNotices(data = appConfig) {
+  const notices = Array.isArray(data?.notices)
+    ? data.notices.map(item => normalizeNotice(item)).filter(Boolean)
+    : [];
+  const announcement = resolveIosAnnouncement(data);
+  if (announcement && !notices.some(item => item.id === announcement.id)) {
+    notices.push(announcement);
+  }
+  const seen = new Set();
+  return notices.filter(item => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
 }
