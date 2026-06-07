@@ -1,5 +1,6 @@
 // /ambulance/tools/overtime.js
 // CHANGELOG (2026-06-07):
+// - Add salary hints, strengthen saved-salary reuse, structure full-width history records, and match Android PDF styling.
 // - Rebuild Overtime with Android-aligned Add, History, Calculator, and Settings workflows.
 // - Add local records, period summaries, selection/deletion, CSV/JSON/PDF export, and JSON backup restore.
 
@@ -214,48 +215,122 @@ function pdfEscape(value) {
 }
 
 function buildPdf(records, totals, label, showSalary) {
-  const rows = [
-    ["Ambulance Overtime Report", 18],
-    [`Overtime on ${label}`, 14],
-    [`Total overtime for this period: ${rounded(totals.totalQar, 1)} QAR`, 12],
-    ["", 8],
-    [`Period: ${label}`, 10],
-    [`Total Hours: ${rounded(totals.totalHours)}   Regular: ${rounded(totals.regularHours)}   Ramadan: ${rounded(totals.ramadanHours)}`, 10],
-    [`Earnings: ${rounded(totals.totalQar, 1)} QAR   Records: ${totals.count}`, 10],
-    ["", 8],
-    ["Records", 14]
-  ];
-  const header = showSalary
-    ? "Date              Type       Hours   Salary     Earnings   Notes"
-    : "Date              Type       Hours   Earnings   Notes";
-  rows.push([header, 9]);
-  records.forEach(record => {
-    const type = TYPES[record.type].label.replace(" OT", "").padEnd(10);
-    const date = shortDateTime(record.dateTimeMillis).padEnd(17);
-    const hours = rounded(record.hours).padEnd(7);
-    const amount = rounded(record.amountQar, 1).padEnd(10);
-    const salary = rounded(record.basicSalary).padEnd(11);
-    const notes = record.notes.replace(/\s+/g, " ").slice(0, showSalary ? 24 : 34);
-    rows.push([showSalary
-      ? `${date} ${type} ${hours} ${salary} ${amount} ${notes}`
-      : `${date} ${type} ${hours} ${amount} ${notes}`, 8]);
-  });
-  rows.push(["", 8], ["Ambulance App", 8]);
-
+  const PAGE_HEIGHT = 842;
+  const rgb = hex => {
+    const value = hex.replace("#", "");
+    return [0, 2, 4].map(index => parseInt(value.slice(index, index + 2), 16) / 255)
+      .map(value => value.toFixed(4)).join(" ");
+  };
+  const estimateWidth = (text, size) => String(text).length * size * 0.52;
   const pages = [];
-  let page = [];
-  let y = 800;
-  rows.forEach(([text, size]) => {
-    const gap = size >= 14 ? 24 : 16;
-    if (y < 45) {
-      pages.push(page);
-      page = [];
-      y = 800;
+  let commands = [];
+  let topY = 42;
+
+  function text(value, x, baselineTop, size, color, bold = false, align = "left") {
+    const safe = pdfEscape(value);
+    const adjustedX = align === "center" ? x - estimateWidth(safe, size) / 2 : x;
+    commands.push(`${rgb(color)} rg BT /${bold ? "F2" : "F1"} ${size} Tf ${adjustedX.toFixed(2)} ${(PAGE_HEIGHT - baselineTop).toFixed(2)} Td (${safe}) Tj ET`);
+  }
+
+  function fillRect(left, top, right, bottom, color) {
+    commands.push(`${rgb(color)} rg ${left} ${PAGE_HEIGHT - bottom} ${right - left} ${bottom - top} re f`);
+  }
+
+  function strokeRect(left, top, right, bottom, color, width = 1) {
+    commands.push(`${rgb(color)} RG ${width} w ${left} ${PAGE_HEIGHT - bottom} ${right - left} ${bottom - top} re S`);
+  }
+
+  function line(x1, y1, x2, y2, color, width = 1) {
+    commands.push(`${rgb(color)} RG ${width} w ${x1} ${PAGE_HEIGHT - y1} m ${x2} ${PAGE_HEIGHT - y2} l S`);
+  }
+
+  function finishPage() {
+    text("Ambulance App", 28, 822, 9, "#AFB4BD", true);
+    pages.push(commands.join("\n"));
+    commands = [];
+  }
+
+  function newPage() {
+    finishPage();
+    topY = 42;
+  }
+
+  function drawLine(value, size, color, bold, x, gap) {
+    if (topY > 800) newPage();
+    text(value, x, topY, size, color, bold);
+    topY += gap;
+  }
+
+  function drawSummaryTable() {
+    if (topY > 770) newPage();
+    const headerBottom = topY + 24;
+    const rowBottom = topY + 54;
+    fillRect(28, topY, 567, headerBottom, "#2F6FED");
+    const headers = ["Period", "Total", "Regular", "Ramadan", "Earnings", "Records"];
+    const xs = [72, 176, 262, 348, 445, 535];
+    headers.forEach((header, index) => text(header, xs[index], topY + 16, 11, "#FFFFFF", true, "center"));
+    strokeRect(28, headerBottom, 567, rowBottom, "#D1D9E6");
+    const values = [
+      label.slice(0, 18),
+      rounded(totals.totalHours),
+      rounded(totals.regularHours),
+      rounded(totals.ramadanHours),
+      `${rounded(totals.totalQar, 1)} QAR`,
+      String(totals.count)
+    ];
+    values.forEach((value, index) => text(value, xs[index], headerBottom + 19, 10.5, "#1F2937", true, "center"));
+    topY = rowBottom;
+  }
+
+  function drawTableHeader() {
+    if (topY > 770) newPage();
+    const bottom = topY + 24;
+    fillRect(28, topY, 567, bottom, "#2F6FED");
+    const headers = showSalary
+      ? ["Date", "Type", "Hours", "Salary", "Earnings", "Notes"]
+      : ["Date", "Type", "Hours", "Earnings", "Notes"];
+    const xs = showSalary
+      ? [34, 126, 232, 282, 358, 438]
+      : [34, 136, 244, 320, 420];
+    headers.forEach((header, index) => text(header, xs[index], topY + 16, 11.5, "#FFFFFF", true));
+    topY = bottom;
+  }
+
+  function drawTableRow(record) {
+    if (topY > 790) {
+      newPage();
+      drawTableHeader();
     }
-    page.push({ text, size, y });
-    y -= gap;
-  });
-  if (page.length) pages.push(page);
+    const bottom = topY + 30;
+    strokeRect(28, topY, 567, bottom, "#D1D9E6");
+    text(shortDateTime(record.dateTimeMillis), 34, topY + 18, 10, "#1F2937", true);
+    const type = TYPES[record.type].label.replace(" OT", "");
+    if (showSalary) {
+      text(type, 126, topY + 18, 10, "#1F2937", true);
+      text(rounded(record.hours), 232, topY + 18, 10, "#1F2937", true);
+      text(rounded(record.basicSalary), 282, topY + 18, 10, "#1F2937", true);
+      text(rounded(record.amountQar, 1), 358, topY + 18, 10, "#1F2937", true);
+      text(record.notes.replace(/\s+/g, " ").slice(0, 28), 438, topY + 18, 10, "#1F2937", true);
+    } else {
+      text(type, 136, topY + 18, 10, "#1F2937", true);
+      text(rounded(record.hours), 244, topY + 18, 10, "#1F2937", true);
+      text(rounded(record.amountQar, 1), 320, topY + 18, 10, "#1F2937", true);
+      text(record.notes.replace(/\s+/g, " ").slice(0, 34), 420, topY + 18, 10, "#1F2937", true);
+    }
+    topY = bottom;
+  }
+
+  drawLine("Ambulance Overtime Report", 24, "#111827", true, 36, 24);
+  drawLine(`Overtime on ${label}`, 18, "#2F6FED", true, 36, 22);
+  drawLine(`Total overtime for this period: ${rounded(totals.totalQar, 1)} QAR`, 17, "#1F2937", true, 36, 24);
+  drawSummaryTable();
+  topY += 18;
+  line(28, topY, 567, topY, "#D1D9E6", 2);
+  topY += 22;
+  drawLine("Records", 18, "#2F6FED", true, 36, 16);
+  drawTableHeader();
+  records.forEach(drawTableRow);
+  finishPage();
 
   const objects = [];
   const addObject = body => {
@@ -265,14 +340,12 @@ function buildPdf(records, totals, label, showSalary) {
   const catalogId = addObject("");
   const pagesId = addObject("");
   const fontId = addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+  const boldFontId = addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
   const pageIds = [];
 
-  pages.forEach(lines => {
-    const stream = lines.map(line =>
-      `BT /F1 ${line.size} Tf 36 ${line.y} Td (${pdfEscape(line.text)}) Tj ET`
-    ).join("\n");
+  pages.forEach(stream => {
     const contentId = addObject(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
-    const pageId = addObject(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${fontId} 0 R >> >> /Contents ${contentId} 0 R >>`);
+    const pageId = addObject(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${fontId} 0 R /F2 ${boldFontId} 0 R >> >> /Contents ${contentId} 0 R >>`);
     pageIds.push(pageId);
   });
   objects[catalogId - 1] = `<< /Type /Catalog /Pages ${pagesId} 0 R >>`;
@@ -349,7 +422,7 @@ export async function run(root) {
       .ot-result-strip{height:4px;border-radius:4px;background:var(--ot-blue);margin-bottom:14px}.ot-result-amount{font-size:36px;font-weight:950}.ot-result-note{margin-top:8px}.ot-formula{margin-top:10px;border-radius:12px;background:#F3F7FF;padding:12px;color:#101828;font-size:10px;font-weight:850;white-space:nowrap;overflow:hidden}
       .ot-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ot-metric{background:#F3F7FF;border-radius:12px;padding:10px;text-align:center}.ot-metric-label{color:#667085;font-size:11px;font-weight:850}.ot-metric-value{color:var(--ot-dark-blue);font-size:16px;font-weight:950;margin-top:3px}
       .ot-export{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ot-export .ot-btn{background:transparent}.ot-export-pdf{border:1px solid #DC2626;color:#DC2626}.ot-export-csv{border:1px solid #059669;color:#059669}.ot-export-json{border:1px solid #2563EB;color:#2563EB}
-      .ot-record-head{display:flex;align-items:center;gap:4px}.ot-record-head h3{flex:1;margin:0}.ot-record{display:flex;gap:10px;align-items:flex-start}.ot-record.selected{background:#EAF2FF;border-color:var(--ot-blue)}.ot-record input{margin-top:5px;width:20px;height:20px}.ot-record-main{min-width:0;flex:1}.ot-record-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ot-record-type{color:var(--ot-dark-blue);font-size:14px;font-weight:950}.ot-record-type.ramadan{color:#B42318}.ot-record-date{color:var(--muted);font-size:12px}.ot-record-amount{margin-top:7px;font-size:18px;font-weight:950}.ot-record-notes{margin-top:5px;color:var(--muted);font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.ot-record-salary{margin-top:5px;color:var(--muted);font-size:11px}
+      .ot-record-head{display:flex;align-items:center;gap:4px}.ot-record-head h3{flex:1;margin:0}#otRecords{display:grid;gap:10px;width:100%}.ot-record{box-sizing:border-box;display:flex;width:100%;gap:12px;align-items:flex-start;padding:12px;text-align:left;font:inherit;color:var(--text)}.ot-record.selected{background:#EAF2FF;border-color:var(--ot-blue)}.ot-record input{flex:none;margin:4px 0 0;width:20px;height:20px}.ot-record-main{display:block;min-width:0;flex:1}.ot-record-top{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}.ot-record-type{display:block;color:var(--ot-dark-blue);font-size:14px;font-weight:950}.ot-record-type.ramadan{color:#B42318}.ot-record-date{display:block;color:var(--muted);font-size:12px}.ot-record-amount{display:block;margin-top:7px;font-size:18px;font-weight:950;line-height:1.25}.ot-record-notes{margin-top:5px;color:var(--muted);font-size:13px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.ot-record-salary{display:block;margin-top:6px;color:var(--muted);font-size:11px}
       .ot-empty{height:120px;display:grid;place-items:center;color:var(--muted);font-weight:850}.ot-switch-row{display:flex;align-items:center;gap:12px}.ot-switch-copy{flex:1}.ot-switch{width:48px;height:28px;appearance:none;border-radius:999px;background:#CBD5E1;position:relative;transition:.2s}.ot-switch:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.2s}.ot-switch:checked{background:var(--ot-blue)}.ot-switch:checked:before{transform:translateX(20px)}
       .ot-toast{position:fixed;z-index:12000;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);transform:translate(-50%,12px);background:#1F2937;color:#fff;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:850;opacity:0;pointer-events:none;transition:.2s;white-space:nowrap}.ot-toast.show{opacity:1;transform:translate(-50%,0)}
       .ot-dialog{box-sizing:border-box;width:min(420px,calc(100vw - 32px));border:1px solid var(--border);border-radius:18px;background:var(--surface);color:var(--text);padding:0;box-shadow:0 22px 54px rgba(2,6,23,.35)}.ot-dialog::backdrop{background:rgba(15,23,42,.58)}.ot-dialog-body{padding:18px}.ot-dialog h3{margin:0 0 10px}.ot-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap}
@@ -446,7 +519,8 @@ export async function run(root) {
       <div id="otAddSummary">${renderSummary("New OT Amount", "Hours", "0", "Estimated Earnings", "0", "QAR")}</div>
       <section class="ot-card">
         <h3>Basic Salary</h3>
-        <div class="ot-field"><label for="otAddSalary">Basic salary in QAR</label><input id="otAddSalary" class="ot-input" inputmode="decimal" value="${salary > 0 ? esc(rounded(salary)) : ""}" ${editing ? "" : "disabled"}></div>
+        <div class="ot-field"><label for="otAddSalary">Basic salary in QAR</label><input id="otAddSalary" class="ot-input" inputmode="decimal" placeholder="Enter basic salary in QAR" value="${salary > 0 ? esc(rounded(salary)) : ""}" ${editing ? "" : "disabled"}></div>
+        <div class="ot-muted" style="margin-top:7px">Saved on this device and reused in Add and Calculator until you change it.</div>
         <div class="ot-row" style="margin-top:10px">
           <button id="otSalaryAction" class="ot-btn primary">${editing ? "Save Salary" : "Edit Salary"}</button>
           <button class="ot-btn outline" data-tab-link="SETTINGS">Settings</button>
@@ -540,7 +614,8 @@ export async function run(root) {
     view.innerHTML = `
       <section class="ot-card">
         <h3>Overtime Calculator</h3>
-        <div class="ot-field"><label for="otCalcSalary">Basic Salary</label><input id="otCalcSalary" class="ot-input" inputmode="numeric" maxlength="9" value="${salary > 0 ? esc(rounded(salary)) : ""}"></div>
+        <div class="ot-field"><label for="otCalcSalary">Basic Salary</label><input id="otCalcSalary" class="ot-input" inputmode="numeric" maxlength="9" placeholder="Enter basic salary in QAR" value="${salary > 0 ? esc(rounded(salary)) : ""}"></div>
+        <div class="ot-muted" style="margin-top:7px">${salary > 0 ? "Using your saved basic salary." : "Save your salary in Add or Settings to reuse it automatically."}</div>
         <div class="ot-field"><label>Default Hours</label><div class="ot-chips">${[1,12,36,48,60,72,84,90].map(value => `<button class="ot-chip" data-hour="${value}">${value}</button>`).join("")}</div></div>
         <div class="ot-field"><label for="otCalcHours">Overtime Hours</label><input id="otCalcHours" class="ot-input" inputmode="numeric" maxlength="5"></div>
       </section>
@@ -584,7 +659,7 @@ export async function run(root) {
       });
     });
     view.querySelector("#otCalcClear").addEventListener("click", () => {
-      salaryInput.value = "";
+      salaryInput.value = salary > 0 ? rounded(salary) : "";
       hoursInput.value = "";
       calculatorAmount = null;
       calculatorType = null;
@@ -728,7 +803,8 @@ export async function run(root) {
       ${warningCard() || `<button class="ot-btn outline ot-wide" data-action="show-warning">Show Overtime data warning</button>`}
       <section class="ot-card">
         <h3>Basic Salary</h3>
-        <div class="ot-field"><label for="otSettingsSalary">Basic salary in QAR</label><input id="otSettingsSalary" class="ot-input" inputmode="decimal" value="${salary > 0 ? esc(rounded(salary)) : ""}" ${editing ? "" : "disabled"}></div>
+        <div class="ot-field"><label for="otSettingsSalary">Basic salary in QAR</label><input id="otSettingsSalary" class="ot-input" inputmode="decimal" placeholder="Enter basic salary in QAR" value="${salary > 0 ? esc(rounded(salary)) : ""}" ${editing ? "" : "disabled"}></div>
+        <div class="ot-muted" style="margin-top:7px">This salary is saved on this device and automatically used in Add and Calculator.</div>
         <button id="otSettingsSalaryAction" class="ot-btn primary ot-wide" style="margin-top:12px">${editing ? "Save Basic Salary" : "Edit Basic Salary"}</button>
       </section>
       <section class="ot-card ot-switch-row">

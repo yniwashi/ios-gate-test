@@ -1,5 +1,7 @@
 <!--
   CHANGELOG (2026-06-07):
+  - Refresh the testing asset key for completed Overtime and Shift Schedule updates.
+  - Enable the Android-aligned Shift Schedule tool, icon, and search terms.
   - Refresh the testing asset key for Overtime, HOS refresh feedback, and home spacing updates.
   - Refine home status action/theme alignment and tighten menu row spacing.
   - Use the Android Overtime icon on the renamed home tile.
@@ -778,7 +780,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260607-gate-test-3";
+  const ASSET_VERSION = "asset-20260607-gate-test-4";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -1033,8 +1035,8 @@
     { text:"Overtime", iconType:"image", icon:"images/ic_main_overtime.svg", color:"btn-overtime",
       href:"#", showDefault:true, actionId:"overtime", appLabel:"Overtime" },
 
-    { text:"Shifts",           iconType:"material", icon:"calendar_month",color:"btn-shifts",
-      href:"#", showDefault:true, appLabel:"Shift Schedule", comingSoon:true },
+    { text:"Shift Schedule",   iconType:"image", icon:"images/ic_main_shift_schedule.svg", color:"btn-shifts",
+      href:"#", showDefault:true, actionId:"shift_schedule" },
 
     { text:"Ventilator Settings", iconType:"image", icon:"images/ic_main_ventilator.svg", color:"btn-vent",
       href:"#", showDefault:true, actionId:"ventilator_settings" },
@@ -1272,6 +1274,7 @@
       "PAT": ["pediatric assessment treatment", "paediatric assessment treatment", "assessment", "treatment guide"],
       "Westley Score": ["croup"],
       "Overtime": ["overtime calculator", "ot", "pay", "hours", "shift", "history", "logger"],
+      "Shift Schedule": ["shifts", "roster", "team calendar", "date lookup", "coverage", "swap", "team a", "team b", "team c", "team d"],
       "Websites": ["links", "resources"],
       "AS-Call": ["phone", "call", "contacts", "directory", "numbers"],
       "Stay Connected": ["community", "discord", "telegram", "whatsapp"]
@@ -2220,7 +2223,7 @@ function wireCharlieModal(){
     { title: "Quick Actions", items: ["Search","Stay Connected"] },
     { title: "Resuscitation & Timers", items: ["CPR","WAAFELSS","RSI Checklist","Ventilator Settings"] },
     { title: "Clinical · Calculators", items: ["Pediatrics","Guidelines","Flowcharts","Calculators","Visual Guides","Scores"] },
-    { title: "Operations", items: ["Overtime","HOS","AS-Call","Websites","Shifts"] }
+    { title: "Operations", items: ["Overtime","HOS","AS-Call","Websites","Shift Schedule"] }
   ];
 
   let currentTool = null;
