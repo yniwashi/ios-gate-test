@@ -1,4 +1,8 @@
 // /ambulance/pediatric_ui.js
+// CHANGELOG (2026-06-07):
+// - Add spacing between medication concentration and vital-sign panels.
+// - Open pediatric references in their resolved document and route AP Fluids to PAT page 12.
+//
 // CHANGELOG (2026-06-05):
 // - Pass readable titles when CCP Pediatrics opens Dose Volume or Pediatric Infusions.
 // - Use the central nested router so Pediatrics shortcuts preserve correct Back behavior.
@@ -161,7 +165,7 @@ export async function runPediatricScreen(root, { scope, initialGroup, accessType
       .ped-title{font-size:22px;font-weight:950;color:#0368FF;margin:12px 0 8px}.ped-header{font-size:16px;font-weight:650;font-style:italic;margin:8px 0 12px}
       .ped-warning{display:grid;gap:4px;background:#FFF7ED;color:#334155;border-radius:12px;padding:12px;margin:8px 0}.ped-warning b{color:#9A3412}.ped-warning.critical{background:#FEF2F2}.ped-warning.critical b{color:#B91C1C}
       .ped-section{padding:8px 0 12px;border-bottom:1px solid var(--border)}.ped-section:last-child{border-bottom:0}.ped-label{font-size:16px;font-weight:850;margin-top:7px}.ped-indication,.ped-dose{font-size:20px;font-weight:950;white-space:pre-wrap}.ped-indication{color:#D32F2F}.ped-dose{color:#0068FA}.ped-volume{color:#0F766E;font-size:18px;font-weight:950}.ped-note,.ped-route{white-space:pre-wrap;line-height:1.45}
-      .ped-vitals{width:100%;display:grid;gap:5px;border:1px solid #C7D2FE;border-radius:10px;background:#EEF2FF;color:#172033;padding:7px 8px;text-align:left}.ped-vitals-head{display:flex;justify-content:space-between;color:#4338CA;font-size:12px}.ped-vitals-head small{color:#64748B}.ped-vitals-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}.ped-vitals-grid span{display:grid;text-align:center}.ped-vitals-grid b{font-size:8px;color:#64748B}.ped-vitals-grid small{font-size:7px;color:#64748B}.ped-vitals-grid strong{font-size:9px}
+      .ped-vitals{width:100%;display:grid;gap:5px;margin-top:10px;border:1px solid #C7D2FE;border-radius:10px;background:#EEF2FF;color:#172033;padding:7px 8px;text-align:left}.ped-vitals-head{display:flex;justify-content:space-between;color:#4338CA;font-size:12px}.ped-vitals-head small{color:#64748B}.ped-vitals-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}.ped-vitals-grid span{display:grid;text-align:center}.ped-vitals-grid b{font-size:8px;color:#64748B}.ped-vitals-grid small{font-size:7px;color:#64748B}.ped-vitals-grid strong{font-size:9px}
       .ped-concentration{background:#FEF2F2;border-radius:14px;padding:10px;display:grid;gap:5px}.ped-concentration.saved{background:#FFF7ED}.ped-concentration b{color:#B91C1C}.ped-concentration.saved b{color:#9A3412}.ped-concentration button{justify-self:end}
       .ped-dialog{position:fixed;inset:0;z-index:1000003;background:rgba(0,0,0,.48);display:grid;place-items:center;padding:24px max(24px,env(safe-area-inset-right)) 24px max(24px,env(safe-area-inset-left));box-sizing:border-box}.ped-dialog-card{box-sizing:border-box;width:min(100%,430px);max-height:82dvh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.28);overscroll-behavior:contain}.ped-dialog h3{margin:0 0 10px;color:#2563EB}.ped-dialog p{white-space:pre-wrap;background:rgba(37,99,235,.07);padding:12px;border-radius:14px;color:var(--muted);line-height:1.45}.ped-dialog-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}.ped-dialog input,.ped-dialog select{box-sizing:border-box;width:100%;height:48px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);color:var(--text);padding:0 12px;font-size:16px}
       @media(max-width:360px){.ped-grid{gap:6px}.ped-med{font-size:10.5px;padding:4px}.ped-inputs{gap:5px}.ped-or{font-size:12px}}
@@ -213,15 +217,21 @@ export async function runPediatricScreen(root, { scope, initialGroup, accessType
     const isReference = result.reference?.type === "reference";
     const query = result.reference?.query || result.displayName;
     try {
+      if (scope === "AP" && result.medicationId === "fluids") {
+        closeSheet();
+        window.__AMBULANCE_OPEN_DOCUMENT_PAGE?.(12, "AP Fluid Bolus", "pat");
+        return;
+      }
       const item = isReference
         ? await resolveReferencePage(query)
         : await resolveFormularyPage(query);
       if (!item) throw new Error(`Reference not found: ${query}`);
+      const documentType = String(item.documentType || item.type || "cpg").toLowerCase();
       closeSheet();
       window.__AMBULANCE_OPEN_DOCUMENT_PAGE?.(
         item.page || item.pageStart,
         item.title || result.displayName,
-        "cpg"
+        ["cpg","sop","cpm","pat"].includes(documentType) ? documentType : "cpg"
       );
     } catch (error) {
       console.error("Pediatric reference navigation failed", error);

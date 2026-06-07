@@ -1,4 +1,7 @@
 // /tools/sop.js
+// CHANGELOG (2026-06-07):
+// - Consume the PDF overlay history entry on Back instead of duplicating the SOP parent screen.
+//
 // CHANGELOG (2026-05-18):
 // - Add the search icon inside the SOP search box.
 // - Move the Clear button below the search hint.
@@ -441,7 +444,7 @@ export async function run(root) {
       modal.style.display = "none";
       frame.src = "about:blank";
       if (modal.__popHandler) {
-        window.removeEventListener("popstate", modal.__popHandler);
+        window.removeEventListener("popstate", modal.__popHandler, true);
         modal.__popHandler = null;
       }
       if (modal.__historyActive) {
@@ -452,11 +455,8 @@ export async function run(root) {
 
     backBtn.addEventListener("click", () => {
       if (modal.__historyActive) {
-        closeModal();
-        if (modal.__baseUrl) {
-          history.replaceState(modal.__baseState || history.state, "", modal.__baseUrl);
-        }
-        modal.__historyActive = false;
+        window.__modalPopHandled = true;
+        history.back();
       } else {
         closeModal();
       }
@@ -471,7 +471,7 @@ export async function run(root) {
           if (!modal.__historyActive) return;
           closeModal(true);
         };
-        window.addEventListener("popstate", modal.__popHandler);
+        window.addEventListener("popstate", modal.__popHandler, true);
       }
       modal.__baseUrl = `${location.pathname}${location.search}${location.hash || ""}`;
       modal.__baseState = history.state;

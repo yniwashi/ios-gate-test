@@ -1,5 +1,8 @@
 <!--
   CHANGELOG (2026-06-07):
+  - Standardize one-press Back behavior across tool dialogs, nested routes, parent categories, and restored nested URLs.
+  - Remove duplicate PDF overlay history entries and pass document names to the iOS PDF search toolbar.
+  - Add Android-aligned App Intro, Report Issue diagnostics, and PIN-protected Admin Panel with temporary test access controls.
   - Restore the index.html-managed Notice UI with Meet Charlie and community buttons; keep App Config exclusive to the bell inbox.
   - Rebuild Stay Connected as the Android-aligned Feedback & Updates action list.
   - Add App Config-driven Notice and notices inbox behavior with persistent unread state and bell badge.
@@ -213,7 +216,7 @@
     .brand{display:flex;align-items:center;gap:7px;min-width:0;flex:1}
     .logo{width:50px;height:50px;object-fit:contain;border-radius:50%;background:#fff;padding:3px;transform:scaleX(-1);box-shadow:0 2px 8px rgba(4,38,84,.22);flex:none}
     .brand-title{display:flex;align-items:baseline;gap:6px;min-width:0;white-space:nowrap}
-    .title{margin:0;font-family:"Baloo Thambi 2","Arial Rounded MT Bold",system-ui,sans-serif;font-size:clamp(31px,7.9vw,40px);font-weight:800;letter-spacing:0;color:#fff;text-shadow:0 2px 5px rgba(0,46,95,.22);white-space:nowrap;line-height:.95}
+    .title{margin:0;font-family:"Baloo Thambi 2","Arial Rounded MT Bold",system-ui,sans-serif;font-size:clamp(31px,7.9vw,40px);font-weight:800;letter-spacing:0;color:#fff;text-shadow:0 2px 5px rgba(0,46,95,.22);white-space:nowrap;line-height:.95;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
     .app-version{font-size:12px;font-weight:950;color:rgba(255,255,255,.86);letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 3px rgba(0,46,95,.22)}
     .theme-toggle{background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:5px 11px; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text)}
     .theme-toggle select{appearance:none; background:transparent; border:none; color:inherit; font:inherit; outline:none; cursor:pointer}
@@ -577,13 +580,27 @@
     .gate-reset-btn:hover{background:color-mix(in oklab,#c0392b 16%,var(--surface))}
     .gate-recheck-btn{color:#7b4d00;border-color:color-mix(in oklab,#d99a00 44%,transparent);background:color-mix(in oklab,#d99a00 12%,var(--surface))}
     .gate-recheck-btn:hover{background:color-mix(in oklab,#d99a00 18%,var(--surface))}
-    .gate-test-overlay{position:fixed;inset:0;z-index:99998;display:none;align-items:flex-end;justify-content:center;padding:18px;background:rgba(2,5,11,.42);backdrop-filter:blur(8px)}
-    .gate-test-overlay.show{display:flex}
-    .gate-test-menu{width:min(360px,calc(100vw - 36px));margin-bottom:calc(env(safe-area-inset-bottom) + 8px);padding:14px;border-radius:16px;border:1px solid var(--border);background:var(--surface);box-shadow:0 20px 50px rgba(0,0,0,.38)}
-    .gate-test-title{margin:0 0 10px;color:var(--text);font-size:15px;font-weight:950}
-    .gate-test-actions{display:flex;gap:8px;flex-wrap:wrap}
-    .gate-test-actions .updates-btn{flex:1;min-height:40px;font-size:12px}
-    .gate-test-close{width:100%;margin-top:9px;color:var(--muted);border-color:var(--border);background:var(--surface-2)}
+    .admin-overlay,.intro-overlay{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,5,11,.58);backdrop-filter:blur(8px)}
+    .admin-overlay.show,.intro-overlay.show{display:flex}
+    .admin-pin-card,.intro-card{width:min(430px,calc(100vw - 32px));overflow:hidden;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:0 24px 60px rgba(0,0,0,.42)}
+    .admin-pin-head,.admin-panel-head{display:flex;align-items:center;gap:13px;padding:17px 18px;background:linear-gradient(135deg,#0d63b2,#084b8d);color:#fff}
+    .admin-pin-icon{display:grid;place-items:center;width:50px;height:50px;flex:none;border-radius:50%;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34)}
+    .admin-pin-icon .material-symbols-rounded{font-size:29px}.admin-pin-copy{min-width:0}.admin-pin-copy strong{display:block;font-size:21px;font-weight:950}.admin-pin-copy span{display:block;margin-top:4px;color:#e0f2fe;font-size:12px}
+    .admin-pin-body{padding:16px 18px 18px}.admin-pin-message{margin:0;padding:13px;border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;color:#374151;font-size:13px;line-height:1.45}
+    .admin-pin-input{box-sizing:border-box;width:100%;height:52px;margin-top:14px;border:1.5px solid #93c5fd;border-radius:8px;background:var(--surface);color:var(--text);font:900 20px/1 system-ui;text-align:center;outline:none}
+    .admin-pin-actions,.admin-actions,.admin-test-actions{display:flex;gap:9px;margin-top:14px}.admin-btn{appearance:none;min-height:46px;flex:1;border:1.5px solid #0d63b2;border-radius:8px;background:#0d63b2;color:#fff;font:900 13px/1 system-ui;padding:9px;cursor:pointer}
+    .admin-btn.secondary{background:var(--surface);color:#0d63b2}.admin-btn.danger{border-color:#b83b31;background:#b83b31}.admin-btn.warning{border-color:#a06d00;background:#a06d00}
+    .admin-panel-card{width:min(760px,calc(100vw - 24px));height:min(90dvh,820px);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border);border-radius:10px;background:var(--surface);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+    .admin-panel-head{justify-content:space-between}.admin-panel-head strong{font-size:20px}.admin-close{flex:none;min-height:38px;padding:8px 15px;border-color:#fff;background:transparent}
+    .admin-panel-body{min-height:0;display:flex;flex:1;flex-direction:column;padding:12px;background:var(--bg)}.admin-actions{margin-top:0}.admin-test-actions{margin:8px 0 0}
+    .admin-json{box-sizing:border-box;width:100%;min-height:0;flex:1;margin-top:10px;padding:12px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .intro-card{padding:22px}.intro-top{display:flex;align-items:center;justify-content:space-between}.intro-step{color:var(--muted);font-size:13px;font-weight:900}.intro-skip{min-width:74px;min-height:42px;border:0;border-radius:8px;background:#64748b;color:#fff;font:900 14px/1 system-ui}
+    .intro-icon{display:grid;place-items:center;width:72px;height:72px;margin:18px auto 0;border:1px solid var(--border);border-radius:18px;background:var(--surface-2);color:var(--intro-color,#005fcb)}.intro-icon .material-symbols-rounded{font-size:39px}
+    .intro-title{margin:18px 0 0;text-align:center;color:var(--intro-color,#005fcb);font-size:25px;font-weight:950}.intro-message{margin:14px 0 0;padding:14px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);text-align:center;font-size:16px;font-weight:800;line-height:1.45}
+    .intro-dots{margin:17px 0 0;color:#2563eb;text-align:center;font-size:20px;font-weight:900;letter-spacing:4px}.intro-actions{display:flex;gap:16px;margin-top:17px}.intro-actions .admin-btn{min-height:48px}.intro-back{background:#64748b;border-color:#64748b}
+    .app-mini-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));z-index:100002;padding:10px 14px;border-radius:8px;background:#111827;color:#fff;font-size:12px;font-weight:850;opacity:0;transform:translate(-50%,10px);pointer-events:none;transition:.18s}.app-mini-toast.show{opacity:1;transform:translate(-50%,0)}
+    [data-theme="dark"] .admin-pin-message{border-color:#315878;background:#17283a;color:#d9e8f6}
+    @media(max-width:520px){.admin-actions{display:grid;grid-template-columns:repeat(3,1fr)}.admin-actions .admin-btn{font-size:11px;padding-inline:4px}.admin-test-actions{display:grid;grid-template-columns:1fr 1fr}.intro-card{padding:18px}}
 
     /* What's New modal */
     .wn-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:color-mix(in oklab,var(--bg) 55%,#02050bed);backdrop-filter:blur(10px);z-index:99998}
@@ -745,16 +762,62 @@
   </div>
 </section>
 
-<section id="gateTestOverlay" class="gate-test-overlay" hidden aria-modal="true" role="dialog" aria-label="Test access menu">
-  <div class="gate-test-menu">
-    <p class="gate-test-title">Test access menu</p>
-    <div class="gate-test-actions">
-      <button id="gateRecheckBtn" class="updates-btn gate-recheck-btn" type="button">Recheck Access</button>
-      <button id="gateResetBtn" class="updates-btn gate-reset-btn" type="button">Reset Test</button>
+<section id="adminPinOverlay" class="admin-overlay" hidden aria-modal="true" role="dialog" aria-label="Admin PIN">
+  <div class="admin-pin-card">
+    <header class="admin-pin-head">
+      <span class="admin-pin-icon"><span class="material-symbols-rounded" aria-hidden="true">admin_panel_settings</span></span>
+      <span class="admin-pin-copy"><strong>Admin Panel</strong><span>Restricted app diagnostics</span></span>
+    </header>
+    <div class="admin-pin-body">
+      <p id="adminPinMessage" class="admin-pin-message">Enter the admin PIN to open diagnostics and app configuration status.</p>
+      <input id="adminPinInput" class="admin-pin-input" type="password" inputmode="numeric" maxlength="8" autocomplete="off" aria-label="Admin PIN">
+      <div class="admin-pin-actions">
+        <button id="adminPinCancel" class="admin-btn secondary" type="button">Cancel</button>
+        <button id="adminPinOpen" class="admin-btn" type="button">Open</button>
+      </div>
     </div>
-    <button id="gateTestCloseBtn" class="updates-btn gate-test-close" type="button">Close</button>
   </div>
 </section>
+
+<section id="adminPanelOverlay" class="admin-overlay" hidden aria-modal="true" role="dialog" aria-label="Admin Panel">
+  <div class="admin-panel-card">
+    <header class="admin-panel-head">
+      <strong>Admin Panel</strong>
+      <button id="adminPanelClose" class="admin-btn admin-close" type="button">Back</button>
+    </header>
+    <div class="admin-panel-body">
+      <div class="admin-actions">
+        <button id="adminCopyJson" class="admin-btn" type="button">Copy JSON</button>
+        <button id="adminShareText" class="admin-btn" type="button">Share Text</button>
+        <button id="adminShareFile" class="admin-btn" type="button">Share File</button>
+      </div>
+      <button id="adminRefreshJson" class="admin-btn secondary" type="button" style="width:100%;flex:none;margin-top:9px">Refresh JSON</button>
+      <div class="admin-test-actions">
+        <button id="gateRecheckBtn" class="admin-btn warning" type="button">Recheck Access</button>
+        <button id="gateResetBtn" class="admin-btn danger" type="button">Reset Test</button>
+      </div>
+      <pre id="adminStatusJson" class="admin-json">Loading Admin Panel JSON...</pre>
+    </div>
+  </div>
+</section>
+
+<section id="appIntroOverlay" class="intro-overlay" hidden aria-modal="true" role="dialog" aria-label="App Intro">
+  <article id="appIntroCard" class="intro-card">
+    <div class="intro-top">
+      <span id="appIntroStep" class="intro-step">1 of 7</span>
+      <button id="appIntroSkip" class="intro-skip" type="button">Skip</button>
+    </div>
+    <div class="intro-icon"><span id="appIntroIcon" class="material-symbols-rounded" aria-hidden="true">search</span></div>
+    <h2 id="appIntroTitle" class="intro-title">Smart Search</h2>
+    <p id="appIntroMessage" class="intro-message"></p>
+    <div id="appIntroDots" class="intro-dots" aria-hidden="true"></div>
+    <div class="intro-actions">
+      <button id="appIntroBack" class="admin-btn intro-back" type="button">Back</button>
+      <button id="appIntroNext" class="admin-btn" type="button">Next</button>
+    </div>
+  </article>
+</section>
+<div id="appMiniToast" class="app-mini-toast" role="status"></div>
 
 <!-- What’s New Modal -->
 <section id="whatsNewOverlay" class="wn-overlay" hidden aria-modal="true" role="dialog">
@@ -843,9 +906,10 @@
         import(`./pediatric_data.js${ASSET_QUERY}`),
         import(`./reference_data.js${ASSET_QUERY}`),
         import(`./document_data.js${ASSET_QUERY}`),
-        import(`./hos_data.js${ASSET_QUERY}`)
-      ]).then(([searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData, documentData, hosData]) => {
-        const shared = { assetVersion: ASSET_VERSION, searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData, documentData, hosData };
+        import(`./hos_data.js${ASSET_QUERY}`),
+        import(`./app_status.js${ASSET_QUERY}`)
+      ]).then(([searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData, documentData, hosData, appStatus]) => {
+        const shared = { assetVersion: ASSET_VERSION, searchCore, searchData, websitesData, asCallData, appConfigData, pediatricData, referenceData, documentData, hosData, appStatus };
         window.__AMBULANCE_SHARED_MODULES = shared;
         return shared;
       }).finally(() => { sharedModulesPromise = null; });
@@ -889,6 +953,10 @@
     return (await loadSharedModules()).documentData;
   }
 
+  async function getAppStatusModule() {
+    return (await loadSharedModules()).appStatus;
+  }
+
   function normalizeAppVersion(value) {
     const text = String(value || "").trim();
     return text || APP_VERSION;
@@ -896,6 +964,7 @@
 
   function setDisplayedAppVersion(value) {
     displayedAppVersion = normalizeAppVersion(value);
+    window.__AMBULANCE_APP_VERSION = displayedAppVersion;
     const appVersionLabel = document.getElementById("appVersionLabel");
     if (appVersionLabel) appVersionLabel.textContent = displayedAppVersion;
     const appStatusCopy = document.getElementById("appStatusCopy");
@@ -945,6 +1014,7 @@
       });
     return gateSessionPromise;
   }
+  window.__AMBULANCE_GET_GATE_SESSION = loadGateSession;
 
   function showProtectedContentDialog() {
     alert("Protected Content\n\nThis section is available to ambulance staff only. Other app tools remain available.");
@@ -1410,15 +1480,20 @@
       modal.style.display = "none";
       frame.src = "about:blank";
       if (modal.__popHandler) {
-        window.removeEventListener("popstate", modal.__popHandler);
+        window.removeEventListener("popstate", modal.__popHandler, true);
         modal.__popHandler = null;
       }
+      modal.__historyActive = false;
       if (fromPop) window.__modalPopHandled = true;
     }
 
     backBtn.addEventListener("click", () => {
-      closeModal();
-      if (modal.__baseUrl) history.replaceState(modal.__baseState || null, "", modal.__baseUrl);
+      if (modal.__historyActive) {
+        window.__modalPopHandled = true;
+        history.back();
+      } else {
+        closeModal();
+      }
     });
 
     modal.__open = (url, title, overlayToken) => {
@@ -1427,9 +1502,13 @@
       modal.style.display = "block";
       modal.__baseUrl = `${location.pathname}${location.search}${location.hash || ""}`;
       modal.__baseState = history.state;
+      modal.__historyActive = true;
       if (!modal.__popHandler) {
-        modal.__popHandler = () => closeModal(true);
-        window.addEventListener("popstate", modal.__popHandler);
+        modal.__popHandler = () => {
+          if (!modal.__historyActive) return;
+          closeModal(true);
+        };
+        window.addEventListener("popstate", modal.__popHandler, true);
       }
       const hash = new URLSearchParams((location.hash || "").replace(/^#/, ""));
       hash.set("overlay", "global_search_pdf");
@@ -1481,8 +1560,8 @@
   async function openGlobalPdf(page, title, type){
     const modal = ensureGlobalPdfModal();
     const key = String(type || "cpg").toLowerCase();
-    const pageBase = await documentPageBase(key);
     const defaultTitle = key === "sop" ? "SOP" : key === "cpm" ? "CPM" : key === "pat" ? "PAT" : "CPG";
+    const pageBase = await documentPageBase(key, { appToolbar:"search", doc:defaultTitle });
     modal.__open(pageBase + String(page), title || defaultTitle, `${type || "cpg"}:${page}`);
   }
   window.__AMBULANCE_OPEN_DOCUMENT_PAGE = openGlobalPdf;
@@ -1850,44 +1929,269 @@
     if (status) status.textContent = `Up to date · Ambulance ${displayedAppVersion}`;
   }
 
-  function initGateTestMenu(){
-    const header = document.querySelector(".topbar");
-    const overlay = document.getElementById("gateTestOverlay");
-    const closeBtn = document.getElementById("gateTestCloseBtn");
-    if (!header || !overlay || header.dataset.testMenuBound === "1") return;
-    header.dataset.testMenuBound = "1";
-    let tapCount = 0;
-    let tapTimer = 0;
+  const APP_INTRO_CARDS = [
+    { title:"Smart Search", message:"Find symptoms, medications, guidelines, and tools from one place.", icon:"search", color:"#005FCB" },
+    { title:"Guidelines", message:"Search CPG, SOP, CPM, and PAT documents and open the right page quickly.", icon:"menu_book", color:"#005FCB" },
+    { title:"CPR", message:"Use CPR to track cycles, medications, shocks, and key events. Sessions are saved automatically and can also be saved when you press Stop.", icon:"monitor_heart", color:"#D63838" },
+    { title:"Visual Guides", message:"Review visual placement guides for pads and ECG leads.", icon:"play_circle", color:"#0891B2" },
+    { title:"Overtime", message:"Record overtime, review history, export reports, and restore backups.", icon:"schedule", color:"#2F6FED" },
+    { title:"Notices", message:"Read important app notices from the bell icon on the home screen.", icon:"notifications", color:"#4F46E5" },
+    { title:"Report Issue", message:"From Stay Connected, send a bug report to help troubleshoot problems faster.", icon:"bug_report", color:"#20BA49" }
+  ];
 
-    function openMenu(){
-      overlay.hidden = false;
-      overlay.classList.add("show");
-      tapCount = 0;
-      clearTimeout(tapTimer);
+  function showMiniToast(message){
+    const toast = document.getElementById("appMiniToast");
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(showMiniToast.timer);
+    showMiniToast.timer = setTimeout(() => toast.classList.remove("show"), 2200);
+  }
+
+  async function copyText(text){
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (_) {
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      const copied = document.execCommand("copy");
+      area.remove();
+      return copied;
     }
+  }
 
-    function closeMenu(){
+  function initAppIntro(){
+    const overlay = document.getElementById("appIntroOverlay");
+    const card = document.getElementById("appIntroCard");
+    let index = 0;
+    function close(){
       overlay.classList.remove("show");
       overlay.hidden = true;
     }
+    function render(){
+      const item = APP_INTRO_CARDS[index];
+      card.style.setProperty("--intro-color", item.color);
+      document.getElementById("appIntroStep").textContent = `${index + 1} of ${APP_INTRO_CARDS.length}`;
+      document.getElementById("appIntroIcon").textContent = item.icon;
+      document.getElementById("appIntroTitle").textContent = item.title;
+      document.getElementById("appIntroMessage").textContent = item.message;
+      document.getElementById("appIntroDots").textContent = APP_INTRO_CARDS.map((_, i) => i === index ? "●" : "○").join(" ");
+      document.getElementById("appIntroBack").style.visibility = index === 0 ? "hidden" : "visible";
+      document.getElementById("appIntroNext").textContent = index === APP_INTRO_CARDS.length - 1 ? "Start" : "Next";
+    }
+    window.__AMBULANCE_OPEN_APP_INTRO = () => {
+      index = 0;
+      render();
+      overlay.hidden = false;
+      overlay.classList.add("show");
+    };
+    document.getElementById("appIntroSkip")?.addEventListener("click", close);
+    document.getElementById("appIntroBack")?.addEventListener("click", () => { if (index > 0) { index -= 1; render(); } });
+    document.getElementById("appIntroNext")?.addEventListener("click", () => {
+      if (index === APP_INTRO_CARDS.length - 1) close();
+      else { index += 1; render(); }
+    });
+  }
 
-    header.addEventListener("click", (event) => {
-      if (event.target.closest("button, select, a")) return;
-      tapCount += 1;
-      clearTimeout(tapTimer);
-      if (tapCount >= 3) {
-        openMenu();
+  function sha256Fallback(text){
+    function rightRotate(value, amount){ return (value >>> amount) | (value << (32 - amount)); }
+    const maxWord = 2 ** 32;
+    const words = [];
+    const ascii = unescape(encodeURIComponent(text));
+    const bitLength = ascii.length * 8;
+    let hash = sha256Fallback.h || [];
+    let k = sha256Fallback.k || [];
+    let primeCounter = k.length;
+    const isComposite = {};
+    for (let candidate = 2; primeCounter < 64; candidate += 1) {
+      if (!isComposite[candidate]) {
+        for (let i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+        hash[primeCounter] = (Math.sqrt(candidate) * maxWord) | 0;
+        k[primeCounter++] = (Math.cbrt(candidate) * maxWord) | 0;
+      }
+    }
+    sha256Fallback.h = hash;
+    sha256Fallback.k = k;
+    let input = ascii + "\x80";
+    while (input.length % 64 !== 56) input += "\x00";
+    for (let i = 0; i < input.length; i += 1) words[i >> 2] |= input.charCodeAt(i) << ((3 - i) % 4) * 8;
+    words.push((bitLength / maxWord) | 0, bitLength);
+    for (let j = 0; j < words.length;) {
+      const chunk = words.slice(j, j += 16);
+      const oldHash = hash.slice(0);
+      for (let i = 0; i < 64; i += 1) {
+        const w15 = chunk[i - 15];
+        const w2 = chunk[i - 2];
+        const a = hash[0], e = hash[4];
+        const temp1 = hash[7]
+          + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+          + ((e & hash[5]) ^ ((~e) & hash[6])) + k[i]
+          + (chunk[i] = i < 16 ? chunk[i] : (
+            chunk[i - 16]
+            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+            + chunk[i - 7]
+            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+          ) | 0);
+        const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+          + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+        hash = [(temp1 + temp2) | 0, a, hash[1], hash[2], (hash[3] + temp1) | 0, e, hash[5], hash[6]];
+      }
+      for (let i = 0; i < 8; i += 1) hash[i] = (hash[i] + oldHash[i]) | 0;
+    }
+    return hash.map(value => (value >>> 0).toString(16).padStart(8, "0")).join("");
+  }
+
+  async function sha256(text){
+    if (crypto?.subtle) {
+      const bytes = new TextEncoder().encode(text);
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      return [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, "0")).join("");
+    }
+    return sha256Fallback(text);
+  }
+
+  function initAdminPanel(){
+    const title = document.querySelector(".title");
+    const pinOverlay = document.getElementById("adminPinOverlay");
+    const panelOverlay = document.getElementById("adminPanelOverlay");
+    const pinInput = document.getElementById("adminPinInput");
+    const pinMessage = document.getElementById("adminPinMessage");
+    const pinOpen = document.getElementById("adminPinOpen");
+    const jsonEl = document.getElementById("adminStatusJson");
+    if (!title || title.dataset.adminBound === "1") return;
+    title.dataset.adminBound = "1";
+    let tapCount = 0;
+    let lastTap = 0;
+    let armedUntil = 0;
+    let holdTimer = 0;
+    const PIN_HASH = "465b288160d9a02acf544872adba58f871a78137cb6bb72eb76e3bc6adf8e6ce";
+    const PIN_SALT = "ambulance-admin-panel-v1:";
+    const FAIL_KEY = "amb_admin_pin_failures";
+    const LOCK_KEY = "amb_admin_pin_locked_until";
+
+    function hide(overlay){
+      overlay.classList.remove("show");
+      overlay.hidden = true;
+    }
+    function show(overlay){
+      overlay.hidden = false;
+      overlay.classList.add("show");
+    }
+    function lockRemaining(){
+      return Math.max(0, Number(localStorage.getItem(LOCK_KEY) || 0) - Date.now());
+    }
+    function applyLockState(){
+      const remaining = lockRemaining();
+      const locked = remaining > 0;
+      pinInput.disabled = locked;
+      pinOpen.disabled = locked;
+      pinOpen.style.opacity = locked ? ".5" : "1";
+      pinMessage.textContent = locked
+        ? `Too many incorrect attempts. Try again in ${Math.max(1, Math.ceil(remaining / 60000))} min.`
+        : "Enter the admin PIN to open diagnostics and app configuration status.";
+      return locked;
+    }
+    async function refreshAdminJson(){
+      jsonEl.textContent = "Loading Admin Panel JSON...";
+      try {
+        const { buildAppStatus } = await getAppStatusModule();
+        const status = await buildAppStatus({ includeAdmin:true });
+        jsonEl.textContent = JSON.stringify(status, null, 2);
+      } catch (error) {
+        jsonEl.textContent = JSON.stringify({ status_error:`Status report unavailable: ${error?.name || "Error"}` }, null, 2);
+      }
+    }
+    async function openPanel(){
+      hide(pinOverlay);
+      show(panelOverlay);
+      await refreshAdminJson();
+    }
+    function showPin(){
+      pinInput.value = "";
+      applyLockState();
+      show(pinOverlay);
+      setTimeout(() => { if (!pinInput.disabled) pinInput.focus(); }, 80);
+    }
+    function armHold(){
+      tapCount = 0;
+      armedUntil = performance.now() + 5000;
+      showMiniToast("Hold title for Admin Panel");
+    }
+    title.addEventListener("click", () => {
+      const now = performance.now();
+      tapCount = now - lastTap > 2500 ? 1 : tapCount + 1;
+      lastTap = now;
+      if (tapCount >= 5) armHold();
+    });
+    const beginHold = () => {
+      if (performance.now() > armedUntil) return;
+      clearTimeout(holdTimer);
+      holdTimer = setTimeout(() => {
+        if (performance.now() <= armedUntil) {
+          armedUntil = 0;
+          showPin();
+        }
+      }, 3000);
+    };
+    const cancelHold = () => clearTimeout(holdTimer);
+    title.addEventListener("touchstart", beginHold, { passive:true });
+    title.addEventListener("touchend", cancelHold, { passive:true });
+    title.addEventListener("touchcancel", cancelHold, { passive:true });
+    title.addEventListener("mousedown", beginHold);
+    title.addEventListener("mouseup", cancelHold);
+    title.addEventListener("mouseleave", cancelHold);
+
+    document.getElementById("adminPinCancel")?.addEventListener("click", () => hide(pinOverlay));
+    pinOpen?.addEventListener("click", async () => {
+      if (applyLockState()) return;
+      const valid = await sha256(PIN_SALT + pinInput.value) === PIN_HASH;
+      if (valid) {
+        localStorage.removeItem(FAIL_KEY);
+        localStorage.removeItem(LOCK_KEY);
+        await openPanel();
         return;
       }
-      tapTimer = setTimeout(() => { tapCount = 0; }, 1200);
+      const failures = Number(localStorage.getItem(FAIL_KEY) || 0) + 1;
+      pinInput.value = "";
+      if (failures >= 5) {
+        localStorage.setItem(FAIL_KEY, "0");
+        localStorage.setItem(LOCK_KEY, String(Date.now() + 15 * 60 * 1000));
+        applyLockState();
+      } else {
+        localStorage.setItem(FAIL_KEY, String(failures));
+        pinMessage.textContent = `Incorrect PIN. ${5 - failures} attempts remaining.`;
+      }
     });
-
-    overlay.addEventListener("click", (event) => {
-      if (event.target === overlay) closeMenu();
+    pinInput?.addEventListener("keydown", (event) => { if (event.key === "Enter") pinOpen.click(); });
+    document.getElementById("adminPanelClose")?.addEventListener("click", () => hide(panelOverlay));
+    document.getElementById("adminRefreshJson")?.addEventListener("click", refreshAdminJson);
+    document.getElementById("adminCopyJson")?.addEventListener("click", async () => {
+      showMiniToast(await copyText(jsonEl.textContent) ? "Status copied" : "Could not copy status");
     });
-    closeBtn?.addEventListener("click", closeMenu);
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !overlay.hidden) closeMenu();
+    document.getElementById("adminShareText")?.addEventListener("click", async () => {
+      if (navigator.share) await navigator.share({ title:"Ambulance Admin Panel", text:jsonEl.textContent }).catch(() => {});
+      else {
+        showMiniToast(await copyText(jsonEl.textContent) ? "Status copied" : "Could not copy status");
+      }
+    });
+    document.getElementById("adminShareFile")?.addEventListener("click", async () => {
+      const { jsonFile, statusFilename } = await getAppStatusModule();
+      const file = jsonFile(JSON.parse(jsonEl.textContent), statusFilename("ambulance_admin_panel"));
+      if (navigator.canShare?.({ files:[file] }) && navigator.share) {
+        await navigator.share({ title:"Ambulance Admin Panel JSON", files:[file] }).catch(() => {});
+      } else {
+        const url = URL.createObjectURL(file);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = file.name;
+        anchor.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+      }
     });
   }
 
@@ -1896,15 +2200,50 @@
     document.getElementById("panel").hidden = false;
     document.body.classList.add("panel-open");
   }
+
+  function closeActiveToolSubview(){
+    const panelBody = document.getElementById("panel-body");
+
+    const nativeDialog = [...document.querySelectorAll("dialog[open]")].pop();
+    if (nativeDialog) {
+      const cancelEvent = new Event("cancel", { cancelable:true });
+      nativeDialog.dispatchEvent(cancelEvent);
+      if (nativeDialog.open) nativeDialog.close();
+      return true;
+    }
+
+    const visualGuideClose = panelBody.querySelector("#vgModalClose");
+    if (visualGuideClose) {
+      visualGuideClose.click();
+      return true;
+    }
+
+    const pediatricDialog = panelBody.querySelector(".ped-dialog");
+    if (pediatricDialog) {
+      const closeButton = pediatricDialog.querySelector(
+        "[data-dialog-close], [data-conc-cancel]"
+      );
+      if (closeButton) closeButton.click();
+      else pediatricDialog.remove();
+      return true;
+    }
+
+    const pediatricSheet = panelBody.querySelector(".ped-sheet:not([hidden])");
+    if (pediatricSheet) {
+      const closeButton = pediatricSheet.querySelector("[data-close]");
+      if (closeButton) closeButton.click();
+      else pediatricSheet.hidden = true;
+      return true;
+    }
+
+    return false;
+  }
+
   function closePanel(fromHistory=false){
     const panel = document.getElementById("panel");
     if (!fromHistory){
       if (!panel.hidden){
-        if (currentTool === "category_guidelines") {
-          history.replaceState(null, "", location.pathname + location.search);
-          closePanel(true);
-          return;
-        }
+        if (closeActiveToolSubview()) return;
         history.back();
       }
       return;
@@ -2039,7 +2378,8 @@
     setDisplayedAppVersion(APP_VERSION);
     const globalSearch = initGlobalSearch();
     configureAppHomeStatus();
-    initGateTestMenu();
+    initAppIntro();
+    initAdminPanel();
     getAppConfigDataModule()
       .then(({ preloadAppConfig, resolveIosVersion }) => preloadAppConfig()
         .then((data) => {
@@ -2416,7 +2756,24 @@ function wireCharlieModal(){
     render();
 
     const { tool, ...params } = parseHash();
-    if (tool) runAction(tool, params, { pushState: true, initialLoad: true });
+    if (tool) {
+      const parentCategory = params.parentCategory;
+      const parentTitle = parentCategory === "community"
+        ? "Join the Community"
+        : CATEGORY_SCREENS[parentCategory]?.title;
+      if (parentCategory && parentTitle) {
+        ensureBaseState();
+        setToolState(
+          parentCategory,
+          { title:parentTitle },
+          false,
+          1
+        );
+        runAction(tool, params, { pushState:true, initialLoad:true, nested:true });
+      } else {
+        runAction(tool, params, { pushState:true, initialLoad:true });
+      }
+    }
   }
 
   // Sections layout
@@ -2873,11 +3230,15 @@ function wireCharlieModal(){
         mountEl.querySelectorAll("[data-connected-action]").forEach((button) => {
           button.addEventListener("click", () => {
             if (button.dataset.connectedAction === "intro") {
-              showComingSoon("App Intro");
+              window.__AMBULANCE_OPEN_APP_INTRO?.();
               return;
             }
             if (button.dataset.connectedAction === "report") {
-              location.href = "mailto:yniwashi@hamad.qa?subject=Ambulance%20iOS%20App%20Issue";
+              runAction(
+                "issue_report",
+                { title:"Report Issue", parentCategory:"community" },
+                { pushState:true, nested:true }
+              );
             }
           });
         });
