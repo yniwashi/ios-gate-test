@@ -1,5 +1,6 @@
 // /tools/cpg_wizard.js
 // CHANGELOG (2026-06-07):
+// - Prevent repeated CPG result taps from stacking duplicate PDF overlay history entries.
 // - Consume the PDF overlay history entry on Back instead of duplicating the CPG parent screen.
 //
 // CHANGELOG (2026-05-18):
@@ -448,6 +449,7 @@ export async function run(root) {
       titleEl.textContent = title || "CPG";
       frame.src = url;
       modal.style.display = "block";
+      const alreadyOpen = modal.__historyActive === true;
       if (!modal.__popHandler) {
         modal.__popHandler = () => {
           if (!modal.__historyActive) return;
@@ -455,10 +457,14 @@ export async function run(root) {
         };
         window.addEventListener("popstate", modal.__popHandler, true);
       }
-      modal.__baseUrl = `${location.pathname}${location.search}${location.hash || ""}`;
-      modal.__baseState = history.state;
-      modal.__historyActive = true;
-      history.pushState(buildOverlayState(overlayToken), "", buildOverlayUrl(overlayToken));
+      if (!alreadyOpen) {
+        modal.__baseUrl = `${location.pathname}${location.search}${location.hash || ""}`;
+        modal.__baseState = history.state;
+        modal.__historyActive = true;
+        history.pushState(buildOverlayState(overlayToken), "", buildOverlayUrl(overlayToken));
+      } else {
+        history.replaceState(buildOverlayState(overlayToken), "", buildOverlayUrl(overlayToken));
+      }
       modal.__openToken = (modal.__openToken || 0) + 1;
       const token = modal.__openToken;
       requestAnimationFrame(() => {

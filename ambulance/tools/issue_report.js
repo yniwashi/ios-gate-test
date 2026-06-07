@@ -1,5 +1,6 @@
 // /ambulance/tools/issue_report.js
 // CHANGELOG (2026-06-07):
+// - Simplify delivery to Share Diagnostic File and Email Text Report with clear alerts and reliable clipboard fallback.
 // - Add the Android-aligned Report Issue form and user-safe diagnostic JSON sharing.
 
 const SUPPORT_EMAIL = "support@niwashibase.com";
@@ -67,17 +68,43 @@ async function reportData(root) {
   return status;
 }
 
-async function shareFile(root, emailMode) {
+function copyTextFallback(text) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+  let copied = false;
+  try {
+    copied = document.execCommand("copy");
+  } catch (_) {}
+  textarea.remove();
+  return copied;
+}
+
+async function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (_) {}
+  }
+  return copyTextFallback(text);
+}
+
+async function shareFile(root) {
   const { jsonFile, statusFilename } = await statusModule();
   const data = await reportData(root);
   const file = jsonFile(data, statusFilename("ambulance_issue_report"));
   const shareData = {
     title: "Ambulance App Issue Report",
-    text: emailMode
-      ? `Please send this diagnostic file to ${SUPPORT_EMAIL}.`
-      : "Ambulance App issue report attached.",
+    text: `Please send this diagnostic file to ${SUPPORT_EMAIL}.`,
     files: [file]
   };
+  alert(`Choose Mail or another sharing app, then send the diagnostic file to:\n\n${SUPPORT_EMAIL}`);
   try {
     if (navigator.canShare?.({ files: [file] }) && navigator.share) {
       await navigator.share(shareData);
@@ -97,20 +124,19 @@ async function shareFile(root, emailMode) {
 
 async function emailText(root) {
   const data = await reportData(root);
-  const text = `Ambulance App Issue Report\n\n${JSON.stringify(data, null, 2)}`;
-  try {
-    await navigator.clipboard.writeText(text);
-    toast(root, "Report copied. Opening email...");
-  } catch (_) {}
+  const diagnostics = JSON.stringify(data, null, 2);
+  const copied = await copyText(diagnostics);
+  alert(copied
+    ? `App diagnostics were copied.\n\nWhen Mail opens, paste them into the message and send it to ${SUPPORT_EMAIL}.`
+    : "The app could not copy the diagnostics automatically.\n\nPlease use Share File instead.");
+  if (!copied) return;
   const concise = [
     "Ambulance App Issue Report",
     "",
     `Problem: ${data.issue_report.problem}`,
     `Area: ${data.issue_report.area}`,
     `Description: ${data.issue_report.description}`,
-    `Phone: ${data.issue_report.phone}`,
-    "",
-    "The full diagnostic report was copied. Paste it below if needed."
+    `Phone: ${data.issue_report.phone}`
   ].join("\n");
   location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Ambulance App Issue Report")}&body=${encodeURIComponent(concise)}`;
 }
@@ -156,11 +182,10 @@ export async function run(root) {
           <input id="issuePhone" type="tel" inputmode="tel" autocomplete="tel">
         </div>
         <p class="issue-send-title">Send to App Support</p>
-        <p class="issue-send-copy">Email File or Email Text sends the report directly to app support. Use Share File if you are part of the Discord server or Telegram channel, or if you know the support phone number.</p>
+        <p class="issue-send-copy">Share the diagnostic file through Mail or another app, or copy the diagnostics and open a prepared email.</p>
         <div class="issue-actions">
-          <button id="issueEmailFile" class="issue-action" type="button"><span class="material-symbols-rounded">mail</span>Email File</button>
           <button id="issueShareFile" class="issue-action" type="button"><span class="material-symbols-rounded">share</span>Share File</button>
-          <button id="issueEmailText" class="issue-action full" type="button"><span class="material-symbols-rounded">mail</span>Email Text Report</button>
+          <button id="issueEmailText" class="issue-action" type="button"><span class="material-symbols-rounded">mail</span>Email Text Report</button>
         </div>
       </div>
       <div id="issueToast" class="issue-toast" role="status"></div>
@@ -177,8 +202,7 @@ export async function run(root) {
   };
   bindOther(problem, root.querySelector("#issueProblemOther"));
   bindOther(area, root.querySelector("#issueAreaOther"));
-  root.querySelector("#issueEmailFile").addEventListener("click", () => shareFile(root, true));
-  root.querySelector("#issueShareFile").addEventListener("click", () => shareFile(root, false));
+  root.querySelector("#issueShareFile").addEventListener("click", () => shareFile(root));
   root.querySelector("#issueEmailText").addEventListener("click", () => emailText(root));
   const dismissKeyboard = () => {
     const active = document.activeElement;

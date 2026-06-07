@@ -1,5 +1,6 @@
 <!--
   CHANGELOG (2026-06-07):
+  - Prevent repeated PDF open actions from stacking duplicate overlay history entries.
   - Standardize one-press Back behavior across tool dialogs, nested routes, parent categories, and restored nested URLs.
   - Remove duplicate PDF overlay history entries and pass document names to the iOS PDF search toolbar.
   - Add Android-aligned App Intro, Report Issue diagnostics, and PIN-protected Admin Panel with temporary test access controls.
@@ -1500,9 +1501,12 @@
       titleEl.textContent = title || "CPG";
       frame.src = url;
       modal.style.display = "block";
-      modal.__baseUrl = `${location.pathname}${location.search}${location.hash || ""}`;
-      modal.__baseState = history.state;
-      modal.__historyActive = true;
+      const alreadyOpen = modal.__historyActive === true;
+      if (!alreadyOpen) {
+        modal.__baseUrl = `${location.pathname}${location.search}${location.hash || ""}`;
+        modal.__baseState = history.state;
+        modal.__historyActive = true;
+      }
       if (!modal.__popHandler) {
         modal.__popHandler = () => {
           if (!modal.__historyActive) return;
@@ -1513,7 +1517,14 @@
       const hash = new URLSearchParams((location.hash || "").replace(/^#/, ""));
       hash.set("overlay", "global_search_pdf");
       if (overlayToken) hash.set("pv", overlayToken);
-      history.pushState({ overlay: "global_search_pdf", overlayToken }, "", `${location.pathname}${location.search}#${hash.toString()}`);
+      const overlayState = {
+        ...(modal.__baseState || {}),
+        overlay: "global_search_pdf",
+        overlayToken
+      };
+      const overlayUrl = `${location.pathname}${location.search}#${hash.toString()}`;
+      if (alreadyOpen) history.replaceState(overlayState, "", overlayUrl);
+      else history.pushState(overlayState, "", overlayUrl);
       requestAnimationFrame(() => modal.classList.add("show"));
     };
 
