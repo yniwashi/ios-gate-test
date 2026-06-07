@@ -1,5 +1,6 @@
 // /tools/sop.js
 // CHANGELOG (2026-06-07):
+// - Close the SOP viewer directly so PDF.js iframe history cannot consume the first Back press.
 // - Prevent repeated SOP result taps from stacking duplicate PDF overlay history entries.
 // - Consume the PDF overlay history entry on Back instead of duplicating the SOP parent screen.
 //
@@ -454,35 +455,14 @@ export async function run(root) {
       }
     }
 
-    backBtn.addEventListener("click", () => {
-      if (modal.__historyActive) {
-        window.__modalPopHandled = true;
-        history.back();
-      } else {
-        closeModal();
-      }
-    });
+    backBtn.addEventListener("click", () => closeModal());
 
     modal.__open = (url, title, overlayToken) => {
       titleEl.textContent = title || "SOP";
       frame.src = url;
       modal.style.display = "block";
-      const alreadyOpen = modal.__historyActive === true;
-      if (!modal.__popHandler) {
-        modal.__popHandler = () => {
-          if (!modal.__historyActive) return;
-          closeModal(true);
-        };
-        window.addEventListener("popstate", modal.__popHandler, true);
-      }
-      if (!alreadyOpen) {
-        modal.__baseUrl = `${location.pathname}${location.search}${location.hash || ""}`;
-        modal.__baseState = history.state;
-        modal.__historyActive = true;
-        history.pushState(buildOverlayState(overlayToken), "", buildOverlayUrl(overlayToken));
-      } else {
-        history.replaceState(buildOverlayState(overlayToken), "", buildOverlayUrl(overlayToken));
-      }
+      modal.__historyActive = false;
+      modal.__overlayToken = overlayToken || "";
       modal.__openToken = (modal.__openToken || 0) + 1;
       const token = modal.__openToken;
       requestAnimationFrame(() => {

@@ -1,5 +1,7 @@
 <!--
   CHANGELOG (2026-06-07):
+  - Close App PDF overlays directly so PDF.js iframe history cannot consume the first Back press.
+  - Bump the testing asset key so the installed App loads the PDF Back and Report Issue fixes.
   - Prevent repeated PDF open actions from stacking duplicate overlay history entries.
   - Standardize one-press Back behavior across tool dialogs, nested routes, parent categories, and restored nested URLs.
   - Remove duplicate PDF overlay history entries and pass document names to the iOS PDF search toolbar.
@@ -886,7 +888,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260607-gate-test-6";
+  const ASSET_VERSION = "asset-20260607-gate-test-7";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -1488,43 +1490,14 @@
       if (fromPop) window.__modalPopHandled = true;
     }
 
-    backBtn.addEventListener("click", () => {
-      if (modal.__historyActive) {
-        window.__modalPopHandled = true;
-        history.back();
-      } else {
-        closeModal();
-      }
-    });
+    backBtn.addEventListener("click", () => closeModal());
 
     modal.__open = (url, title, overlayToken) => {
       titleEl.textContent = title || "CPG";
       frame.src = url;
       modal.style.display = "block";
-      const alreadyOpen = modal.__historyActive === true;
-      if (!alreadyOpen) {
-        modal.__baseUrl = `${location.pathname}${location.search}${location.hash || ""}`;
-        modal.__baseState = history.state;
-        modal.__historyActive = true;
-      }
-      if (!modal.__popHandler) {
-        modal.__popHandler = () => {
-          if (!modal.__historyActive) return;
-          closeModal(true);
-        };
-        window.addEventListener("popstate", modal.__popHandler, true);
-      }
-      const hash = new URLSearchParams((location.hash || "").replace(/^#/, ""));
-      hash.set("overlay", "global_search_pdf");
-      if (overlayToken) hash.set("pv", overlayToken);
-      const overlayState = {
-        ...(modal.__baseState || {}),
-        overlay: "global_search_pdf",
-        overlayToken
-      };
-      const overlayUrl = `${location.pathname}${location.search}#${hash.toString()}`;
-      if (alreadyOpen) history.replaceState(overlayState, "", overlayUrl);
-      else history.pushState(overlayState, "", overlayUrl);
+      modal.__historyActive = false;
+      modal.__overlayToken = overlayToken || "";
       requestAnimationFrame(() => modal.classList.add("show"));
     };
 
@@ -2226,6 +2199,12 @@
     const visualGuideClose = panelBody.querySelector("#vgModalClose");
     if (visualGuideClose) {
       visualGuideClose.click();
+      return true;
+    }
+
+    const issueDialogCancel = panelBody.querySelector("[data-dialog-cancel]");
+    if (issueDialogCancel) {
+      issueDialogCancel.click();
       return true;
     }
 
