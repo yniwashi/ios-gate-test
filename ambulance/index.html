@@ -1,5 +1,7 @@
 <!--
   CHANGELOG (2026-06-07):
+  - Make App Back navigate directly to the recorded parent or Home instead of traversing Safari/PDF iframe history.
+  - Bump the testing asset key for deterministic parent-route Back navigation.
   - Close App PDF overlays directly so PDF.js iframe history cannot consume the first Back press.
   - Bump the testing asset key so the installed App loads the PDF Back and Report Issue fixes.
   - Prevent repeated PDF open actions from stacking duplicate overlay history entries.
@@ -888,7 +890,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260607-gate-test-7";
+  const ASSET_VERSION = "asset-20260607-gate-test-8";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -2234,7 +2236,23 @@
     if (!fromHistory){
       if (!panel.hidden){
         if (closeActiveToolSubview()) return;
-        history.back();
+        const parentCategory = currentRouteParams.parentCategory;
+        const parentTitle = parentCategory === "community"
+          ? "Join the Community"
+          : CATEGORY_SCREENS[parentCategory]?.title;
+        if (parentCategory && parentTitle) {
+          const parentParams = { title:parentTitle };
+          const parentDepth = Math.max(1, currentRouteDepth - 1);
+          setToolState(parentCategory, parentParams, true, parentDepth);
+          runAction(parentCategory, parentParams, {
+            fromHistory:true,
+            pushState:false,
+            routeDepth:parentDepth
+          });
+          return;
+        }
+        history.replaceState(null, "", location.pathname + location.search);
+        closePanel(true);
       }
       return;
     }
@@ -2244,6 +2262,7 @@
     document.body.classList.remove("panel-open");
     currentTool = null;
     currentRouteDepth = 0;
+    currentRouteParams = {};
     try { sessionStorage.setItem("ambulance_home_url", location.pathname + location.search); } catch (_) {}
   }
 
@@ -2776,6 +2795,7 @@ function wireCharlieModal(){
 
   let currentTool = null;
   let currentRouteDepth = 0;
+  let currentRouteParams = {};
   let navigationSequence = 0;
   let baseStateInitialized = false;
 
@@ -2796,6 +2816,7 @@ function wireCharlieModal(){
     else history.pushState(state, "", url);
     currentTool = actionId;
     currentRouteDepth = routeDepth;
+    currentRouteParams = { ...params };
   }
 
   function showComingSoon(title){
@@ -3116,6 +3137,7 @@ function wireCharlieModal(){
         if (options.fromHistory) {
           currentTool = actionId;
           currentRouteDepth = routeDepth;
+          currentRouteParams = { ...params };
         } else if (options.pushState !== false) {
           const replace = currentTool != null && !options.nested;
           setToolState(actionId, params, replace, routeDepth);
@@ -3127,6 +3149,7 @@ function wireCharlieModal(){
         if (options.fromHistory) {
           currentTool = actionId;
           currentRouteDepth = routeDepth;
+          currentRouteParams = { ...params, title:category.title };
         } else if (options.pushState !== false) {
           const replace = currentTool != null && !options.nested;
           setToolState(actionId, { ...params, title: category.title }, replace, routeDepth);
@@ -3235,6 +3258,7 @@ function wireCharlieModal(){
         if (options.fromHistory) {
           currentTool = actionId;
           currentRouteDepth = routeDepth;
+          currentRouteParams = { ...params };
         } else if (options.pushState !== false) {
           if (options.initialLoad) {
             setToolState(actionId, params, false, routeDepth);
