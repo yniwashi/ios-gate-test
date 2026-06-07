@@ -94,7 +94,7 @@ CHANGELOG (2026-05-17):
 - WAAFELS CCP energy sequence is 6 steps: weight x 4, x 4, x 4, x 6, x 8, x 10, clamped to 360 J.
 - `APP_VERSION` in `ambulance/index.html` is the visible user-facing version.
 - `ASSET_VERSION` in `ambulance/index.html` is the hidden cache refresh key for app-owned JavaScript. Bump it whenever deployed app code changes should force a fresh load without changing the visible app version.
-- App Config messaging is intentionally split: `announcement` powers the home Notice button using the original simple iOS modal, while `notices` powers the bell inbox, unread badge, Mark read, and Read all behavior.
+- Home messaging is intentionally split: `WHATS_NEW_MESSAGE` in `ambulance/index.html` powers the rich Notice modal, while the App Config `notices` array exclusively powers the bell inbox, unread badge, Mark read, and Read all behavior.
 - Notice read IDs persist in local storage under `ambulance_ios_notice_read_ids_v1`; changing a notice ID makes it unread without requiring an App code update.
 - App-owned JavaScript imports should use `ASSET_VERSION`, including `ambulance/search_core.js`, `ambulance/search_data.js`, `ambulance/websites_data.js`, and `ambulance/tools/*.js`.
 - `TEMP/ios-webclip-gate-worker.js` is a Cloudflare Worker reference, not a static site file. It protects `/ambulance/` and `/cpr/`, mints/verifies the `wc` cookie via `/session` and `/cookie-check`, makes `/install/` non-cacheable, and tracks `/install/dl` mobileconfig downloads. Its expected environment/bindings include `SIGNING_KEY`, `HASH_SALT`, `IOS_DOWNLOADS`, `IOS_DLLOGS`, `NOTION_TOKEN`, and `NOTION_DB_ID`.
@@ -192,7 +192,7 @@ CHANGELOG (2026-05-17):
 ### 2026-06-07 03:50 +03
 - Completed the Android-aligned Overtime implementation refinements, including persistent salary reuse, full-width history records, and Android-style PDF exports; full manual testing remains open.
 - Added Android-aligned Shift Schedule with Team Calendar, Date Lookup, Coverage/Swap rules, compact date selectors, dark-mode shift contrast, and the Android home icon; full manual testing remains open.
-- Added App Config announcement and notices support: the Notice button uses `announcement` with the original simple iOS modal, while the bell uses the `notices` inbox with persistent read IDs, unread badge, Mark read, and Read all.
+- Added App Config notices support for the bell inbox with persistent read IDs, unread badge, Mark read, and Read all; restored the Notice button to the index.html-managed rich update UI with Meet Charlie and community actions.
 - Rebuilt Stay Connected as the Android `Feedback & Updates` action list with matching wording, ordering, social icons, links, and light/dark styling.
 - Kept App Intro pending and retained email-based Report Issue until the full Android app-status reporting workflow is ported.
-- Bumped the testing App asset version to `asset-20260607-gate-test-5`.
+- Bumped the testing App asset version to `asset-20260607-gate-test-6`.

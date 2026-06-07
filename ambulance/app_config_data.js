@@ -1,6 +1,6 @@
 // /ambulance/app_config_data.js
 // CHANGELOG (2026-06-07):
-// - Expose Android-compatible iOS announcement and notices parsing from the shared App config.
+// - Parse the App Config notices array for the bell inbox without coupling it to the index.html-managed Notice button.
 //
 // CHANGELOG (2026-06-05):
 // - Add shared iOS App config loader with memory/cache/remote/backup fallback behavior.
@@ -150,18 +150,10 @@ function normalizeNotice(value, defaultTitle = "Notice") {
   return notice.enabled && notice.id && notice.message ? notice : null;
 }
 
-export function resolveIosAnnouncement(data = appConfig) {
-  return normalizeNotice(data?.announcement);
-}
-
 export function resolveIosNotices(data = appConfig) {
   const notices = Array.isArray(data?.notices)
     ? data.notices.map(item => normalizeNotice(item)).filter(Boolean)
     : [];
-  const announcement = resolveIosAnnouncement(data);
-  if (announcement && !notices.some(item => item.id === announcement.id)) {
-    notices.push(announcement);
-  }
   const seen = new Set();
   return notices.filter(item => {
     if (seen.has(item.id)) return false;

@@ -1,6 +1,6 @@
 <!--
   CHANGELOG (2026-06-07):
-  - Restore the original simple Notice modal layout while keeping its text sourced from App Config `announcement`.
+  - Restore the index.html-managed Notice UI with Meet Charlie and community buttons; keep App Config exclusive to the bell inbox.
   - Rebuild Stay Connected as the Android-aligned Feedback & Updates action list.
   - Add App Config-driven Notice and notices inbox behavior with persistent unread state and bell badge.
   - Refresh the testing asset key for completed Overtime and Shift Schedule updates.
@@ -616,7 +616,6 @@
     .notice-divider{height:1px;margin:9px 0;background:var(--border)}.notice-message{margin:0;color:color-mix(in oklab,var(--text) 84%,var(--muted));font-size:13px;line-height:1.5;white-space:pre-line}
     .notice-mark-read{display:block;margin:10px 0 0 auto;appearance:none;border:1px solid color-mix(in oklab,#4f46e5 58%,var(--border));border-radius:999px;background:transparent;color:#4f46e5;padding:7px 11px;font-size:11px;font-weight:900}
     .notices-empty{display:grid;place-items:center;min-height:180px;color:var(--muted);font-size:14px;font-weight:800;text-align:center}
-    .notice-detail-message{white-space:pre-line}
     [data-theme="dark"] .notices-head{background:linear-gradient(135deg,#514bb3,#39358d)}[data-theme="dark"] .notice-item.unread{background:#302918;border-color:#6f5d2d}[data-theme="dark"] .notices-read-all,[data-theme="dark"] .notice-mark-read{color:#aaa5ff;border-color:#625daa;background:color-mix(in oklab,#4f46e5 10%,var(--surface))}
     @media(prefers-color-scheme:dark){[data-theme="auto"] .notices-head{background:linear-gradient(135deg,#514bb3,#39358d)}[data-theme="auto"] .notice-item.unread{background:#302918;border-color:#6f5d2d}[data-theme="auto"] .notices-read-all,[data-theme="auto"] .notice-mark-read{color:#aaa5ff;border-color:#625daa;background:color-mix(in oklab,#4f46e5 10%,var(--surface))}}
 
@@ -789,18 +788,6 @@
   </article>
 </section>
 
-<!-- Notice Detail -->
-<section id="noticeDetailOverlay" class="wn-overlay" hidden aria-modal="true" role="dialog" aria-label="Notice">
-  <article class="wn-card" role="document">
-    <div class="wn-header">
-      <p class="wn-pill">Notice</p>
-      <button id="noticeDetailClose" class="wn-close" type="button">Close</button>
-    </div>
-    <h2 id="noticeDetailTitle" class="wn-title">Notice</h2>
-    <div id="noticeDetailMessage" class="wn-body notice-detail-message"></div>
-  </article>
-</section>
-
 <!-- Charlie Modal -->
 <section id="charlieOverlay" class="wn-overlay" hidden aria-modal="true" role="dialog">
   <article class="wn-card" role="document">
@@ -835,7 +822,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260607-gate-test-5";
+  const ASSET_VERSION = "asset-20260607-gate-test-6";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -1042,7 +1029,6 @@
     WHATS_NEW_MESSAGE
   } = MESSAGING_CONFIG;
   const NOTICE_READ_IDS_KEY = "ambulance_ios_notice_read_ids_v1";
-  let latestAnnouncement = null;
   let latestNotices = [];
   let noticesReady = false;
   let noticesLoadPromise = null;
@@ -2076,7 +2062,10 @@
     document.getElementById("appUpdatesBtn")?.addEventListener("click", () => {
       location.href = "https://www.niwashibase.com/whats-new/?platform=ios";
     });
-    document.getElementById("appNoticeBtn")?.addEventListener("click", openCurrentAnnouncement);
+    document.getElementById("appNoticeBtn")?.addEventListener("click", () => {
+      localStorage.removeItem(WHATS_NEW_KEY);
+      handleWhatsNew();
+    });
     document.getElementById("noticesBellBtn")?.addEventListener("click", openNoticesInbox);
     document.getElementById("gateRecheckBtn")?.addEventListener("click", recheckGateTestAccess);
     document.getElementById("gateResetBtn")?.addEventListener("click", resetGateTestState);
@@ -2211,22 +2200,11 @@ function updateNoticeBadge(){
   badge.setAttribute("aria-hidden", unread > 0 ? "false" : "true");
 }
 
-function configureNoticeButton(){
-  const noticeButton = document.getElementById("appNoticeBtn");
-  const updatesButton = document.getElementById("appUpdatesBtn");
-  if (!noticeButton || !updatesButton) return;
-  const usable = !!latestAnnouncement;
-  noticeButton.hidden = !usable;
-  updatesButton.style.flex = usable ? "1" : "2";
-}
-
 async function loadNoticesFromConfig(configData = null){
   if (configData) {
     const module = await getAppConfigDataModule();
-    latestAnnouncement = module.resolveIosAnnouncement(configData);
     latestNotices = module.resolveIosNotices(configData);
     noticesReady = true;
-    configureNoticeButton();
     updateNoticeBadge();
     return latestNotices;
   }
@@ -2234,10 +2212,8 @@ async function loadNoticesFromConfig(configData = null){
   noticesLoadPromise = getAppConfigDataModule()
     .then(async module => {
       const data = await module.getAppConfig();
-      latestAnnouncement = module.resolveIosAnnouncement(data);
       latestNotices = module.resolveIosNotices(data);
       noticesReady = true;
-      configureNoticeButton();
       updateNoticeBadge();
       return latestNotices;
     })
@@ -2306,46 +2282,17 @@ async function openNoticesInbox(){
   }
 }
 
-function openNoticeDetail(notice){
-  if (!notice) return;
-  const overlay = document.getElementById("noticeDetailOverlay");
-  const title = document.getElementById("noticeDetailTitle");
-  const message = document.getElementById("noticeDetailMessage");
-  if (!overlay || !title || !message) return;
-  title.textContent = notice.title;
-  message.textContent = notice.message;
-  showNoticeOverlay(overlay);
-}
-
-async function openCurrentAnnouncement(){
-  if (!noticesReady) {
-    try {
-      await loadNoticesFromConfig();
-    } catch (_) {
-      alert("Unable to load the current notice. Check your connection and try again.");
-      return;
-    }
-  }
-  if (latestAnnouncement) openNoticeDetail(latestAnnouncement);
-}
-
 function wireNoticesControls(){
   const inbox = document.getElementById("noticesOverlay");
-  const detail = document.getElementById("noticeDetailOverlay");
   const list = document.getElementById("noticesList");
   const readAll = document.getElementById("noticesReadAll");
   const closeInbox = document.getElementById("noticesClose");
-  const closeDetail = document.getElementById("noticeDetailClose");
-  if (!inbox || !detail || inbox.dataset.bound === "1") return;
+  if (!inbox || inbox.dataset.bound === "1") return;
   inbox.dataset.bound = "1";
 
   closeInbox?.addEventListener("click", () => hideNoticeOverlay(inbox));
-  closeDetail?.addEventListener("click", () => hideNoticeOverlay(detail));
   inbox.addEventListener("click", event => {
     if (event.target === inbox) hideNoticeOverlay(inbox);
-  });
-  detail.addEventListener("click", event => {
-    if (event.target === detail) hideNoticeOverlay(detail);
   });
   readAll?.addEventListener("click", () => {
     const ids = readNoticeIds();
@@ -2365,8 +2312,7 @@ function wireNoticesControls(){
   });
   document.addEventListener("keydown", event => {
     if (event.key !== "Escape") return;
-    if (!detail.hidden) hideNoticeOverlay(detail);
-    else if (!inbox.hidden) hideNoticeOverlay(inbox);
+    if (!inbox.hidden) hideNoticeOverlay(inbox);
   });
 }
 
