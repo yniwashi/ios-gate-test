@@ -1,6 +1,7 @@
 <!--
 CHANGELOG (2026-06-07):
 - Document Overtime, Shift Schedule, App Config notices, Stay Connected, and the current testing asset version.
+- Document the production App Config switch, fail-closed access policy, and production gate audit.
 
 CHANGELOG (2026-06-06):
 - Document HOS, AS-Call, and Websites testing App migration work and HOS external navigation workaround.
@@ -97,6 +98,9 @@ CHANGELOG (2026-05-17):
 - Home messaging is intentionally split: `WHATS_NEW_MESSAGE` in `ambulance/index.html` powers the rich Notice modal, while the App Config `notices` array exclusively powers the bell inbox, unread badge, Mark read, and Read all behavior.
 - Notice read IDs persist in local storage under `ambulance_ios_notice_read_ids_v1`; changing a notice ID makes it unread without requiring an App code update.
 - App-owned JavaScript imports should use `ASSET_VERSION`, including `ambulance/search_core.js`, `ambulance/search_data.js`, `ambulance/websites_data.js`, and `ambulance/tools/*.js`.
+- The app loader is prepared for `/ios-app-config/production` with `/backup` fallback and rejects cached testing configs. Do not deploy it until both R2-backed endpoints return valid direct configs.
+- Access-type resolution must fail closed to Other User restrictions unless `/gate/session-info` confirms an active authenticated Ambulance Staff session.
+- Current testing App asset version is `asset-20260607-gate-test-9`.
 - `TEMP/ios-webclip-gate-worker.js` is a Cloudflare Worker reference, not a static site file. It protects `/ambulance/` and `/cpr/`, mints/verifies the `wc` cookie via `/session` and `/cookie-check`, makes `/install/` non-cacheable, and tracks `/install/dl` mobileconfig downloads. Its expected environment/bindings include `SIGNING_KEY`, `HASH_SALT`, `IOS_DOWNLOADS`, `IOS_DLLOGS`, `NOTION_TOKEN`, and `NOTION_DB_ID`.
 - Do not copy the worker into the static website tree unless intentionally preparing a Worker deployment.
 
@@ -196,3 +200,10 @@ CHANGELOG (2026-05-17):
 - Rebuilt Stay Connected as the Android `Feedback & Updates` action list with matching wording, ordering, social icons, links, and light/dark styling.
 - Kept App Intro pending and retained email-based Report Issue until the full Android app-status reporting workflow is ported.
 - Bumped the testing App asset version to `asset-20260607-gate-test-6`.
+
+### 2026-06-07 20:08 +03
+- Deep-reviewed iOS registration, session TTL, device identity, locked/revoked handling, protected routes, and Other User restrictions against the shared Access Gate behavior.
+- Fixed the app access policy to fail closed and fixed exact protected-route matching in the prepared production Worker.
+- Switched the testing app loader and local production/backup config drafts to the production environment and bumped `ASSET_VERSION` to `asset-20260607-gate-test-9`.
+- Confirmed the production App Config endpoint still returned `404 ios_app_config_not_found`; production deployment remains blocked until production and backup R2 configs are uploaded and verified.
+- Updated the iOS README drafts and project TODO with the required production migration order. No files were pushed or Workers deployed.

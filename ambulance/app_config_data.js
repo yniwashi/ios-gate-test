@@ -1,5 +1,6 @@
 // /ambulance/app_config_data.js
 // CHANGELOG (2026-06-07):
+// - Switch to the production iOS App Config endpoint and reject cached testing configs after the environment change.
 // - Parse the App Config notices array for the bell inbox without coupling it to the index.html-managed Notice button.
 //
 // CHANGELOG (2026-06-05):
@@ -7,8 +8,9 @@
 // - Switch to the dedicated iOS App config endpoints and resolve app.version.
 
 const DEFAULT_CONFIG = {
-  urlAppConfig: "https://api.niwashibase.com/api/v1/ambulance/ios-app-config/testing",
+  urlAppConfig: "https://api.niwashibase.com/api/v1/ambulance/ios-app-config/production",
   urlBackupAppConfig: "https://api.niwashibase.com/api/v1/ambulance/ios-app-config/backup",
+  environment: "production",
   defaultCheckIntervalHours: 3
 };
 
@@ -36,10 +38,13 @@ function getCheckIntervalMs(data) {
   return hours * 60 * 60 * 1000;
 }
 
-function validateAppConfig(data) {
+function validateAppConfig(data, allowedEnvironments = [config.environment, "backup"]) {
   const parsed = toObject(data);
   if (!parsed) throw new Error("Invalid App config");
   if (parsed.platform !== "ios") throw new Error("Invalid App config platform");
+  if (!allowedEnvironments.includes(parsed.environment)) {
+    throw new Error("Invalid App config environment");
+  }
   if (!toObject(parsed.app)) throw new Error("Missing App config");
   return parsed;
 }
@@ -70,21 +75,21 @@ function writeCache(data, source) {
   } catch (_) {}
 }
 
-async function fetchJson(url) {
+async function fetchJson(url, allowedEnvironments) {
   const res = await fetch(url, { cache: "no-cache" });
   if (!res.ok) throw new Error(`Failed to load App config (${res.status})`);
-  return validateAppConfig(await res.json());
+  return validateAppConfig(await res.json(), allowedEnvironments);
 }
 
 async function fetchFresh() {
   try {
-    const data = await fetchJson(config.urlAppConfig);
+    const data = await fetchJson(config.urlAppConfig, [config.environment]);
     appConfig = data;
     writeCache(data, "primary");
     return data;
   } catch (primaryError) {
     if (!config.urlBackupAppConfig) throw primaryError;
-    const data = await fetchJson(config.urlBackupAppConfig);
+    const data = await fetchJson(config.urlBackupAppConfig, ["backup"]);
     appConfig = data;
     writeCache(data, "backup");
     return data;

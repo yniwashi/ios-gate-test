@@ -1,5 +1,8 @@
 <!--
   CHANGELOG (2026-06-07):
+  - Prepare the app for iOS production deployment with v0.4 asset naming and no hidden gate test controls.
+  - Fail closed to limited access when the gate session is missing, invalid, or unavailable.
+  - Bump the testing asset key for the production App Config and access-policy switch.
   - Make App Back navigate directly to the recorded parent or Home instead of traversing Safari/PDF iframe history.
   - Bump the testing asset key for deterministic parent-route Back navigation.
   - Close App PDF overlays directly so PDF.js iframe history cannot consume the first Back press.
@@ -87,7 +90,6 @@
   - Replace the always-visible App Mode search field with a Search quick-action tile that opens the existing global search view.
 
   CHANGELOG (2026-06-04):
-  - Add temporary Recheck Access button to test locked/revoked status without clearing install ID.
   - Add temporary test reset button to clear gate/app storage and return to registration.
   - Expose gate access type globally for tool modules and bump test assets for CCP limited-access fix.
   - Hide global search for Other User and pass gate access type to tool modules.
@@ -581,10 +583,6 @@
     .updates-cta #charlieBtn{display:none}
     .charlie-btn{color:#C8935A;border-color:color-mix(in oklab,#C8935A 40%,transparent);background:color-mix(in oklab,#C8935A 12%,var(--surface))}
     .charlie-btn:hover{background:color-mix(in oklab,#C8935A 18%,var(--surface))}
-    .gate-reset-btn{color:#c0392b;border-color:color-mix(in oklab,#c0392b 40%,transparent);background:color-mix(in oklab,#c0392b 10%,var(--surface))}
-    .gate-reset-btn:hover{background:color-mix(in oklab,#c0392b 16%,var(--surface))}
-    .gate-recheck-btn{color:#7b4d00;border-color:color-mix(in oklab,#d99a00 44%,transparent);background:color-mix(in oklab,#d99a00 12%,var(--surface))}
-    .gate-recheck-btn:hover{background:color-mix(in oklab,#d99a00 18%,var(--surface))}
     .admin-overlay,.intro-overlay{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,5,11,.58);backdrop-filter:blur(8px)}
     .admin-overlay.show,.intro-overlay.show{display:flex}
     .admin-pin-card,.intro-card{width:min(430px,calc(100vw - 32px));overflow:hidden;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:0 24px 60px rgba(0,0,0,.42)}
@@ -593,11 +591,11 @@
     .admin-pin-icon .material-symbols-rounded{font-size:29px}.admin-pin-copy{min-width:0}.admin-pin-copy strong{display:block;font-size:21px;font-weight:950}.admin-pin-copy span{display:block;margin-top:4px;color:#e0f2fe;font-size:12px}
     .admin-pin-body{padding:16px 18px 18px}.admin-pin-message{margin:0;padding:13px;border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;color:#374151;font-size:13px;line-height:1.45}
     .admin-pin-input{box-sizing:border-box;width:100%;height:52px;margin-top:14px;border:1.5px solid #93c5fd;border-radius:8px;background:var(--surface);color:var(--text);font:900 20px/1 system-ui;text-align:center;outline:none}
-    .admin-pin-actions,.admin-actions,.admin-test-actions{display:flex;gap:9px;margin-top:14px}.admin-btn{appearance:none;min-height:46px;flex:1;border:1.5px solid #0d63b2;border-radius:8px;background:#0d63b2;color:#fff;font:900 13px/1 system-ui;padding:9px;cursor:pointer}
+    .admin-pin-actions,.admin-actions{display:flex;gap:9px;margin-top:14px}.admin-btn{appearance:none;min-height:46px;flex:1;border:1.5px solid #0d63b2;border-radius:8px;background:#0d63b2;color:#fff;font:900 13px/1 system-ui;padding:9px;cursor:pointer}
     .admin-btn.secondary{background:var(--surface);color:#0d63b2}.admin-btn.danger{border-color:#b83b31;background:#b83b31}.admin-btn.warning{border-color:#a06d00;background:#a06d00}
     .admin-panel-card{width:min(760px,calc(100vw - 24px));height:min(90dvh,820px);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border);border-radius:10px;background:var(--surface);box-shadow:0 24px 60px rgba(0,0,0,.45)}
     .admin-panel-head{justify-content:space-between}.admin-panel-head strong{font-size:20px}.admin-close{flex:none;min-height:38px;padding:8px 15px;border-color:#fff;background:transparent}
-    .admin-panel-body{min-height:0;display:flex;flex:1;flex-direction:column;padding:12px;background:var(--bg)}.admin-actions{margin-top:0}.admin-test-actions{margin:8px 0 0}
+    .admin-panel-body{min-height:0;display:flex;flex:1;flex-direction:column;padding:12px;background:var(--bg)}.admin-actions{margin-top:0}
     .admin-json{box-sizing:border-box;width:100%;min-height:0;flex:1;margin-top:10px;padding:12px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace}
     .intro-card{padding:22px}.intro-top{display:flex;align-items:center;justify-content:space-between}.intro-step{color:var(--muted);font-size:13px;font-weight:900}.intro-skip{min-width:74px;min-height:42px;border:0;border-radius:8px;background:#64748b;color:#fff;font:900 14px/1 system-ui}
     .intro-icon{display:grid;place-items:center;width:72px;height:72px;margin:18px auto 0;border:1px solid var(--border);border-radius:18px;background:var(--surface-2);color:var(--intro-color,#005fcb)}.intro-icon .material-symbols-rounded{font-size:39px}
@@ -605,7 +603,7 @@
     .intro-dots{margin:17px 0 0;color:#2563eb;text-align:center;font-size:20px;font-weight:900;letter-spacing:4px}.intro-actions{display:flex;gap:16px;margin-top:17px}.intro-actions .admin-btn{min-height:48px}.intro-back{background:#64748b;border-color:#64748b}
     .app-mini-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));z-index:100002;padding:10px 14px;border-radius:8px;background:#111827;color:#fff;font-size:12px;font-weight:850;opacity:0;transform:translate(-50%,10px);pointer-events:none;transition:.18s}.app-mini-toast.show{opacity:1;transform:translate(-50%,0)}
     [data-theme="dark"] .admin-pin-message{border-color:#315878;background:#17283a;color:#d9e8f6}
-    @media(max-width:520px){.admin-actions{display:grid;grid-template-columns:repeat(3,1fr)}.admin-actions .admin-btn{font-size:11px;padding-inline:4px}.admin-test-actions{display:grid;grid-template-columns:1fr 1fr}.intro-card{padding:18px}}
+    @media(max-width:520px){.admin-actions{display:grid;grid-template-columns:repeat(3,1fr)}.admin-actions .admin-btn{font-size:11px;padding-inline:4px}.intro-card{padding:18px}}
 
     /* What's New modal */
     .wn-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:color-mix(in oklab,var(--bg) 55%,#02050bed);backdrop-filter:blur(10px);z-index:99998}
@@ -797,10 +795,6 @@
         <button id="adminShareFile" class="admin-btn" type="button">Share File</button>
       </div>
       <button id="adminRefreshJson" class="admin-btn secondary" type="button" style="width:100%;flex:none;margin-top:9px">Refresh JSON</button>
-      <div class="admin-test-actions">
-        <button id="gateRecheckBtn" class="admin-btn warning" type="button">Recheck Access</button>
-        <button id="gateResetBtn" class="admin-btn danger" type="button">Reset Test</button>
-      </div>
       <pre id="adminStatusJson" class="admin-json">Loading Admin Panel JSON...</pre>
     </div>
   </div>
@@ -809,7 +803,7 @@
 <section id="appIntroOverlay" class="intro-overlay" hidden aria-modal="true" role="dialog" aria-label="App Intro">
   <article id="appIntroCard" class="intro-card">
     <div class="intro-top">
-      <span id="appIntroStep" class="intro-step">1 of 7</span>
+      <span id="appIntroStep" class="intro-step">1 of 6</span>
       <button id="appIntroSkip" class="intro-skip" type="button">Skip</button>
     </div>
     <div class="intro-icon"><span id="appIntroIcon" class="material-symbols-rounded" aria-hidden="true">search</span></div>
@@ -889,8 +883,8 @@
   // APP_VERSION is visible to users. ASSET_VERSION is the hidden cache refresh key.
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
-  const APP_VERSION = "v0.3";
-  const ASSET_VERSION = "asset-20260607-gate-test-8";
+  const APP_VERSION = "v0.4";
+  const ASSET_VERSION = "asset-20260607-ios-1";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -985,7 +979,7 @@
   const PROTECTED_ACTIONS = new Set(["category_guidelines", "cpg_wizard", "sop", "flowcharts", "formulary", "as_call", "hos"]);
   const PROTECTED_SEARCH_TYPES = new Set(["cpg", "sop", "cpm", "pat", "flowchart", "formulary"]);
   let gateSessionPromise = null;
-  let gateAccessType = ACCESS_TYPES.AMBULANCE_STAFF;
+  let gateAccessType = ACCESS_TYPES.NON_AMBULANCE_STAFF;
 
   function isProtectedAction(actionId) {
     return PROTECTED_ACTIONS.has(String(actionId || ""));
@@ -1006,13 +1000,18 @@
     gateSessionPromise = fetch("/gate/session-info", { credentials: "include", cache: "no-store" })
       .then((res) => res.ok ? res.json() : null)
       .then((data) => {
-        gateAccessType = data?.access_type || ACCESS_TYPES.AMBULANCE_STAFF;
+        const activeAccessType = data?.status === "active" && data?.authenticated === true
+          ? data.access_type
+          : "";
+        gateAccessType = activeAccessType === ACCESS_TYPES.AMBULANCE_STAFF
+          ? ACCESS_TYPES.AMBULANCE_STAFF
+          : ACCESS_TYPES.NON_AMBULANCE_STAFF;
         document.body.dataset.accessType = gateAccessType;
         window.__AMBULANCE_ACCESS_TYPE = gateAccessType;
         return data;
       })
       .catch(() => {
-        gateAccessType = ACCESS_TYPES.AMBULANCE_STAFF;
+        gateAccessType = ACCESS_TYPES.NON_AMBULANCE_STAFF;
         document.body.dataset.accessType = gateAccessType;
         window.__AMBULANCE_ACCESS_TYPE = gateAccessType;
         return null;
@@ -1025,29 +1024,6 @@
     alert("Protected Content\n\nThis section is available to ambulance staff only. Other app tools remain available.");
   }
 
-  async function resetGateTestState() {
-    if (!confirm("Reset this test App and return to registration?")) return;
-    try {
-      await fetch("/gate/logout", { method: "POST", credentials: "include", cache: "no-store" });
-    } catch (_) {}
-    try { localStorage.clear(); } catch (_) {}
-    try { sessionStorage.clear(); } catch (_) {}
-    try {
-      if (window.caches?.keys) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map((key) => caches.delete(key)));
-      }
-    } catch (_) {}
-    location.replace("/");
-  }
-
-  async function recheckGateTestAccess() {
-    if (!confirm("Recheck this device access now? This keeps the test device ID.")) return;
-    try {
-      await fetch("/gate/logout", { method: "POST", credentials: "include", cache: "no-store" });
-    } catch (_) {}
-    location.replace("/");
-  }
   /* =========================
        CONFIG (production)
        - HOST/theme + feature toggles
@@ -1068,17 +1044,17 @@
 
     // -- What's New modal --
     WHATS_NEW_ENABLED: true,
-    WHATS_NEW_KEY: "amb_whats_new_v04",
+    WHATS_NEW_KEY: "amb_whats_new_v04_release",
     WHATS_NEW_MESSAGE: `
   <ul>
-    <li><strong>CPG updated to v2.5.</strong> The CPG has been updated to the latest version, including the new flowcharts and medications.</li>
-    <li><strong>SOP v4.4 added.</strong> Added SOP access with search, browsing, SOP numbers, and sections.</li>
-    <li><strong>Global Search added.</strong> Search the app, CPG, SOP, Formulary, and Flowcharts from one place.</li>
-    <li><strong>RSI Checklist updated to v4.0.</strong> Checked items now highlight the checkbox cell and related checklist text cell in green.</li>
-    <li><strong>Charlie is live.</strong> Your new AI-powered app support bot is now on Discord and Telegram - ask him anything about the app.</li>
+    <li><strong>Ambulance App v0.4 released.</strong> The App now opens into a full home screen with the main tools organized like the Android app.</li>
+    <li><strong>No more Shortcuts mode.</strong> The tools that were previously opened through Shortcuts are now being moved directly into the App experience.</li>
+    <li><strong>Guidelines, Pediatrics, Calculators, Scores, Visual Guides, HOS, AS-Call, Websites, Overtime, and Shift Schedule</strong> have been refreshed so they feel closer to the Android app.</li>
+    <li><strong>Access registration is ready.</strong> Ambulance staff and other users now get the correct App access for their account type.</li>
+    <li><strong>Notices are now in the bell.</strong> Use the bell icon to read App notices. For the full What's New page, press the <strong>Updates</strong> button on the home screen.</li>
   </ul>
   <button id="wnMeetCharlie" type="button" style="width:100%;padding:13px 16px;margin:4px 0 10px;border-radius:12px;border:none;background:linear-gradient(180deg,#D4A574,#C8935A);color:#fff;font:800 15px/1 system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 4px 16px rgba(200,147,90,.40)"><img src="images/charlie.png" alt="" style="width:32px;height:32px;border-radius:6px;object-fit:contain;flex:none"> Meet Charlie →</button>
-  <p><strong>Stay in the loop:</strong> hop into Ambulance app channels for real-time alerts, feature drops, and pro tips.</p>
+  <p><strong>Stay connected:</strong> use these buttons for Charlie, community updates, and App support channels.</p>
   <div class="wn-links">
     <a class="wn-link" style="background:linear-gradient(180deg,#5c64f4,#3b42c9)" href="https://discord.gg/qc8fK3yd92" target="_blank" rel="noopener">
       <img src="images/discord.png" alt="Discord">
@@ -1918,7 +1894,6 @@
   const APP_INTRO_CARDS = [
     { title:"Smart Search", message:"Find symptoms, medications, guidelines, and tools from one place.", icon:"search", color:"#005FCB" },
     { title:"Guidelines", message:"Search CPG, SOP, CPM, and PAT documents and open the right page quickly.", icon:"menu_book", color:"#005FCB" },
-    { title:"CPR", message:"Use CPR to track cycles, medications, shocks, and key events. Sessions are saved automatically and can also be saved when you press Stop.", icon:"monitor_heart", color:"#D63838" },
     { title:"Visual Guides", message:"Review visual placement guides for pads and ECG leads.", icon:"play_circle", color:"#0891B2" },
     { title:"Overtime", message:"Record overtime, review history, export reports, and restore backups.", icon:"schedule", color:"#2F6FED" },
     { title:"Notices", message:"Read important app notices from the bell icon on the home screen.", icon:"notifications", color:"#4F46E5" },
@@ -2416,8 +2391,6 @@
       handleWhatsNew();
     });
     document.getElementById("noticesBellBtn")?.addEventListener("click", openNoticesInbox);
-    document.getElementById("gateRecheckBtn")?.addEventListener("click", recheckGateTestAccess);
-    document.getElementById("gateResetBtn")?.addEventListener("click", resetGateTestState);
     const whatsNewTrigger = document.getElementById("wnShowAgain");
     whatsNewTrigger?.addEventListener("click", () => {
       localStorage.removeItem(WHATS_NEW_KEY);
