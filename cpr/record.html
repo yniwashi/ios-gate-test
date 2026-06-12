@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>CPR Record</title>
-<link rel="stylesheet" href="page-ui.css?ver=asset-20260612-gate-test-cpr-4">
+<link rel="stylesheet" href="page-ui.css?ver=asset-20260612-gate-test-cpr-6">
 <style>
 .record-summary-card{background:var(--red);color:#fff;border-radius:18px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:12px}
 .record-summary-top{display:flex;align-items:center;gap:8px}
@@ -36,7 +36,7 @@
 </header>
 <main class="page" id="page"></main>
 <div class="page-toast" id="pageToast" hidden role="status"></div>
-<script src="cpr-storage.js?ver=asset-20260612-gate-test-cpr-4"></script>
+<script src="cpr-storage.js?ver=asset-20260612-gate-test-cpr-6"></script>
 <script>
 const params = new URLSearchParams(location.search);
 const embedded = params.get("embedded") === "1" && window.parent !== window;
@@ -171,7 +171,7 @@ async function exportRecord(record, type) {
 }
 
 document.getElementById("backBtn").onclick = () => {
-  location.href = `history.html?ver=asset-20260612-gate-test-cpr-4${embedded ? "&embedded=1" : ""}`;
+  location.href = `history.html?ver=asset-20260612-gate-test-cpr-6${embedded ? "&embedded=1" : ""}`;
 };
 render();
 </script>
