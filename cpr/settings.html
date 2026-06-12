@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>CPR Settings</title>
-<link rel="stylesheet" href="page-ui.css?ver=asset-20260612-gate-test-cpr-10">
+<link rel="stylesheet" href="page-ui.css?ver=asset-20260612-gate-test-cpr-11">
 </head>
 <body class="portrait-only settings-page">
 <header class="topbar">
@@ -72,9 +72,12 @@
     </div>
   </div>
 </section>
-<script src="cpr-storage.js?ver=asset-20260612-gate-test-cpr-10"></script>
+<script src="cpr-storage.js?ver=asset-20260612-gate-test-cpr-11"></script>
 <script>
 const embedded=new URLSearchParams(location.search).get('embedded')==='1'&&window.parent!==window;
+const cprTouchNoop=()=>{};
+document.addEventListener('touchstart',cprTouchNoop,{passive:true});
+window.addEventListener('touchstart',cprTouchNoop,{passive:true});
 let settings = cprLoadSettings();
 let introIndex=0;
 function sendParent(type){if(embedded)window.parent.postMessage({type},'*')}
