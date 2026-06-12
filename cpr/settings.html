@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>CPR Settings</title>
-<link rel="stylesheet" href="page-ui.css?ver=asset-20260612-gate-test-cpr-15">
+<link rel="stylesheet" href="page-ui.css?ver=asset-20260612-gate-test-cpr-16">
 </head>
 <body class="portrait-only settings-page">
 <header class="topbar">
@@ -72,9 +72,10 @@
     </div>
   </div>
 </section>
-<script src="cpr-storage.js?ver=asset-20260612-gate-test-cpr-15"></script>
+<script src="cpr-storage.js?ver=asset-20260612-gate-test-cpr-16"></script>
 <script>
 const embedded=new URLSearchParams(location.search).get('embedded')==='1'&&window.parent!==window;
+if(embedded)document.body.classList.add('embedded');
 const cprTouchNoop=()=>{};
 document.addEventListener('touchstart',cprTouchNoop,{passive:true});
 window.addEventListener('touchstart',cprTouchNoop,{passive:true});
@@ -141,7 +142,9 @@ document.getElementById('backBtn').onclick=closePage;
 document.getElementById('openCpr').onclick=closePage;
 let toastTimer;
 function showToast(message){const toast=document.getElementById('pageToast');toast.textContent=message;toast.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.hidden=true},1800)}
-document.getElementById('resetBtn').onclick=()=>{settings={...CprDefaults};save();render();showToast('CPR settings reset.')};
+function resetSettings(){settings={...CprDefaults};save();render();showToast('CPR settings reset.')}
+document.getElementById('resetBtn').onclick=resetSettings;
+window.addEventListener('message',event=>{if(event.data?.type==='cpr-reset-settings')resetSettings()});
 document.getElementById('stopSave').onclick=()=>{if(embedded)sendParent('cpr-stop-active');else{cprFinalizeActive();render()}};
 cprTryPortraitLock();
 document.getElementById('introBtn').onclick=openIntro;
