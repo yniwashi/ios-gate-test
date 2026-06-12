@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>CPR Settings</title>
 <script>if(new URLSearchParams(location.search).get('embedded')==='1'&&window.parent!==window)document.documentElement.classList.add('embedded-page')</script>
-<link rel="stylesheet" href="page-ui.css?ver=asset-20260613-gate-test-cpr-17">
+<link rel="stylesheet" href="page-ui.css?ver=asset-20260613-gate-test-cpr-18">
 </head>
 <body class="portrait-only settings-page">
 <header class="topbar">
@@ -73,7 +73,7 @@
     </div>
   </div>
 </section>
-<script src="cpr-storage.js?ver=asset-20260613-gate-test-cpr-17"></script>
+<script src="cpr-storage.js?ver=asset-20260613-gate-test-cpr-18"></script>
 <script>
 const embedded=new URLSearchParams(location.search).get('embedded')==='1'&&window.parent!==window;
 if(embedded)document.body.classList.add('embedded');
@@ -83,6 +83,7 @@ window.addEventListener('touchstart',cprTouchNoop,{passive:true});
 let settings = cprLoadSettings();
 let introIndex=0;
 function sendParent(type){if(embedded)window.parent.postMessage({type},'*')}
+if(embedded)window.parent.postMessage({type:'cpr-subpage-title',title:'CPR Settings',reset:true},'*');
 function closePage(){if(embedded)sendParent('cpr-close-subpage');else location.href='index.html'}
 function save(){cprSaveSettings(settings);sendParent('cpr-settings-changed')}
 function fmt(seconds){if(seconds<60)return `${seconds} sec`;let m=Math.floor(seconds/60),s=seconds%60;return s?`${m} min ${s} sec`:`${m} min`}
