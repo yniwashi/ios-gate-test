@@ -1,1322 +1,280 @@
 <!doctype html>
 <html lang="en">
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>CPR Timer — Trial</title>
-
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d63838">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CPR Timer - Android Parity Sandbox</title>
 <style>
-/* ==========================================================
-   CPR TIMER — compact, centered, responsive 
-
-   CHANGELOG (2026-01-15):
-   - Ensure CPR logs modal uses a single back layer with stable URL/state.
-   - Close logs modal before navigating away from the tool.
-
-   CHANGELOG (2026-01-04):
-   • Added Retrieve Log button that loads the autosaved draft into the in-app
-     modal so a backgrounded webclip session can be recovered and exported.
-   • Logs modal gained Draft detail view plus Delete Log / Delete All controls
-     with confirmations, along with a refreshed footer layout and padding.
-   • Unified PDF export + sharing helper for live sessions and saved logs,
-     ensuring iOS share sheet support and sanitized filenames everywhere.
-   • Restructured the actions grid: portrait keeps two-button rows while
-     landscape anchors paired controls beneath the Cycle/Adrenaline timers; all
-     buttons reset timers after Stop/ROSC/Save.
-   • Save Log button repurposed to Retrieve Log; messaging now instructs crews
-     to finalize with Stop/ROSC to capture data before using the fallback.
-
-   Layout/UX notes:
-   - Timers always under TOTAL; side-by-side in landscape
-   - Actions anchor under their respective timers in landscape
-   - Portrait: Export PDF is always in the bottom pair
-   - Overlays (countdown / “Give Adrenaline”) show only at cue and auto-center
-   - Theme “Auto” follows device theme
-   ========================================================== */
-
-/* ---------- THEME TOKENS ---------- */
 :root{
-  color-scheme: light dark;
-  --bg:#0b0d10; --fg:#e9eef3; --muted:#9aa7b3;
-  --card:#14181d; --border:#20262d;
-  --btn-bg:#171b21; --btn-fg:#e9eef3; --btn-bd:#2b333b;
-
-  --rosc-1:#fb8686; --rosc-2:#f52a2a; --rosc-bd:#ff5050;
-  --stop-1:#C62828; --stop-2:#8E1E1E; --stop-bd:#A12222;
-  --shock-1:#ffe79d; --shock-2:#ffd878; --shock-bd:#ffdb7d;
-  --amio-1:#2EA0FF; --amio-2:#1976D2; --amio-bd:#1E88E5;
-  --dsed-1:#ff5e4e; --dsed-2:#ff9f3e; --dsed-bd:#f7ac56;
-  --export-1:#1fa367; --export-2:#1cd958; --export-bd:#10b168;
-
-  --wa-m-1:#f26bfb; --wa-m-2:#e129ed; --wa-m-bd:#e52ff1;
-  --wa-y-1:#00BFA6; --wa-y-2:#008F79; --wa-y-bd:#00A68F;
-
-  --title-size: clamp(20px, 3.2vw, 36px);
-  --subtitle-size: clamp(12px, 1.8vw, 16px);
-  --total-size: clamp(40px, 6vw, 64px);
-  --kpi-digits: clamp(56px, 10vw, 140px);
-
-  --chip-h: clamp(34px, 5.2vw, 44px);
-  --chip-pad-x: clamp(8px, 1.6vw, 12px);
-
-  --gap-xs: 6px;
-  --gap-sm: 10px;
-  --gap-md: 14px;
-  --gap-lg: 18px;
-
-  --card-pad: clamp(10px, 2vw, 14px);
-  --container-pad: clamp(10px, 2.4vw, 16px);
-
-  --radius: 14px;
-  --shadow: 0 6px 20px rgba(0,0,0,.22);
-
-  --total-color:#f1f5f9;
-  --cycle-accent-light:#ff4d4d;
-  --countdown-red:#ff3333;
-  --adr-color:#2ea0ff;
-
-  /* Modal */
-  --modal-bg: rgba(0,0,0,.6);
-  --modal-card: var(--card);
-  --modal-border: var(--border);
+  color-scheme:light;
+  --bg:#f4f7fb;--surface:#fff;--surface-alt:#eff4fa;--text:#101827;--muted:#657386;--border:#d9e0ea;
+  --red:#d63838;--red-soft:#fff1f1;--red-border:#ffc7c7;--cycle:#ef4444;--adr:#2563eb;
+  --shock:#eab308;--amio:#a855f7;--dsed:#fb9e24;--rosc:#22c55e;--stop:#dc2626;--wa:#d936be;
+  --disabled:#f1f5f9;--disabled-text:#94a3b8;--shadow:0 2px 10px rgba(16,24,39,.12);--shadow-strong:0 8px 24px rgba(16,24,39,.16);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
 }
-:root[data-theme="light"]{
-  color-scheme: light;
-  --bg:#f6f8fc; --fg:#111827; --muted:#4b5563;
-  --card:#ffffff; --border:#e5e7eb;
-  --btn-bg:#ffffff; --btn-fg:#111827; --btn-bd:#d1d5db;
-  --total-color:#111111;
-  --shock-1:#FFCA28; --shock-2:#F5B700; --shock-bd:#E0A800;
-  --dsed-1:#FFE082; --dsed-2:#F5C54A; --dsed-bd:#E6B53A;
-  --modal-bg: rgba(0,0,0,.42);
+*{box-sizing:border-box}html{margin:0;min-height:100%;background:var(--red)}body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}body:before{content:"";position:fixed;z-index:120;top:0;left:0;right:0;height:env(safe-area-inset-top);background:var(--red);pointer-events:none}button,input,select{font:inherit}
+body{overscroll-behavior:none}.app{min-height:100dvh;padding:calc(env(safe-area-inset-top) + 8px) 8px calc(env(safe-area-inset-bottom) + 10px)}
+.stack{display:flex;flex-direction:column;gap:7px;max-width:980px;margin:0 auto}.card{background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:18px}
+.header{padding:7px 8px;display:flex;flex-direction:column;gap:8px}.topline{display:grid;grid-template-columns:64px 1fr 64px;align-items:center;gap:8px}
+.title{text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}.title b{font-size:23px;color:var(--red);font-weight:900;line-height:1}.trial{font-size:8.5px;font-weight:900;background:var(--red-soft);border:1px solid var(--red-border);border-radius:999px;padding:2px 8px;color:#101828}
+.headrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.hbtn,.iconbtn,.info{height:38px;border:1px solid var(--red-border);background:var(--red-soft);color:var(--red);border-radius:14px;font-size:12px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;padding:0 7px;text-decoration:none;min-width:0}
+.iconbtn{height:38px;width:100%;font-size:0}.info{height:38px;color:#000}.ghost{border:0;background:transparent}.svg-ico{width:20px;height:20px;fill:currentColor;flex:0 0 auto}.action .svg-ico{width:23px;height:23px}.tbtn .svg-ico{width:22px;height:22px}.action.long .svg-ico{width:19px;height:19px}
+.banner{display:none;padding:11px 12px;border:1px solid rgba(214,56,56,.35);background:#fff7f7;border-radius:20px;box-shadow:var(--shadow);gap:10px}.banner.show{display:flex;flex-direction:column}.banner-row{display:flex;align-items:center;gap:8px}.banner-title,.badge{font-size:11px;font-weight:900;letter-spacing:1.1px;border-radius:999px;padding:4px 10px;border:1px solid currentColor;background:color-mix(in srgb,currentColor 12%,transparent)}
+.banner-title{color:var(--red)}.banner-q{font-size:16px;font-weight:900}.banner-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.promptbtn{height:42px;border-radius:14px;border:1px solid var(--red-border);font-weight:900}.promptbtn.primary{background:var(--adr);color:#fff;border-color:#1d4ed8}.promptbtn.secondary{background:#fff;color:var(--red)}
+#resumeBanner{position:sticky;top:calc(env(safe-area-inset-top) + 8px);z-index:35;padding:14px;border:2px solid var(--red);background:linear-gradient(180deg,#fff7f7,#ffe4e4);box-shadow:0 10px 28px rgba(214,56,56,.24),0 0 0 4px rgba(214,56,56,.08)}
+#resumeBanner.show{animation:resumePulse 1.35s ease-in-out 3}
+#resumeBanner .banner-row:before{content:"!";width:24px;height:24px;border-radius:999px;background:var(--red);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;line-height:1}
+#resumeBanner .banner-title{background:var(--red);border-color:var(--red);color:#fff;font-size:12px;padding:5px 12px}
+#resumeBanner #resumeGap{margin-left:auto;border-radius:999px;background:#fff;border:1px solid var(--red-border);color:var(--red)!important;padding:4px 9px;font-size:12px!important}
+#resumeBanner .banner-q{font-size:17px;line-height:21px;color:#7f1d1d}
+#resumeBanner .promptbtn{height:48px;border-radius:16px;font-size:15px}
+#resumeBanner .promptbtn.primary{background:linear-gradient(180deg,#f87171,var(--red));border-color:#b91c1c}
+@keyframes resumePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
+.feedback{display:none;align-items:center;gap:8px;background:#effdf5;border:1px solid rgba(34,197,94,.45);border-radius:18px;padding:9px 12px;box-shadow:var(--shadow);font-size:13px;font-weight:900}.feedback.show{display:flex}.feedback .tag{color:#15803d;background:rgba(255,255,255,.82);border:1px solid rgba(34,197,94,.22);border-radius:999px;padding:4px 9px;font-size:11px;letter-spacing:.8px}
+.latest{display:none;gap:6px;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:6px 8px}.latest.show{display:flex}.chip{white-space:nowrap;border-radius:999px;padding:4px 9px;font-size:10px;font-weight:900;border:1px solid color-mix(in srgb,var(--c) 22%,transparent);background:color-mix(in srgb,var(--c) 11%,transparent);color:var(--c)}.chip span{color:var(--text);margin-left:5px}
+.total{text-align:center;padding:9px 12px;display:flex;flex-direction:column;align-items:center;gap:6px}.total .time{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:44px;font-weight:900;line-height:1}.badge.muted{color:var(--muted)}
+.timer{position:relative;overflow:hidden;padding:10px 12px;border-radius:24px;border:1px solid color-mix(in srgb,var(--accent) 34%,transparent);box-shadow:var(--shadow);background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 10%,#fff),color-mix(in srgb,var(--accent) 4.5%,#fff));display:flex;flex-direction:column;gap:2px}
+.timer>*{position:relative;z-index:1}
+.timer.active{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 32%,transparent),0 8px 24px color-mix(in srgb,var(--accent) 16%,transparent)}
+.timer.beat-pulse{animation:cycleCardPulse var(--beat-ms,500ms) linear infinite}
+.timer.beat-pulse:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 30%,#fff),color-mix(in srgb,var(--accent) 14%,#fff));opacity:0;animation:cycleTintPulse var(--beat-ms,500ms) linear infinite;pointer-events:none}
+@keyframes cycleTintPulse{0%{opacity:.82}45%{opacity:.30}100%{opacity:0}}
+@keyframes cycleCardPulse{0%{border-color:color-mix(in srgb,var(--accent) 76%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 48%,transparent),0 8px 24px color-mix(in srgb,var(--accent) 22%,transparent)}100%{border-color:color-mix(in srgb,var(--accent) 42%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 30%,transparent),0 6px 18px color-mix(in srgb,var(--accent) 12%,transparent)}}
+.timer-head{display:flex;align-items:center;gap:7px}.last{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);font-size:9.5px;font-weight:900;border-radius:999px;padding:3px 8px;background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 18%,transparent)}.last:empty{display:none}
+.digits{height:122px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--accent);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:88px;font-weight:900;line-height:1;white-space:pre-line}.digits.prompt{font-size:40px}.digits.count{font-size:86px}
+.timer-controls{display:grid;grid-template-columns:1fr 1fr;gap:36px;width:88%;margin:0 auto}.tbtn,.action{height:34px;border:0;border-radius:18px;font-size:12px;font-weight:900;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.16);transition:transform .08s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px}.tbtn:active,.action:active{transform:scale(.94)}.tbtn[disabled],.action[disabled]{background:var(--disabled)!important;color:var(--disabled-text)!important;border:1px solid #cbd5e1!important;box-shadow:none;transform:none}
+.tbtn.start{background:linear-gradient(180deg,#f87171,var(--red));border:1px solid #b91c1c}.tbtn.adrstart{background:linear-gradient(180deg,#60a5fa,var(--adr));border:1px solid #1d4ed8}.tbtn.pause{background:linear-gradient(180deg,#e2e8f0,#cbd5e1);color:#475569;border:1px solid #94a3b8}
+.actions{display:grid;gap:7px;grid-template-columns:1fr 1fr;grid-template-areas:"stop stop" "amio rosc" "shock dsed" "wa wa"}.action{height:42px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:7px}.action.full{width:100%}.stop{grid-area:stop;background:linear-gradient(180deg,#e86565,var(--stop))}.rosc{grid-area:rosc;background:linear-gradient(180deg,#59db8a,var(--rosc));color:#064e3b}.shock{grid-area:shock;background:linear-gradient(180deg,#f4d657,var(--shock));color:#713f12}.amio{grid-area:amio;background:linear-gradient(180deg,#bd7bf8,var(--amio))}.dsed{grid-area:dsed;background:linear-gradient(180deg,#ffbd63,var(--dsed));color:#7c2d12}.wa{background:linear-gradient(180deg,#e96bd4,var(--wa))}.neutral{background:linear-gradient(180deg,#4b5d73,#2e3d50)}.wa-section{grid-area:wa;width:100%;min-width:0}.wa-section>.action{width:100%}.hidden{display:none!important}
+.panel{padding:9px;border-radius:18px;background:var(--surface);border:1px solid rgba(46,58,70,.35);box-shadow:var(--shadow)}.wa-panel{display:none;margin-top:7px;width:100%}.wa-panel.show{display:block}.mini-select{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.sel{height:32px;border-radius:11px;border:1px solid #d0d5dd;background:#f0f2f5;color:#7a828c;font-size:11px;font-weight:900}.sel.on{background:var(--wa);border:2px solid var(--wa);color:#fff}.wa-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:7px}.agebox{height:50px;border:1px solid #d0d5dd;border-radius:16px;background:#fff;padding:6px 12px;display:flex;align-items:center;gap:8px}.agebox input{border:0;outline:0;font-weight:900;font-size:15px;min-width:0;width:100%}.agebox small{color:var(--muted);font-weight:900}.wa-results{margin-top:7px;display:grid;grid-template-columns:1fr 1fr;gap:5px}.wa-title{grid-column:1/-1;text-align:center;font-size:12px;font-weight:900}.wcell{min-height:48px;border-radius:10px;background:var(--surface-alt);padding:6px 7px}.wcell small{display:block;color:var(--muted);font-size:9px;font-weight:800}.wcell b{font-size:10.5px;line-height:1.2;white-space:pre-line}
+.logcard{padding:10px;overflow:hidden}.loghead{display:flex;align-items:center;justify-content:flex-start;padding:0 0 4px;font-weight:900}.recent-toggle{border:1px solid color-mix(in srgb,currentColor 24%,transparent);background:color-mix(in srgb,currentColor 12%,transparent);color:var(--muted);border-radius:999px;padding:4px 10px;font-size:11px;font-weight:900;letter-spacing:1.1px;display:inline-flex;align-items:center;justify-content:center;gap:7px}.wa-toggle{border:1px solid var(--wa);background:linear-gradient(180deg,#e96bd4,var(--wa));color:#fff;border-radius:18px;height:42px;width:100%;padding:0 12px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 6px 18px rgba(0,0,0,.16);letter-spacing:0}.wa-toggle .chev{position:absolute;right:12px}.chev{width:20px;height:20px;border-radius:999px;border:1px solid color-mix(in srgb,currentColor 30%,transparent);display:inline-flex;align-items:center;justify-content:center}.chev svg{width:10px;height:7px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;transition:transform .16s}.recent-collapsed .chev svg,.wa-section:not(.wa-open) .wa-toggle .chev svg{transform:rotate(180deg)}.recent{max-height:180px;overflow:auto;display:flex;flex-direction:column;gap:4px;padding-top:4px}.recent-collapsed .recent{display:none}.event{display:flex;align-items:center;gap:8px;background:var(--surface-alt);border-radius:12px;padding:6px 8px}.event time{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;color:var(--muted);font-weight:900;white-space:nowrap}.event b{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event small{display:none}
+.subpage-host{position:fixed;inset:0;z-index:100;background:var(--bg);display:none}.subpage-host.show{display:block}.subpage-host iframe{display:block;width:100%;height:100%;border:0;background:var(--bg)}
+.cpr-intro-modal{position:fixed;inset:0;z-index:130;background:rgba(15,23,42,.48);padding:18px;display:flex;align-items:center;justify-content:center}.cpr-intro-modal[hidden],.cpr-intro-actions button[hidden]{display:none!important}.cpr-intro-dialog{width:min(100%,520px);max-height:calc(100dvh - 36px);overflow:auto;background:#fff;border-radius:24px;padding:20px;box-shadow:0 18px 50px rgba(15,23,42,.28);display:flex;flex-direction:column;gap:16px}.cpr-intro-count{align-self:flex-start;border-radius:999px;background:#f1f5f9;color:#667085;padding:4px 10px;font-size:13px;font-weight:800}.cpr-intro-heading{display:flex;align-items:center;gap:12px}.cpr-intro-heading h2{margin:0;color:#dc2626;font-size:22px;line-height:25px;font-weight:900}.cpr-intro-icon{width:58px;height:58px;flex:0 0 58px;border-radius:16px;background:#fff1f2;color:#dc2626;display:flex;align-items:center;justify-content:center}.cpr-intro-icon svg{width:32px;height:32px;fill:currentColor}.cpr-intro-message{min-height:112px;max-height:230px;overflow:auto;border:1px solid #fecaca;border-radius:18px;background:#fff1f2;padding:16px;color:#111827;font-size:16px;line-height:23px;font-weight:800;text-align:center;display:flex;align-items:center;justify-content:center}.cpr-intro-dots{text-align:center;color:#dc2626;font-size:18px;font-weight:800;white-space:nowrap;overflow:hidden}.cpr-intro-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.cpr-intro-actions.first-page{grid-template-columns:repeat(2,minmax(0,1fr))}.cpr-intro-actions.first-page .cpr-intro-skip{grid-column:1}.cpr-intro-actions.first-page .cpr-intro-next{grid-column:2}.cpr-intro-actions button{height:44px;width:100%;border:0;border-radius:14px;color:#fff;font-weight:900}.cpr-intro-skip{background:#94a3b8}.cpr-intro-back{background:#64748b}.cpr-intro-next{background:#dc2626}
+@media (orientation:landscape) and (min-width:700px){
+  .app{padding:calc(env(safe-area-inset-top) + 16px) calc(env(safe-area-inset-right) + 14px) calc(env(safe-area-inset-bottom) + 10px) calc(env(safe-area-inset-left) + 14px)}.stack{max-width:1180px;gap:8px}.header{display:grid;grid-template-columns:64px 76px minmax(180px,1fr) 86px 46px 46px;align-items:center;padding:5px 8px;gap:8px}.topline,.headrow{display:contents}#homeBtn{grid-column:1;grid-row:1}#bpmInfo{grid-column:2;grid-row:1}.title{grid-column:3;grid-row:1;flex-direction:row;justify-content:center;min-width:0}.title b{font-size:19px}.trial{font-size:9px;white-space:nowrap}#historyBtn{grid-column:4;grid-row:1}#muteBtn{grid-column:5;grid-row:1}#settingsBtn{grid-column:6;grid-row:1}.hbtn,.info{height:38px}.iconbtn{height:34px}
+  .latest{display:none!important}.land-top{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch}.total,.land-latest{height:62px;min-height:62px;padding:7px 12px;align-self:stretch}.total{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px;text-align:left}.total .time{font-size:36px}.land-latest{display:flex;align-items:center;gap:8px;overflow:auto}
+  .timers{display:grid;grid-template-columns:1fr 1fr;gap:12px}.timer{min-height:242px;padding:12px 14px}.digits{height:122px;font-size:clamp(88px,10vw,108px)}.digits.prompt{font-size:clamp(40px,5vw,52px)}.digits.count{font-size:clamp(92px,10vw,112px)}.timer-controls{gap:56px;width:80%}.tbtn{height:42px;border-radius:18px;font-size:14px}.tbtn .svg-ico{width:22px;height:22px}
+  .actions{display:grid;grid-template-columns:repeat(4,1fr);grid-template-areas:"stop shock rosc dsed" "amio amio wa wa";gap:8px 12px}.action{height:42px}.wa-section{display:flex;flex-direction:column;gap:8px;width:100%}.wa-toggle{height:42px}.land-bottom{display:flex;justify-content:center;align-items:flex-start}.land-bottom.wa-expanded{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}.land-bottom.wa-expanded .logcard.center{width:100%;max-width:none}.land-bottom.wa-expanded #waLandscapeHost{min-width:0}.land-bottom.wa-expanded .wa-panel{margin-top:0}.logcard.center{width:75%;max-width:900px}
 }
-
-/* ---------- BASE ---------- */
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--fg)}
-.container{max-width:1200px;margin:0 auto;padding:var(--container-pad)}
-
-/* ---------- HEADER ---------- */
-.header{display:grid;gap:8px}
-.controls-row{display:flex;align-items:center;gap:var(--chip-pad-x);justify-content:space-between}
-.brand{justify-self:center;font-weight:900;font-size:var(--title-size);letter-spacing:.2px;text-align:center}
-.brand .trial{margin-left:8px;color:#ff3535;font-weight:800;font-size:.55em;white-space:nowrap}
-
-/* chips */
-.chip{display:flex;align-items:center;gap:8px;padding:0 var(--chip-pad-x);height:var(--chip-h);border-radius:12px;background:var(--card);border:1px solid var(--border);color:var(--muted)}
-.chip .chip-label{font-weight:800;font-size:var(--subtitle-size);text-transform:uppercase;letter-spacing:.08em}
-.chip input[type=number]{width:clamp(60px,10vw,86px);padding:6px 8px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--fg)}
-#backChip,#themeChip,#muteChip{background:transparent;border:none;padding:0}
-#backBtn.icon-toggle{border:1px solid var(--btn-bd);background:var(--btn-bg);font-size:22px}
-.icon-toggle{display:inline-flex;align-items:center;justify-content:center;width:var(--chip-h);height:var(--chip-h);border-radius:12px;border:1px solid var(--btn-bd);background:var(--btn-bg);color:var(--fg)}
-.icon-toggle svg{width:clamp(20px,3.4vw,28px);height:clamp(20px,3.4vw,28px)}
-
-/* ---------- TOTAL CPR ---------- */
-.total{grid-area:total;display:flex;flex-direction:column;align-items:center;margin:var(--gap-xs) 0 var(--gap-sm)}
-.total .label{font-size:var(--subtitle-size);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-bottom:2px}
-.total .digits{font-variant-numeric:tabular-nums;font-family:ui-monospace,Consolas,monospace;font-weight:900;font-size:var(--total-size);color:var(--total-color)}
-
-/* ---------- MAIN GRID ---------- */
-.main{
-  display:grid;
-  row-gap: var(--gap-md);
-  column-gap: var(--gap-lg);
-  grid-template-areas:
-    "total"
-    "cycle"
-    "adr"
-    "actions"
-    "wa"
-    "log";
-  grid-template-columns: 1fr;
-  justify-items:center;
-}
-
-/* Landscape: timers right under TOTAL; actions below timers */
-@media (orientation:landscape){
-  .main{
-    grid-template-areas:
-      "total total"
-      "cycle adr"
-      "actionsL actionsR"
-      "wa log";
-    grid-template-columns: 1fr 1fr;
-    row-gap: var(--gap-sm);
-    justify-items:center;
-    align-items:start;
-  }
-}
-
-/* ---------- TIMERS ---------- */
-.timer{
-  position:relative;
-  margin:0; padding:0;
-  text-align:center;
-  width:min(560px, 100%);
-  place-self:center;
-}
-.timer .label{
-  font-size:var(--subtitle-size);
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  color:var(--muted);
-  font-weight:900;
-  margin-bottom:6px;
-}
-.timer .digits{
-  font-variant-numeric:tabular-nums;
-  font-family:ui-monospace,Consolas,monospace;
-  font-weight:900; line-height:1;
-  font-size:var(--kpi-digits);
-}
-#cycleDigits{ color:var(--cycle-accent-light) }
-#adrDigits{   color:#2ea0ff }
-#cycleTimer{ grid-area:cycle }
-#adrTimer{   grid-area:adr }
-
-/* Overlay helpers */
-.overlay-center{
-  position:absolute;
-  left:0; top:0;
-  transform:translate(-50%,-50%);
-  z-index:2; pointer-events:none;
-  display:flex; align-items:center; justify-content:center;
-  text-align:center;
-}
-#countdown.overlay-center{
-  font-family:ui-monospace,Consolas,monospace; font-weight:900; line-height:1;
-  color:var(--countdown-red);
-  font-size: clamp(80px, min(18vw, 22vh), 180px);
-  text-shadow:0 2px 10px rgba(0,0,0,.28);
-}
-#adrPrompt.overlay-center{
-  font-family:ui-monospace,Consolas,monospace; font-weight:900; line-height:1.05;
-  color:var(--adr-color);
-  font-size: clamp(38px, min(10vw, 12vh), 96px);
-}
-/* Hide overlays by default; show only when toggled */
-#countdown{ display:none }
-#countdown.show{ display:flex }
-#adrPrompt{ display:none }
-#adrTimer.adr-show #adrPrompt{ display:flex }
-
-.cycle-hide .label, .cycle-hide #cycleDigits, .cycle-hide .icon-row{ visibility:hidden }
-#adrTimer.adr-hide .label, #adrTimer.adr-hide #adrDigits, #adrTimer.adr-hide .icon-row{ visibility:hidden }
-
-/* Start/Pause */
-.icon-row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center}
-.icon-ctrl{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;border:1px solid var(--btn-bd);background:var(--btn-bg);color:var(--btn-fg);font-size: clamp(13px, 2vw, 16px);font-weight:700}
-.icon-ctrl svg{width:22px;height:22px;fill:currentColor}
-.icon-ctrl[disabled]{opacity:.45;filter:grayscale(.1);cursor:not-allowed}
-
-/* ---------- ACTION BUTTONS ---------- */
-.btn{
-  appearance:none; cursor:pointer;
-  display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  padding:10px 12px; border-radius:12px; border:1px solid var(--btn-bd);
-  color:#fff; font-weight:800; letter-spacing:.2px;
-  font-size: clamp(14px, 2vw, 16px);
-  box-shadow:var(--shadow); width:100%; max-width:360px; margin-inline:auto;
-}
-.btn .ico{width:18px;height:18px}
-.btn:active{transform:translateY(1px)}
-.btn.is-disabled{opacity:.48;filter:grayscale(.2);cursor:not-allowed}
-.btn-rosc{ background:linear-gradient(180deg,var(--rosc-1),var(--rosc-2)); border-color:var(--rosc-bd) }
-.btn-stop{ background:linear-gradient(180deg,var(--stop-1),var(--stop-2)); border-color:var(--stop-bd) }
-.btn-shock{ background:linear-gradient(180deg,var(--shock-1),var(--shock-2)); border-color:var(--shock-bd); color:#1a1a1a }
-.btn-amio{ background:linear-gradient(180deg,var(--amio-1),var(--amio-2)); border-color:var(--amio-bd) }
-.btn-dsed{ background:linear-gradient(180deg,var(--dsed-1),var(--dsed-2)); border-color:var(--dsed-bd); color:#1a1a1a }
-.btn-export{ background:linear-gradient(180deg,var(--export-1),var(--export-2)); border-color:var(--export-bd) }
-
-/* Actions layout */
-.actions-wrap{
-  grid-area:actions;
-  display:grid;
-  gap:var(--gap-sm);
-  grid-template-columns:repeat(2, minmax(140px, 1fr));
-}
-#actionsLeft, #actionsRight{
-  display:contents;
-}
-#stopb      { order:1; }
-#roscb      { order:2; }
-#shockb     { order:3; }
-#dsedb      { order:4; }
-#amiob      { order:5; }
-#printPdf   { order:6; }
-#retrieveLog{ order:7; }
-#viewLogs   { order:8; }
-@media (orientation:landscape){
-  .actions-wrap{ display:contents; }
-  #actionsLeft, #actionsRight{
-    display:grid;
-    gap:var(--gap-sm);
-    grid-template-columns:repeat(2, minmax(140px,1fr));
-    justify-items:center;
-  }
-  #actionsLeft{ grid-area:actionsL; }
-  #actionsRight{ grid-area:actionsR; }
-}
-@media (orientation:landscape){
-  .actions-wrap{
-    grid-template-columns:repeat(4, minmax(140px, 1fr));
-  }
-}
-
-/* ---------- WAAFELSS & LOG ---------- */
-.extras-wa{grid-area:wa}
-.extras-log{grid-area:log}
-
-.wa-shell{width:min(560px, 100%); margin-inline:auto}
-.wa-shell details{border:1px solid var(--border); border-radius:12px; background:var(--card); box-shadow:var(--shadow)}
-.wa-shell summary{list-style:none; cursor:pointer; user-select:none; padding:10px 12px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:8px}
-.wa-shell summary::marker{display:none}
-.wa-shell summary .caret{transition:transform .2s ease}
-.wa-shell details[open] summary .caret{transform:rotate(90deg)}
-.wa-content{padding:var(--card-pad); padding-top:6px; border-top:1px solid var(--border)}
-.wa-row{display:grid; grid-template-columns:repeat(2, minmax(140px, 1fr)); gap:var(--gap-sm); justify-items:stretch; margin-bottom:6px}
-.wa-row input{grid-column:1 / -1;font-size: 15px; width:100%; padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--fg)}
-.wa-row input::placeholder { font-size: 15px; color: var(--muted); }
-.wrow .wtag, .wrow .wval { font-size: clamp(13px, 1.8vw, 16px); font-weight: 700; }
-.wrow .wtag { color: var(--muted); }
-.wrow .wval { color: var(--fg); }
-
-.btn-wa-m{ background:linear-gradient(180deg,var(--wa-m-1),var(--wa-m-2)); border-color:var(--wa-m-bd) }
-.btn-wa-y{ background:linear-gradient(180deg,var(--wa-y-1),var(--wa-y-2)); border-color:var(--wa-y-bd) }
-
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:var(--card-pad); width:min(560px, 100%); box-shadow:var(--shadow); margin-inline:auto}
-.toast{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  padding:18px 24px;
-  border-radius:20px;
-  background:rgba(244,63,94,.92);
-  color:#fff;
-  font-weight:800;
-  font-size:clamp(16px, 3vw, 20px);
-  text-align:center;
-  box-shadow:var(--shadow);
-  display:none;
-  max-width:340px;
-  z-index:9999;
-}
-.toast.show{ display:flex; }
-.log{max-height:240px;overflow:auto;margin:0;padding-left:20px;font-size:clamp(12px, 1.2vw, 13px)}
-.log li{margin:6px 0}
-
-/* ---------- MODAL (Logs Viewer) ---------- */
-.modal{
-  position:fixed; inset:0; display:none; align-items:flex-end; justify-content:center;
-  background:var(--modal-bg); z-index:9999;
-}
-.modal.open{ display:flex; }
-.modal-card{
-  width:min(820px, 96vw); max-height:90vh; background:var(--modal-card);
-  border:1px solid var(--modal-border); border-radius:16px 16px 0 0; box-shadow:var(--shadow);
-  display:grid; grid-template-rows:auto 1fr auto;
-  padding-top:12px;
-  margin-top:4vh;
-}
-@media (min-width:700px){
-  .modal-card{ border-radius:16px; margin-top:6vh; align-self:flex-start; }
-}
-.modal-hdr{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:12px 16px; font-weight:900; border-bottom:1px solid var(--modal-border);
-}
-.modal-body{ padding:0; overflow:auto; }
-.modal-ftr{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  justify-content:center;
-  padding:14px 12px;
-  border-top:1px solid var(--modal-border);
-}
-
-.list-item{ padding:12px 16px; border-bottom:1px solid var(--modal-border); cursor:pointer; }
-.list-item small{ display:block; color:var(--muted); margin-top:4px }
-
-.detail{
-  padding:12px 16px;
-}
-.detail table{ width:100%; border-collapse:collapse; }
-.detail th, .detail td{ padding:8px 10px; border-bottom:1px solid var(--modal-border); text-align:left; }
-.detail .kv{ margin-bottom:8px; color:var(--muted); }
-.detail .kv b{ color:var(--fg); }
-
-.modal-btn{
-  appearance:none; cursor:pointer;
-  padding:8px 12px; border-radius:10px; border:1px solid var(--btn-bd);
-  background:var(--btn-bg); color:var(--btn-fg); font-weight:800;
-}
-.modal-btn.primary{ background:linear-gradient(180deg,#1fa367,#1cd958); border-color:#10b168; color:#fff; }
-.modal-btn.warn{ background:linear-gradient(180deg,#f87171,#dc2626); border-color:#b91c1c; color:#fff; }
-#logDelete,
-#logsDeleteAll{
-  min-width:200px;
-}
-#logsExport{
-  min-width:min(320px, 92%);
-  padding:14px 22px;
-  font-size:clamp(16px, 3vw, 19px);
-  border-radius:14px;
-}
-
-/* ---------- PRINT ---------- */
-@media print{
-  .header,.controls-row,.actions-wrap,.wa-shell{display:none!important}
-  body{background:#fff;color:#000}
-  .digits{color:#000}
-}
-@page{ margin:0 }
+@media (orientation:portrait), (max-width:699px){.land-top{display:block}.land-latest{display:none}.timers{display:flex;flex-direction:column;gap:7px}}
 </style>
-
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f6f8fc" media="(prefers-color-scheme: light)">
-
+</head>
 <body>
-<div class="container">
-
-  <!-- Header -->
-  <div class="header">
-    <div class="controls-row" id="controlsRow">
-      <div class="chip" id="backChip">
-        <div class="chip-label"></div>
-        <button id="backBtn" class="icon-toggle" title="Back">←</button>
+<div class="app">
+  <main class="stack">
+    <header class="header card">
+      <div class="topline">
+        <button class="hbtn" id="homeBtn">Home</button>
+        <div class="title"><b>CPR Timer</b><span class="trial">Trial Version</span></div>
+        <button class="iconbtn" id="settingsBtn" title="Settings" aria-label="Settings"></button>
       </div>
-      <div class="chip" id="themeChip">
-        <div class="chip-label">Theme</div>
-        <button id="themeBtn" class="icon-toggle" title="Theme: Auto">Auto</button>
+      <div class="headrow">
+        <div class="info" id="bpmInfo">BPM 120</div>
+        <button class="hbtn" id="historyBtn">History</button>
+        <button class="iconbtn" id="muteBtn" title="Mute" aria-label="Mute"></button>
       </div>
-      <div class="chip" id="bpmChip">
-        <div class="chip-label">BPM</div>
-        <input id="bpm" type="number" min="60" max="160" step="1" placeholder="110">
-      </div>
-      <div class="chip" id="muteChip">
-        <div class="chip-label">Mute</div>
-        <button id="muteBtn" class="icon-toggle" title="Beat mute/unmute" aria-pressed="false">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M3 9v6h4l5 4V5L7 9H3z" stroke="currentColor" stroke-width="2"/>
-            <path id="wave" d="M15 8c1.8 1.2 3 3 3 5s-1.2 3.8-3 5" stroke="currentColor" stroke-width="2" opacity="1"/>
-            <path id="muteX" d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" opacity="0"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <div class="brand">CPR Timer <span class="trial">Trial Version</span></div>
-  </div>
-
-  <!-- Total CPR Time -->
-  <div class="total">
-    <div class="label">TOTAL CPR TIME</div>
-    <div id="totalDigits" class="digits">00:00</div>
-  </div>
-
-  <!-- Main -->
-  <main class="main">
-
-    <!-- Timers -->
-    <section id="cycleTimer" class="timer">
-      <div class="label">CYCLE</div>
-      <div id="cycleDigits" class="digits">00:00</div>
-      <div id="countdown">10</div>
-      <div class="icon-row">
-        <button id="cprStart" class="icon-ctrl" title="Start/Resume CPR">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><span>Start</span>
-        </button>
-        <button id="cprPause" class="icon-ctrl" title="Pause CPR" disabled>
-          <svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg><span>Pause</span>
-        </button>
+    </header>
+    <section id="adrBanner" class="banner">
+      <div class="banner-row"><span class="banner-title">ADRENALINE DUE</span><span id="adrAttempt" style="font-size:11px;font-weight:900;color:var(--muted)">First prompt</span><span style="flex:1"></span><b id="adrPromptSeconds" style="font-family:ui-monospace;color:var(--red)">15s</b></div>
+      <div class="banner-q">Was adrenaline given?</div>
+      <div class="banner-actions"><button class="promptbtn primary" data-action="ADRENALINE_CONFIRM_GIVEN">Given</button><button class="promptbtn secondary" data-action="ADRENALINE_CONFIRM_NOT_YET">Not Yet</button></div>
+    </section>
+    <section id="feedback" class="feedback"><span class="tag">ACTION</span><span id="feedbackText"></span></section>
+    <section id="resumeBanner" class="banner">
+      <div class="banner-row"><span class="banner-title">CPR INTERRUPTED</span><span id="resumeGap" style="font-size:11px;font-weight:900;color:var(--muted)"></span></div>
+      <div class="banner-q" id="resumeText">Review timers before continuing CPR.</div>
+      <div class="banner-actions"><button class="promptbtn primary" id="resumeAudioBtn">Continue</button><button class="promptbtn secondary" id="resumeDismissBtn">Dismiss</button></div>
+    </section>
+    <section id="latest" class="latest"></section>
+    <section class="land-top">
+      <div class="total card"><span class="badge muted">TOTAL CPR</span><div id="totalTime" class="time">00:00</div></div>
+      <div class="land-latest card"><span class="badge muted">LATEST</span><div id="landLatest" style="display:flex;gap:6px;overflow:auto;flex:1"></div></div>
+    </section>
+    <section class="timers">
+      <article id="cyclePanel" class="timer" style="--accent:var(--cycle)">
+        <div class="timer-head"><span class="badge" style="color:var(--cycle)">CYCLE</span><span id="cycleLast" class="last"></span></div>
+        <div id="cycleTime" class="digits">00:00</div>
+        <div class="timer-controls"><button id="cycleStart" class="tbtn start">Start</button><button id="cyclePause" class="tbtn pause">Pause</button></div>
+      </article>
+      <article id="adrPanel" class="timer" style="--accent:var(--adr)">
+        <div class="timer-head"><span class="badge" style="color:var(--adr)">ADRENALINE</span><span id="adrLast" class="last"></span></div>
+        <div id="adrTime" class="digits">00:00</div>
+        <div class="timer-controls"><button id="adrStart" class="tbtn adrstart">Start</button><button id="adrPause" class="tbtn pause">Pause</button></div>
+      </article>
+    </section>
+    <section class="actions">
+      <button class="action stop" data-action="STOP" data-icon="stop">Stop</button>
+      <button class="action amio long" data-action="AMIODARONE" data-icon="amiodarone">Amiodarone</button>
+      <button class="action rosc" data-action="ROSC" data-icon="rosc">ROSC</button>
+      <button class="action shock" data-action="SHOCK" data-icon="shock">Shock</button>
+      <button class="action dsed" data-action="DSED" data-icon="dsed">Log DSED</button>
+      <div class="wa-section" id="waSection">
+        <button class="wa-toggle" id="waToggle">WAAFELSS <span class="chev"><svg viewBox="0 0 10 7"><path d="M1 5.8 5 1.2 9 5.8"/></svg></span></button>
+        <section id="waPanel" class="panel wa-panel">
+          <div class="mini-select"><button class="sel on" data-wa-scope="AP">AP</button><button class="sel" data-wa-scope="CCP">CCP</button><button class="sel on" data-wa-age="Months">Months</button><button class="sel" data-wa-age="Years">Years</button></div>
+          <div class="wa-form"><label class="agebox"><span><small>Age</small><input id="waAge" inputmode="numeric" placeholder="0"></span><small id="waSuffix">months</small></label><button class="action wa" id="waCalc">Calculate</button></div>
+          <div id="waError" style="display:none;color:#dc2626;font-size:12px;font-weight:900;margin-top:7px"></div>
+          <div id="waResults" class="wa-results"></div>
+        </section>
       </div>
     </section>
-
-    <section id="adrTimer" class="timer">
-      <div class="label">ADRENALINE</div>
-      <div id="adrDigits" class="digits">00:00</div>
-      <div id="adrPrompt">Give Adrenaline</div>
-      <div class="icon-row">
-        <button id="adrStart" class="icon-ctrl" title="Start/Resume Adrenaline">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><span>Start</span>
-        </button>
-        <button id="adrPause" class="icon-ctrl" title="Pause Adrenaline" disabled>
-          <svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg><span>Pause</span>
-        </button>
-      </div>
+    <section class="land-bottom" id="landBottom">
+      <section class="logcard card center" id="recentCard">
+        <div class="loghead"><button class="recent-toggle" id="toggleRecent">RECENT EVENTS <span class="chev"><svg viewBox="0 0 10 7"><path d="M1 5.8 5 1.2 9 5.8"/></svg></span></button></div>
+        <div id="recent" class="recent"></div>
+      </section>
+      <div id="waLandscapeHost"></div>
     </section>
-
-    <!-- Actions -->
-    <div class="actions-wrap">
-      <div id="actionsLeft">
-        <button id="stopb" class="btn btn-stop"> 
-          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 0 1 7.5 5.25h9a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-9Z"></path>
-          </svg> Stop
-        </button>
-        <button id="shockb" class="btn btn-shock">
-          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M13 2 L3 14h7l-1 8 10-12h-7z" stroke="currentColor" stroke-width="2.5"/></svg>
-          Shock
-        </button>
-        <button id="amiob" class="btn btn-amio">
-          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
-          </svg>
-          Amiodarone
-        </button>
-        <button id="printPdf" class="btn btn-export is-disabled" title="Export PDF (enabled after Stop/ROSC)">
-          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15"></path>
-          </svg> Export PDF
-        </button>
-      </div>
-      <div id="actionsRight">
-        <button id="roscb" class="btn btn-rosc">
-          <svg class="ico" viewBox="0 0 24 24" fill="none"><path d="M12 21C12 21 4 14 4 9a4 4 0 0 1 8 0 4 4 0 0 1 8 0c0 5-8 12-8 12Z" stroke="currentColor" stroke-width="3"/></svg>
-          ROSC
-        </button>
-        <button id="dsedb" class="btn btn-dsed" title="Log DSED">
-          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
-          </svg>
-          Log DSED
-        </button>
-        <button id="retrieveLog" class="btn" style="background:linear-gradient(180deg,#334155,#1f2937);border-color:#475569">
-  <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-    <path stroke-linecap="round" stroke-linejoin="round"
-      d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-  </svg>
-  Retrieve Log
-</button>
-
-        <button id="viewLogs" class="btn" style="background:linear-gradient(180deg,#475569,#334155);border-color:#64748b">
-  <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-    <path stroke-linecap="round" stroke-linejoin="round"
-      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-  </svg>
-  View Logs
-</button>
-
-      </div>
-    </div>
-
-    <!-- Extras -->
-    <div class="extras-wa">
-      <div class="wa-shell">
-        <details>
-          <summary><span class="caret">▶</span><span>WAAFELSS</span></summary>
-          <div class="wa-content">
-            <div class="wa-row">
-              <input id="age" type="number" min="1" step="1" inputmode="numeric" placeholder="Enter Age">
-              <button id="mBtn" class="btn btn-wa-m" title="Months" disabled>Months</button>
-              <button id="yBtn" class="btn btn-wa-y" title="Years" disabled>Years</button>
-            </div>
-            <div class="waffles-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
-              <div class="wrow"><div class="wtag">Age</div><div id="wAge" class="wval">—</div></div>
-              <div class="wrow"><div class="wtag">Weight</div><div id="wWeight" class="wval">—</div></div>
-              <div class="wrow"><div class="wtag">Adrenaline</div><div id="wAdr" class="wval">—</div></div>
-              <div class="wrow"><div class="wtag">Amiodarone</div><div id="wAmio" class="wval">—</div></div>
-              <div class="wrow"><div class="wtag">Fluids</div><div id="wFluids" class="wval">—</div></div>
-              <div class="wrow"><div class="wtag">SGA</div><div id="wSGA" class="wval">—</div></div>
-              <div class="wrow"><div class="wtag">Energy</div><div id="wJoules" class="wval">—</div></div>
-              <div class="wrow"><div class="wtag">D10%</div><div id="wD10" class="wval">—</div></div>
-            </div>
-          </div>
-        </details>
-      </div>
-    </div>
-
-    <div class="extras-log">
-      <div class="card">
-        <ul id="log" class="log"></ul>
-      </div>
-    </div>
-
   </main>
 </div>
 
-<div id="backWarn" class="toast" role="status" aria-live="polite"></div>
-
-<!-- ===== In-App Logs Viewer Modal (no popups) ===== -->
-<div id="logsModal" class="modal" aria-hidden="true" aria-modal="true" role="dialog">
-  <div class="modal-card" role="document">
-    <div class="modal-hdr">
-      <div id="logsModalTitle">Saved CPR Logs</div>
-      <button id="logsClose" class="modal-btn" aria-label="Close">Close</button>
+<div class="subpage-host" id="subpageHost" aria-hidden="true">
+  <iframe id="subpageFrame" title="CPR page"></iframe>
+</div>
+<section class="cpr-intro-modal" id="mainIntroModal" hidden role="dialog" aria-modal="true" aria-labelledby="mainIntroTitle">
+  <div class="cpr-intro-dialog">
+    <div class="cpr-intro-count" id="mainIntroCount"></div>
+    <div class="cpr-intro-heading">
+      <span class="cpr-intro-icon" id="mainIntroIcon"></span>
+      <h2 id="mainIntroTitle"></h2>
     </div>
-    <div class="modal-body">
-      <!-- List View -->
-      <div id="logsList" hidden>
-        <div id="logsEmpty" class="list-item" style="cursor:default;display:none;color:var(--muted)">No saved CPR logs.</div>
-        <div id="logsListWrap"></div>
-      </div>
-      <!-- Detail View -->
-      <div id="logsDetail" class="detail" hidden>
-        <div class="kv"><b>Started:</b> <span id="dStarted">—</span></div>
-        <div class="kv"><b>Ended:</b> <span id="dEnded">—</span></div>
-        <div class="kv"><b>Total:</b> <span id="dTotal">—</span></div>
-        <div class="kv"><b>Counts:</b> <span id="dCounts">—</span></div>
-        <table>
-          <thead><tr><th style="width:120px">Time</th><th>Event</th></tr></thead>
-          <tbody id="dRows"></tbody>
-        </table>
-      </div>
-    </div>
-    <div class="modal-ftr">
-      <button id="logDelete" class="modal-btn warn" hidden>Delete Log</button>
-      <button id="logsDeleteAll" class="modal-btn warn" hidden>Delete All Logs</button>
-      <button id="logsExport" class="modal-btn primary" hidden>Export PDF</button>
+    <div class="cpr-intro-message" id="mainIntroMessage"></div>
+    <div class="cpr-intro-dots" id="mainIntroDots" aria-hidden="true"></div>
+    <div class="cpr-intro-actions">
+      <button class="cpr-intro-skip" id="mainIntroSkip">Skip</button>
+      <button class="cpr-intro-back" id="mainIntroBack">Back</button>
+      <button class="cpr-intro-next" id="mainIntroNext">Next</button>
     </div>
   </div>
-</div>
+</section>
 
+
+<script src="cpr-storage.js"></script>
 <script>
 (() => {
-/* ===== THEME ===== */
-const root = document.documentElement;
-const themeBtn = document.getElementById('themeBtn');
-let themeMode = 'auto';
-const mql = window.matchMedia('(prefers-color-scheme: dark)');
-function applyTheme(){
-  if (themeMode === 'auto'){
-    const isDark = mql.matches;
-    if (isDark) root.removeAttribute('data-theme');
-    else root.setAttribute('data-theme','light');
-  } else {
-    if (themeMode==='light') root.setAttribute('data-theme','light');
-    if (themeMode==='dark')  root.removeAttribute('data-theme');
-  }
-  themeBtn.textContent = themeMode[0].toUpperCase()+themeMode.slice(1);
-  themeBtn.title = `Theme: ${themeBtn.textContent}`;
-  const meta = document.querySelector('meta[name="theme-color"]')
-    || (()=>{const m=document.createElement('meta');m.setAttribute('name','theme-color');document.head.appendChild(m);return m;})();
-  requestAnimationFrame(()=>{
-    const bg = getComputedStyle(root).getPropertyValue('--bg').trim() || '#0b0d10';
-    meta.setAttribute('content', bg);
-  });
-}
-themeBtn.addEventListener('click', () => {
-  themeMode = themeMode==='auto' ? 'light' : themeMode==='light' ? 'dark' : 'auto';
-  applyTheme();
-});
-mql.addEventListener?.('change', ()=>{ if(themeMode==='auto') applyTheme(); });
-applyTheme();
-
-/* Back */
-const EXIT_MSG = "CPR is still running. Please tap Stop or ROSC to finish before leaving.";
-const backWarn = document.getElementById('backWarn');
-let backWarnTimer = null;
-let logsModalOpen = false;
-function showBackWarning(msg){
-  if(!backWarn) return;
-  backWarn.textContent = msg;
-  backWarn.classList.add('show');
-  clearTimeout(backWarnTimer);
-  backWarnTimer = setTimeout(()=>backWarn.classList.remove('show'), 3500);
-}
-function navigateBack(){
-  if (logsModalOpen) {
-    history.back();
-    return;
-  }
-  if (sessionOngoing()){
-    showBackWarning(EXIT_MSG);
-    return;
-  }
-  const storedHome = sessionStorage.getItem('ambulance_home_url');
-  if (storedHome) {
-    location.href = storedHome;
-    return;
-  }
-  if (typeof window.closePanel === 'function'){
-    window.closePanel();
-    return;
-  }
-  if (window.history.length > 1){
-    history.back();
-    return;
-  }
-  location.hash = "";
-}
-document.getElementById('backBtn')?.addEventListener('click', navigateBack);
-
-/* ===== EXIT GUARD (back button & iOS swipe) ===== */
-function sessionOngoing(){ return !!(totalStart && !totalEnd); }
-window.addEventListener('beforeunload', (e)=>{
-  if (sessionOngoing()){
-    e.preventDefault();
-    e.returnValue = "";
-  }
-});
-
-
-/* ===== HELPERS ===== */
-const $ = id => document.getElementById(id);
-const fmt = s => { s=Math.max(0,Math.floor(s)); const m=String((s/60|0)).padStart(2,'0'); return `${m}:${String(s%60).padStart(2,'0')}`; };
-const hhmmss = d => d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
-const logEl = $('log');
-const events = [];
-function stamp(label){
-  const ts=new Date();
-  const li=document.createElement('li');
-  li.textContent=`${hhmmss(ts)} | ${label}`;
-  logEl.prepend(li);
-  events.push({ts,label});
-  autosave_bump(ts, label);   // autosave on every line
-}
-
-/* ===== WAKE LOCK ===== */
-let wakeLock=null;
-async function requestWake(){try{ if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen');}}catch{}}
-async function releaseWake(){try{ if(wakeLock){await wakeLock.release(); wakeLock=null;}}catch{}}
-document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && (cprRunning||adrRunning)) requestWake(); });
-
-/* ===== AUDIO ===== */
-let audioCtx;
-const buffers={}, files={
-  beat:'beat.wav', start:'start.wav', pause:'pause.wav', stop:'stop.wav',
-  adr4:'adr4.wav', total20:'total20.wav', cpr90:'cpr90.wav', cpr120:'cpr120.wav', rosc:'rosc.wav'
+const $=id=>document.getElementById(id);
+const storeKey='cpr_android_parity_sessions_v1', activeKey='cpr_android_parity_active_v1', settingsKey='cpr_android_parity_settings_v1';
+const C={ADRENALINE_ADMINISTERED:'#2563eb',SHOCK_DELIVERED:'#eab308',AMIODARONE_ADMINISTERED:'#a855f7',DSED_DELIVERED:'#fb9e24',ROSC:'#22c55e',CYCLE_COMPLETED:'#ef4444',CPR_STARTED:'#64748b',CPR_PAUSED:'#64748b',CPR_RESUMED:'#64748b',CPR_STOPPED:'#64748b'};
+const defaults={interruptionSeconds:5,cycleSeconds:120,adrenalineSeconds:240,pauseResetThresholdSeconds:30,bpm:120,useWaafles:true,playAudioCues:true,playCycleNinetySecondCue:true,audioCueVoice:'female',confirmAdrenalineBeforeLogging:false,adrenalineAutoLogDelaySeconds:5,adrenalineConfirmationDelaySeconds:15,resumeAlertSeconds:10};
+let settings=load(settingsKey,defaults);
+let state={sessionId:null,isRunning:false,isCyclePaused:false,isAdrenalineActive:false,isAdrenalinePaused:false,cyclePausedSeconds:0,adrenalinePausedSeconds:0,isAwaitingSave:false,cprElapsedSeconds:0,cycleElapsedSeconds:0,adrenalineElapsedSeconds:0,cycleCount:0,adrenalineCount:0,amiodaroneCount:0,shockCount:0,dsedCount:0,roscCount:0,isMetronomeMuted:false,activePrompt:null,adrenalinePrompt:null,recentEvents:[]};
+let session=null,lastTick=0,timer=null,beatTimer=null,wakeLock=null,feedbackTimer=null,wa={scope:'AP',ageGroup:'Months'};
+let spokenQueue=[],spokenPlaying=false,spokenSource=null,spokenEndTimer=null,spokenGeneration=0;
+let flags={cycleWarning:false,cycleFinished:false,total20:false};
+let mainIntroIndex=0;
+let resumeAlertVisible=false;
+let audioCtx=null,buffers={},bufferLoads={},audioFiles=['cpr_metronome_tone.mp3','cpr_female_start_cpr.wav','cpr_female_paused.wav','cpr_female_time_log.wav','cpr_female_rosc.wav','cpr_female_check_rhythm.wav','cpr_female_cycle_90_seconds.wav','cpr_female_give_adrenaline.wav','cpr_female_first_adrenaline_started.wav','cpr_female_total_20_minutes.wav','cpr_female_adrenaline_confirm_due.wav','cpr_female_adrenaline_confirm_repeat.wav','cpr_female_adrenaline_confirm_no_response.wav','cpr_female_adrenaline_confirm_marked_not_yet.wav','cpr_female_amiodarone_first_dose_due.wav','cpr_female_amiodarone_second_dose_due.wav','cpr_male_start_cpr.wav','cpr_male_paused.wav','cpr_male_time_log.wav','cpr_male_rosc.wav','cpr_male_check_rhythm.wav','cpr_male_cycle_90_seconds.wav','cpr_male_give_adrenaline.wav','cpr_male_first_adrenaline_started.wav','cpr_male_total_20_minutes.wav','cpr_male_adrenaline_confirm_due.wav','cpr_male_adrenaline_confirm_repeat.wav','cpr_male_adrenaline_confirm_no_response.wav','cpr_male_adrenaline_confirm_marked_not_yet.wav','cpr_male_amiodarone_first_dose_due.wav','cpr_male_amiodarone_second_dose_due.wav'];
+const iconPath={
+settings:'M370,880L354,752Q341,747 329.5,740Q318,733 307,725L188,775L78,585L181,507Q180,500 180,493.5Q180,487 180,480Q180,473 180,466.5Q180,460 181,453L78,375L188,185L307,235Q318,227 330,220Q342,213 354,208L370,80L590,80L606,208Q619,213 630.5,220Q642,227 653,235L772,185L882,375L779,453Q780,460 780,466.5Q780,473 780,480Q780,487 780,493.5Q780,500 778,507L881,585L771,775L653,725Q642,733 630,740Q618,747 606,752L590,880L370,880ZM440,800L519,800L533,694Q564,686 590.5,670.5Q617,655 639,633L738,674L777,606L691,541Q696,527 698,511.5Q700,496 700,480Q700,464 698,448.5Q696,433 691,419L777,354L738,286L639,328Q617,305 590.5,289.5Q564,274 533,266L520,160L441,160L427,266Q396,274 369.5,289.5Q343,305 321,327L222,286L183,354L269,418Q264,433 262,448Q260,463 260,480Q260,496 262,511Q264,526 269,541L183,606L222,674L321,632Q343,655 369.5,670.5Q396,686 427,694L440,800ZM482,620Q540,620 581,579Q622,538 622,480Q622,422 581,381Q540,340 482,340Q423,340 382.5,381Q342,422 342,480Q342,538 382.5,579Q423,620 482,620Z',
+unmute:'M560,829L560,747Q650,721 705,647Q760,573 760,479Q760,385 705,311Q650,237 560,211L560,129Q684,157 762,254.5Q840,352 840,479Q840,606 762,703.5Q684,801 560,829ZM120,600L120,360L280,360L480,160L480,800L280,600L120,600ZM560,640L560,318Q607,340 633.5,384Q660,428 660,480Q660,531 633.5,574.5Q607,618 560,640ZM400,354L314,440L200,440L200,520L314,520L400,606L400,354Z',
+mute:'M792,904L671,783Q646,799 618,810.5Q590,822 560,829L560,747Q574,742 587.5,737Q601,732 613,725L480,592L480,800L280,600L120,600L120,360L248,360L56,168L112,112L848,848L792,904ZM784,672L726,614Q743,583 751.5,549Q760,515 760,479Q760,385 705,311Q650,237 560,211L560,129Q684,157 762,254.5Q840,352 840,479Q840,532 825.5,581Q811,630 784,672ZM650,538L560,448L560,318Q607,340 633.5,384Q660,428 660,480Q660,495 657.5,509.5Q655,524 650,538ZM480,368L376,264L480,160L480,368ZM400,606L400,512L328,440L200,440L200,520L314,520L400,606Z',
+start:'M320,760L320,200L760,480L320,760ZM400,614L610,480L400,346L400,614Z',
+pause:'M520,760L520,200L760,200L760,760L520,760ZM200,760L200,200L440,200L440,760L200,760ZM600,680L680,680L680,280L600,280L600,680ZM280,680L360,680L360,280L280,280L280,680Z',
+stop:'M240,720L240,240L720,240L720,720L240,720ZM320,640L640,640L640,320L320,320L320,640Z',
+amiodarone:'M440,520L200,520L200,440L440,440L440,200L520,200L520,440L760,440L760,520L520,520L520,760L440,760L440,520Z',
+dsed:'M440,520L200,520L200,440L440,440L440,200L520,200L520,440L760,440L760,520L520,520L520,760L440,760L440,520Z',
+rosc:'M480,840L422,788Q321,697 255,631Q189,565 150,512.5Q111,460 95.5,416Q80,372 80,326Q80,232 143,169Q206,106 300,106Q352,106 399,128Q446,150 480,190Q514,150 561,128Q608,106 660,106Q754,106 817,169Q880,232 880,326Q880,372 864.5,416Q849,460 810,512.5Q771,565 705,631Q639,697 538,788L480,840ZM480,732Q576,646 638,584.5Q700,523 736,477.5Q772,432 786,396.5Q800,361 800,326Q800,266 760,226Q720,186 660,186Q613,186 573,212.5Q533,239 518,280L442,280Q427,239 387,212.5Q347,186 300,186Q240,186 200,226Q160,266 160,326Q160,361 174,396.5Q188,432 224,477.5Q260,523 322,584.5Q384,646 480,732Z',
+shock:'M280,880L440,580L120,540L600,80L680,80L520,380L840,420L360,880L280,880ZM502,633L663,479L394,445L457,328L297,482L565,515L502,633Z'
 };
-function primeAudio(){
-  if(!audioCtx){ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }
-  if (audioCtx.state === 'suspended') { audioCtx.resume().catch(()=>{}); }
-  try{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); g.gain.value=0.0001; o.connect(g).connect(audioCtx.destination); o.start(); setTimeout(()=>{try{o.stop();}catch{}},1);}catch{}
-  (async()=>{ for(const [k,p] of Object.entries(files)){ if(buffers[k]) continue; try{ const b=await fetch(p).then(r=>r.arrayBuffer()); buffers[k]=await audioCtx.decodeAudioData(b);}catch{} } })();
+function svgIcon(name){return `<svg class="svg-ico" viewBox="0 0 960 960" aria-hidden="true"><path d="${iconPath[name]}"></path></svg>`}
+function withIcon(name,text){return `${svgIcon(name)}<span>${text}</span>`}
+function load(k,f){try{return {...f,...JSON.parse(localStorage.getItem(k)||'{}')}}catch{return {...f}}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+function allSessions(){try{return JSON.parse(localStorage.getItem(storeKey)||'[]')}catch{return[]}}
+function saveSessions(a){try{localStorage.setItem(storeKey,JSON.stringify(a))}catch{}}
+function fmt(s){s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function clock(ms){return new Date(ms).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false})}
+function clockSec(ms){return new Date(ms).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function eventColor(t){return C[t]||'#64748b'}
+function createAudioContext(){audioCtx=new(window.AudioContext||window.webkitAudioContext)();bufferLoads={};return audioCtx}
+async function ensureAudioContext(options={}){if(options.recreate&&audioCtx){try{await audioCtx.close()}catch{}audioCtx=null;bufferLoads={}}let ctx=!audioCtx||audioCtx.state==='closed'?createAudioContext():audioCtx;if(ctx.state!=='running')await ctx.resume();return ctx}
+async function unlockAudio(options={}){let ctx;try{ctx=await ensureAudioContext(options)}catch(error){console.warn('Recreating CPR audio context after resume failure',error);try{audioCtx?.close()}catch{}audioCtx=createAudioContext();ctx=audioCtx;await ctx.resume()}if(ctx.state!=='running')await ctx.resume();let silent=ctx.createBuffer(1,1,ctx.sampleRate||44100),source=ctx.createBufferSource();source.buffer=silent;source.connect(ctx.destination);source.start(0);return ctx}
+async function loadAudio(file){if(buffers[file])return buffers[file];if(bufferLoads[file])return bufferLoads[file];bufferLoads[file]=(async()=>{let ctx=await ensureAudioContext(),response=await fetch('audio/'+file);if(!response.ok)throw new Error(`Audio ${response.status}: ${file}`);let data=await response.arrayBuffer(),buffer=await ctx.decodeAudioData(data);buffers[file]=buffer;return buffer})().catch(error=>{console.error('CPR audio load failed',file,error);return null}).finally(()=>{delete bufferLoads[file]});return bufferLoads[file]}
+async function primeAudio(){try{await ensureAudioContext();loadAudio('cpr_metronome_tone.mp3');audioFiles.filter(file=>file.startsWith(`cpr_${settings.audioCueVoice}_`)).forEach(file=>loadAudio(file))}catch(error){console.error('CPR audio initialization failed',error)}}
+function cueName(n){return `cpr_${settings.audioCueVoice}_${n.replace(/^cpr_/,'')}.wav`}
+function playCue(n){if(!settings.playAudioCues)return false;spokenQueue.push({file:cueName(n),attempts:0});playNextCue();return true}
+async function playNextCue(){if(spokenPlaying||!spokenQueue.length)return;spokenPlaying=true;let generation=spokenGeneration,entry=spokenQueue[0],played=false;try{let buffer=await loadAudio(entry.file);if(generation!==spokenGeneration)return;if(!buffer)throw new Error(`Unavailable CPR cue: ${entry.file}`);await ensureAudioContext();await playBuffer(buffer,1,true);played=true}catch(error){console.error('CPR queued cue failed',entry.file,error);entry.attempts++}finally{if(generation===spokenGeneration){spokenPlaying=false;spokenSource=null;clearTimeout(spokenEndTimer);spokenEndTimer=null;if(played||entry.attempts>=3)spokenQueue.shift();setTimeout(playNextCue,played?0:400)}}}
+function stopSpokenCues(){spokenGeneration++;spokenQueue=[];spokenPlaying=false;clearTimeout(spokenEndTimer);spokenEndTimer=null;try{spokenSource?.stop()}catch{}spokenSource=null}
+function playBuffer(buffer,vol=1,isSpoken=false){return new Promise(resolve=>{try{let source=audioCtx.createBufferSource(),gain=audioCtx.createGain(),done=false;let finish=()=>{if(done)return;done=true;resolve(true)};source.buffer=buffer;gain.gain.value=vol;source.connect(gain).connect(audioCtx.destination);source.onended=finish;if(isSpoken){spokenSource=source;spokenEndTimer=setTimeout(finish,Math.ceil((buffer.duration||1)*1000)+750)}source.start()}catch(error){console.error('CPR audio playback failed',error);resolve(false)}})}
+async function play(file,vol=1){try{let buffer=await loadAudio(file);if(buffer){await ensureAudioContext();return await playBuffer(buffer,vol,false)}}catch(error){console.error('CPR audio play failed',file,error)}return false}
+function beep(freq=760,duration=35,vol=.06){try{let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='square';o.frequency.value=freq;g.gain.value=vol;o.connect(g).connect(audioCtx.destination);o.start();setTimeout(()=>{try{o.stop()}catch{}},duration);return true}catch{return false}}
+async function playMetronomeTick(){if(await play('cpr_metronome_tone.mp3',.9))return;try{await ensureAudioContext();beep()}catch{}}
+function resetSpokenPlayback(){spokenGeneration++;spokenPlaying=false;clearTimeout(spokenEndTimer);spokenEndTimer=null;try{spokenSource?.stop()}catch{}spokenSource=null}
+function startBeat(){stopBeat();if(state.isMetronomeMuted||!state.isRunning||state.isCyclePaused||state.activePrompt?.type==='RHYTHM_CHECK')return;playMetronomeTick();let iv=Math.max(300,60000/settings.bpm);beatTimer=setInterval(playMetronomeTick,iv)}
+function stopBeat(){clearInterval(beatTimer);beatTimer=null}
+async function wake(){try{if('wakeLock'in navigator)wakeLock=await navigator.wakeLock.request('screen')}catch{}}
+function releaseWake(){try{wakeLock?.release()}catch{}wakeLock=null}
+function showResumeAlert(seconds,reset){resumeAlertVisible=true;stopBeat();$('resumeGap').textContent=`Away ${fmt(seconds)}`;$('resumeText').textContent=reset?'Total CPR time was kept, but cycle and adrenaline timers were reset. Tap Continue to restore audio.':'Review CPR timers, then tap Continue to restore audio.';$('resumeBanner').classList.add('show')}
+function hideResumeAlert(){resumeAlertVisible=false;$('resumeBanner').classList.remove('show')}
+function appendEvent(type,label,note='',elapsed=state.cprElapsedSeconds,wall=Date.now()){let ev={id:uid(),elapsedSeconds:elapsed,wallTimeMillis:wall,type,label,note};session.events.push(ev);state.recentEvents=[ev,...state.recentEvents].slice(0,80);persist();return ev}
+function persist(){if(!session)return;session.updatedAtMillis=Date.now();session.totalSeconds=state.cprElapsedSeconds;session.cycleCount=state.cycleCount;session.adrenalineCount=state.adrenalineCount;session.amiodaroneCount=state.amiodaroneCount;session.shockCount=state.shockCount;session.dsedCount=state.dsedCount;session.roscCount=state.roscCount;session.activeTimerSnapshot={savedAtMillis:Date.now(),...state,settings,cycleWarning:flags.cycleWarning,cycleFinished:flags.cycleFinished,total20:flags.total20};save(activeKey,session);let a=allSessions(),i=a.findIndex(x=>x.id===session.id);if(i>=0)a[i]=session;else a.unshift(session);saveSessions(a)}
+function applyInterruptionGap(d){state.cprElapsedSeconds+=d;if(!state.isCyclePaused&&state.activePrompt?.type!=='RHYTHM_CHECK')state.cycleElapsedSeconds+=d;if(state.isAdrenalineActive&&!state.isAdrenalinePaused&&!state.adrenalinePrompt)state.adrenalineElapsedSeconds=Math.min(settings.adrenalineSeconds,state.adrenalineElapsedSeconds+d);if(state.isCyclePaused)state.cyclePausedSeconds+=d;if(state.isAdrenalinePaused)state.adrenalinePausedSeconds+=d;let reset=d>=300;if(reset){state.cycleElapsedSeconds=0;state.adrenalineElapsedSeconds=0;state.isAdrenalineActive=false;state.isAdrenalinePaused=false;state.cyclePausedSeconds=0;state.adrenalinePausedSeconds=0;state.activePrompt=null;state.adrenalinePrompt=null;flags={cycleWarning:false,cycleFinished:false,total20:state.cprElapsedSeconds>=1200};appendEvent('TIMERS_RESET','Timers reset after app interruption',`The app was interrupted for ${fmt(d)}; total CPR time was kept, but cycle and adrenaline timers were reset.`)}else if(d>0){updatePrompt(d,false);protocol(Date.now(),false);updateAdrPrompt(d,false);persist()}if(d>=Math.max(1,+settings.resumeAlertSeconds||300))showResumeAlert(d,reset);return reset}
+function restore(){let a=JSON.parse(localStorage.getItem(activeKey)||'null');if(!a||a.endedAtMillis)return;let snap=a.activeTimerSnapshot||{},saved=snap.savedAtMillis||a.updatedAtMillis||0;if(saved&&Date.now()-saved>4*60*60*1000){let end=saved,final={...a,endedAtMillis:end,updatedAtMillis:end,outcome:'Auto-saved',totalSeconds:snap.cprElapsedSeconds||a.totalSeconds||0,activeTimerSnapshot:null};final.events=[...(final.events||[]),{id:uid(),elapsedSeconds:final.totalSeconds,wallTimeMillis:end,type:'NOTE',label:'Session auto-saved after recovery',note:'Active CPR draft was older than 4 hours and was saved automatically.'}];let all=allSessions(),i=all.findIndex(x=>x.id===final.id);if(i>=0)all[i]=final;else all.unshift(final);saveSessions(all);localStorage.removeItem(activeKey);showFeedback('Previous CPR session was auto-saved.');return}let stopped=(a.events||[]).some(e=>e.type==='CPR_STOPPED');let activeLike=!!snap.sessionId&&(snap.isRunning||snap.isAwaitingSave);if(stopped||!activeLike){localStorage.removeItem(activeKey);return}session=a;state={...state,...snap,settings,sessionId:a.id,recentEvents:[...(a.events||[])].reverse()};flags={cycleWarning:!!snap.cycleWarning,cycleFinished:!!snap.cycleFinished,total20:!!snap.total20||state.cprElapsedSeconds>=1200};if(saved&&snap.isRunning){let d=Math.floor((Date.now()-saved)/1000);applyInterruptionGap(d)}if(state.isRunning){wake();startTicker();if(!resumeAlertVisible)startBeat()}render()}
+function newSession(){let now=Date.now();stopSpokenCues();session={id:uid(),startedAtMillis:now,endedAtMillis:null,updatedAtMillis:now,totalSeconds:0,outcome:null,events:[],notes:'',activeTimerSnapshot:null};state={...state,sessionId:session.id,isRunning:true,isCyclePaused:false,isAdrenalineActive:false,isAdrenalinePaused:false,isAwaitingSave:false,cprElapsedSeconds:0,cycleElapsedSeconds:0,adrenalineElapsedSeconds:0,cycleCount:0,adrenalineCount:0,amiodaroneCount:0,shockCount:0,dsedCount:0,roscCount:0,activePrompt:null,adrenalinePrompt:null,recentEvents:[]};flags={cycleWarning:false,cycleFinished:false,total20:false};appendEvent('CPR_STARTED','CPR Timer Started');playCue('cpr_start_cpr');wake();startTicker();startBeat()}
+function startTicker(){if(timer)return;lastTick=Date.now();timer=setInterval(tick,250)}
+function stopTicker(){clearInterval(timer);timer=null}
+function tick(){let now=Date.now(),d=Math.floor((now-lastTick)/1000);if(d<=0)return;lastTick+=d*1000;if(state.isRunning&&d>=Math.max(1,+settings.resumeAlertSeconds||300)){applyInterruptionGap(d);render();return}if(state.isRunning){state.cprElapsedSeconds+=d;if(!state.isCyclePaused&&state.activePrompt?.type!=='RHYTHM_CHECK')state.cycleElapsedSeconds+=d;if(state.isAdrenalineActive&&!state.isAdrenalinePaused&&!state.adrenalinePrompt)state.adrenalineElapsedSeconds=Math.min(settings.adrenalineSeconds,state.adrenalineElapsedSeconds+d)}if(state.isCyclePaused)state.cyclePausedSeconds+=d;if(state.isAdrenalinePaused)state.adrenalinePausedSeconds+=d;updatePrompt(d);protocol(now);updateAdrPrompt(d);persist();render()}
+function protocol(now,playAudio=true){if(!flags.total20&&state.cprElapsedSeconds>=1200){flags.total20=true;if(playAudio)playCue('cpr_total_20_minutes')}if(settings.playCycleNinetySecondCue&&!flags.cycleWarning&&settings.cycleSeconds>=120&&state.cycleElapsedSeconds>=90){flags.cycleWarning=true;if(playAudio)playCue('cpr_cycle_90_seconds')}if(!flags.cycleFinished&&state.cycleElapsedSeconds>=Math.max(1,settings.cycleSeconds-2)){flags.cycleFinished=true;state.cycleCount++;appendEvent('CYCLE_COMPLETED',`Cycle ${state.cycleCount} Finished`)}if(!state.activePrompt&&state.cycleElapsedSeconds>=settings.cycleSeconds){if(playAudio)playCue('cpr_check_rhythm');stopBeat();appendEvent('INTERRUPTION_STARTED','Rhythm Check Started');state.cycleElapsedSeconds=0;state.activePrompt={type:'RHYTHM_CHECK',secondsRemaining:settings.interruptionSeconds};flags.cycleWarning=false;flags.cycleFinished=false}if(!state.adrenalinePrompt&&state.isAdrenalineActive&&state.adrenalineElapsedSeconds>=settings.adrenalineSeconds){if(playAudio)playCue('cpr_give_adrenaline');state.adrenalineElapsedSeconds=settings.adrenalineSeconds;state.adrenalinePrompt=settings.confirmAdrenalineBeforeLogging?{type:'ADRENALINE_GIVE_CONFIRM',secondsRemaining:settings.adrenalineConfirmationDelaySeconds,attempt:1,firstPromptElapsedSeconds:state.cprElapsedSeconds,firstPromptWallTimeMillis:now}:{type:'GIVE_ADRENALINE',secondsRemaining:settings.adrenalineAutoLogDelaySeconds,attempt:1,firstPromptElapsedSeconds:state.cprElapsedSeconds,firstPromptWallTimeMillis:now}}}
+function updatePrompt(d,playAudio=true){let p=state.activePrompt;if(!p)return;p.secondsRemaining=Math.max(0,p.secondsRemaining-d);if(p.secondsRemaining===0){appendEvent('INTERRUPTION_ENDED','Rhythm Check Ended');if(playAudio)playCue('cpr_start_cpr');state.activePrompt=null;startBeat()}}
+function updateAdrPrompt(d,playAudio=true){let p=state.adrenalinePrompt;if(!p||state.isAdrenalinePaused||d<=0)return;p.secondsRemaining=Math.max(0,p.secondsRemaining-d);if(p.secondsRemaining>0)return;if(p.type==='GIVE_ADRENALINE'){logAdrenaline('Auto-logged at due time')}else if(p.type==='ADRENALINE_GIVE_CONFIRM'){if(playAudio)playCue('cpr_adrenaline_confirm_due');state.adrenalinePrompt={...p,type:'ADRENALINE_CONFIRM',secondsRemaining:settings.adrenalineConfirmationDelaySeconds,attempt:1}}else if(p.type==='ADRENALINE_CONFIRM'){if(p.attempt<=1){if(playAudio)playCue('cpr_adrenaline_confirm_repeat');state.adrenalinePrompt={...p,secondsRemaining:settings.adrenalineConfirmationDelaySeconds,attempt:2}}else autoLogAdr(p,false,playAudio)}else if(p.type==='ADRENALINE_CONFIRM_WAIT'){if(p.attempt>=3)autoLogAdr(p,true,playAudio);else{if(playAudio)playCue('cpr_adrenaline_confirm_repeat');state.adrenalinePrompt={...p,type:'ADRENALINE_CONFIRM',secondsRemaining:settings.adrenalineConfirmationDelaySeconds,attempt:Math.max(2,p.attempt)}}}}
+function autoLogAdr(p,marked,playAudio=true){let n=state.adrenalineCount+1,elapsed=p.firstPromptElapsedSeconds||state.cprElapsedSeconds,wall=p.firstPromptWallTimeMillis||Date.now();state.adrenalineCount=n;appendEvent('ADRENALINE_ADMINISTERED',`Adrenaline #${n}`,marked?'Auto-logged after marked not yet':'Auto-logged after no response',elapsed,wall);state.adrenalineElapsedSeconds=Math.min(settings.adrenalineSeconds,Math.max(0,state.cprElapsedSeconds-elapsed));state.adrenalinePrompt=null;state.isAdrenalineActive=true;state.isAdrenalinePaused=false;if(playAudio)playCue(marked?'cpr_adrenaline_confirm_marked_not_yet':'cpr_adrenaline_confirm_no_response')}
+function logAdrenaline(note='Given by confirmation',elapsed=state.cprElapsedSeconds,wall=Date.now()){state.adrenalineCount++;appendEvent('ADRENALINE_ADMINISTERED',`Adrenaline #${state.adrenalineCount}`,note,elapsed,wall);state.adrenalineElapsedSeconds=0;state.adrenalinePrompt=null;state.isAdrenalineActive=true;state.isAdrenalinePaused=false}
+async function action(a){try{await unlockAudio();primeAudio()}catch(error){console.error('CPR audio unlock failed',error)}let msg=feedbackText(a);if(a==='START')startCycle();if(a==='PAUSE')pauseCycle();if(a==='ADRENALINE')adrenaline();if(a==='ADRENALINE_PAUSE')pauseAdr();if(a==='ADRENALINE_CONFIRM_GIVEN')confirmAdr();if(a==='ADRENALINE_CONFIRM_NOT_YET')notYetAdr();if(a==='AMIODARONE')mark('amiodaroneCount','AMIODARONE_ADMINISTERED','Amiodarone');if(a==='SHOCK')mark('shockCount','SHOCK_DELIVERED','Shock',true);if(a==='DSED')mark('dsedCount','DSED_DELIVERED','DSED');if(a==='ROSC')rosc();if(a==='STOP')stopSave();if(msg)showFeedback(msg);render()}
+function startCycle(){if(!session)return newSession();if(state.activePrompt?.type==='RHYTHM_CHECK')return;if(state.isAwaitingSave){state.isAwaitingSave=false;state.isRunning=true;state.isCyclePaused=false;state.cycleElapsedSeconds=0;state.activePrompt=null;appendEvent('CPR_STARTED','CPR restarted after ROSC');flags={cycleWarning:false,cycleFinished:false,total20:false};playCue('cpr_start_cpr');wake();startTicker();startBeat();return}if(state.isCyclePaused){let long=state.cyclePausedSeconds>settings.pauseResetThresholdSeconds;appendEvent('CPR_RESUMED',long?`New CPR cycle started after ${fmt(state.cyclePausedSeconds)} pause`:`CPR Timer Resumed after ${fmt(state.cyclePausedSeconds)} pause`);state.cycleElapsedSeconds=long?0:state.cycleElapsedSeconds;state.isCyclePaused=false;state.cyclePausedSeconds=0;state.isRunning=true;if(long){flags.cycleWarning=false;flags.cycleFinished=false}playCue('cpr_start_cpr');startTicker();startBeat();return}if(!state.isRunning){state.isRunning=true;appendEvent('CPR_STARTED','CPR Timer Started');playCue('cpr_start_cpr');wake();startTicker();startBeat()}}
+function pauseCycle(){if(!session||!state.isRunning||state.isCyclePaused||state.isAwaitingSave||state.activePrompt?.type==='RHYTHM_CHECK')return;state.isCyclePaused=true;state.cyclePausedSeconds=0;appendEvent('CPR_PAUSED','CPR Timer Paused');playCue('cpr_paused');stopBeat()}
+function adrenaline(){if(!session)startCycle();if(!session||state.isAwaitingSave&&state.isRunning)return;if(state.isAwaitingSave&&!state.isRunning)startCycle();if(state.isAdrenalinePaused){let long=state.adrenalinePausedSeconds>settings.pauseResetThresholdSeconds;appendEvent('ADRENALINE_PAUSED',`Adrenaline timer paused for ${fmt(state.adrenalinePausedSeconds)}`);if(long){logAdrenaline('Confirmed by user');playCue('cpr_give_adrenaline')}else{appendEvent('ADRENALINE_STARTED','Adrenaline Timer Resumed');state.isAdrenalinePaused=false;state.adrenalinePausedSeconds=0}return}if(state.isAdrenalineActive)return;logAdrenaline('Given by confirmation');playCue(state.adrenalineCount===1?'cpr_first_adrenaline_started':'cpr_give_adrenaline')}
+function pauseAdr(){if(!session||state.isAwaitingSave||!state.isAdrenalineActive||state.isAdrenalinePaused)return;state.isAdrenalinePaused=true;state.adrenalinePausedSeconds=0;state.adrenalinePrompt=null;appendEvent('ADRENALINE_PAUSED','Adrenaline Timer Paused')}
+function confirmAdr(){if(state.adrenalinePrompt?.type!=='ADRENALINE_CONFIRM')return;logAdrenaline('Given by confirmation')}
+function notYetAdr(){let p=state.adrenalinePrompt;if(p?.type!=='ADRENALINE_CONFIRM')return;let n=p.attempt<=1?2:3;state.adrenalinePrompt={...p,type:'ADRENALINE_CONFIRM_WAIT',secondsRemaining:settings.adrenalineConfirmationDelaySeconds,attempt:n,wasMarkedNotYet:n>=3}}
+function mark(key,type,name,shock=false){if(!session||state.isAwaitingSave)return;state[key]++;appendEvent(type,`${name} #${state[key]} ${name==='Shock'?'Delivered':'Administered'}`);if(shock&&state[key]===3)playCue('cpr_amiodarone_first_dose_due');if(shock&&state[key]===5)playCue('cpr_amiodarone_second_dose_due')}
+function rosc(){if(!session||state.isAwaitingSave)return;state.roscCount++;appendEvent('ROSC',state.roscCount===1?'ROSC Achieved':`ROSC Achieved #${state.roscCount}`);session.outcome='ROSC';playCue('cpr_rosc');state.isRunning=false;state.isCyclePaused=false;state.isAdrenalineActive=false;state.isAdrenalinePaused=false;state.isAwaitingSave=true;state.cyclePausedSeconds=0;state.adrenalinePausedSeconds=0;state.cycleElapsedSeconds=0;state.adrenalineElapsedSeconds=0;state.activePrompt=null;state.adrenalinePrompt=null;stopTicker();stopBeat();releaseWake();flags={cycleWarning:false,cycleFinished:false,total20:false};persist()}
+function stopSave(){if(!session){localStorage.removeItem(activeKey);stopTicker();stopBeat();stopSpokenCues();releaseWake();state={sessionId:null,isRunning:false,isCyclePaused:false,isAdrenalineActive:false,isAdrenalinePaused:false,cyclePausedSeconds:0,adrenalinePausedSeconds:0,isAwaitingSave:false,cprElapsedSeconds:0,cycleElapsedSeconds:0,adrenalineElapsedSeconds:0,cycleCount:0,adrenalineCount:0,amiodaroneCount:0,shockCount:0,dsedCount:0,roscCount:0,isMetronomeMuted:false,activePrompt:null,adrenalinePrompt:null,recentEvents:[]};return}appendEvent('CPR_STOPPED','CPR Timer Stopped');session.endedAtMillis=Date.now();session.totalSeconds=state.cprElapsedSeconds;session.outcome=session.outcome||'Completed';persist();localStorage.removeItem(activeKey);playCue('cpr_time_log');stopTicker();stopBeat();releaseWake();state={sessionId:null,isRunning:false,isCyclePaused:false,isAdrenalineActive:false,isAdrenalinePaused:false,cyclePausedSeconds:0,adrenalinePausedSeconds:0,isAwaitingSave:false,cprElapsedSeconds:0,cycleElapsedSeconds:0,adrenalineElapsedSeconds:0,cycleCount:0,adrenalineCount:0,amiodaroneCount:0,shockCount:0,dsedCount:0,roscCount:0,isMetronomeMuted:false,activePrompt:null,adrenalinePrompt:null,recentEvents:[]};session=null;flags={cycleWarning:false,cycleFinished:false,total20:false}}
+function feedbackText(a){let has=!!session;return{START:state.isAwaitingSave?'CPR restarted':state.isCyclePaused&&state.cyclePausedSeconds>settings.pauseResetThresholdSeconds?'New CPR cycle started':state.isCyclePaused?'CPR resumed':!state.isRunning?'CPR started':null,PAUSE:state.isRunning&&!state.isCyclePaused&&!state.isAwaitingSave?'CPR paused':null,ADRENALINE:state.isAwaitingSave&&!state.isRunning?'CPR restarted · adrenaline logged':state.isAdrenalinePaused?'Adrenaline resumed':state.isAdrenalineActive?'Adrenaline timer already running':'Adrenaline logged',ADRENALINE_PAUSE:has&&state.isAdrenalineActive&&!state.isAdrenalinePaused&&!state.isAwaitingSave?'Adrenaline paused':null,ADRENALINE_CONFIRM_GIVEN:'Adrenaline logged',ADRENALINE_CONFIRM_NOT_YET:'Marked not yet',SHOCK:has&&!state.isAwaitingSave?'Shock logged':null,AMIODARONE:has&&!state.isAwaitingSave?'Amiodarone logged':null,DSED:has&&!state.isAwaitingSave?'DSED logged':null,ROSC:has&&!state.isAwaitingSave?'ROSC logged':null,STOP:has?'CPR session saved':null}[a]}
+function showFeedback(m){$('feedbackText').textContent=m;$('feedback').classList.add('show');clearTimeout(feedbackTimer);feedbackTimer=setTimeout(()=>$('feedback').classList.remove('show'),1600)}
+function statusText(){if(state.activePrompt?.type==='RHYTHM_CHECK')return'Rhythm check in progress';if(['GIVE_ADRENALINE','ADRENALINE_GIVE_CONFIRM'].includes(state.adrenalinePrompt?.type))return'Adrenaline cue active';if(state.isAwaitingSave)return'ROSC recorded · ready to restart or stop';if(state.isCyclePaused)return'Cycle paused · total time continues';if(state.isAdrenalinePaused)return'Adrenaline timer paused';if(state.isRunning)return'Running · webclip active';if(state.sessionId)return'Autosaved · ready to continue';return'Ready'}
+function canStartCycle(){return state.isAwaitingSave||!state.isRunning||state.isCyclePaused}function canStartAdr(){return(state.isAwaitingSave&&!state.isRunning)||!state.isAdrenalineActive||state.isAdrenalinePaused}
+function startText(){return state.isAwaitingSave?'Restart CPR':state.isCyclePaused&&state.cyclePausedSeconds>settings.pauseResetThresholdSeconds?'New Cycle':state.isCyclePaused?'Resume':'Start'}function adrStartText(){return state.isAwaitingSave&&!state.isRunning?'Start CPR + Adr':state.isAdrenalinePaused&&state.adrenalinePausedSeconds>settings.pauseResetThresholdSeconds?'Give & Restart':state.isAdrenalinePaused?'Resume':'Start'}
+function render(){settings.bpm=Math.max(60,Math.min(160,settings.bpm));$('bpmInfo').textContent=`BPM ${settings.bpm}`;$('settingsBtn').innerHTML=svgIcon('settings');$('muteBtn').innerHTML=svgIcon(state.isMetronomeMuted?'mute':'unmute');$('muteBtn').disabled=!session;$('muteBtn').style.opacity=session?'1':'.45';$('waSection').classList.toggle('hidden',!settings.useWaafles);if(!settings.useWaafles){$('waPanel').classList.remove('show');$('waSection').classList.remove('wa-open')}syncWaaflesPlacement();$('totalTime').textContent=fmt(state.cprElapsedSeconds);let cp=state.activePrompt?.type==='RHYTHM_CHECK';$('cycleTime').textContent=cp?String(state.activePrompt.secondsRemaining):fmt(state.cycleElapsedSeconds);$('cycleTime').className='digits '+(cp?'count':'');let ap=state.adrenalinePrompt&&['GIVE_ADRENALINE','ADRENALINE_GIVE_CONFIRM'].includes(state.adrenalinePrompt.type);$('adrTime').textContent=ap?'Give\nAdrenaline':fmt(state.adrenalineElapsedSeconds);$('adrTime').className='digits '+(ap?'prompt':'');let cyclePulse=state.isRunning&&!state.isCyclePaused&&!state.isAwaitingSave;$('cyclePanel').classList.toggle('active',cyclePulse);$('cyclePanel').classList.toggle('beat-pulse',cyclePulse);$('cyclePanel').style.setProperty('--beat-ms',Math.max(300,Math.min(1000,Math.floor(60000/settings.bpm)))+'ms');$('adrPanel').classList.toggle('active',state.isAdrenalineActive&&!state.isAdrenalinePaused&&!state.isAwaitingSave);$('cycleStart').innerHTML=withIcon('start',startText());$('adrStart').innerHTML=withIcon('start',adrStartText());$('cyclePause').innerHTML=withIcon('pause','Pause');$('adrPause').innerHTML=withIcon('pause','Pause');$('cycleStart').disabled=!canStartCycle();$('cyclePause').disabled=!(state.isRunning&&!state.isCyclePaused&&!state.isAwaitingSave&&!cp);$('adrStart').disabled=!canStartAdr();$('adrPause').disabled=!(state.sessionId&&state.isAdrenalineActive&&!state.isAdrenalinePaused&&!state.isAwaitingSave);document.querySelectorAll('[data-action]').forEach(b=>{let a=b.dataset.action;if(['SHOCK','AMIODARONE','DSED','ROSC'].includes(a))b.disabled=!session||state.isAwaitingSave;if(a==='STOP')b.disabled=!session});let confirm=state.adrenalinePrompt?.type==='ADRENALINE_CONFIRM';$('adrBanner').classList.toggle('show',confirm);if(confirm){$('adrPromptSeconds').textContent=state.adrenalinePrompt.secondsRemaining+'s';$('adrAttempt').textContent=state.adrenalinePrompt.attempt<=1?'First prompt':'Second prompt'}renderLatest();renderEvents();save(settingsKey,settings)}
+function renderLatest(){let types=['ADRENALINE_ADMINISTERED','CYCLE_COMPLETED','AMIODARONE_ADMINISTERED','SHOCK_DELIVERED','DSED_DELIVERED','ROSC'];let items=types.map(t=>state.recentEvents.find(e=>e.type===t)).filter(Boolean).sort((a,b)=>b.wallTimeMillis-a.wallTimeMillis);let html=items.map(e=>`<span class="chip" style="--c:${eventColor(e.type)}">${labelShort(e)}<span>${clock(e.wallTimeMillis)}</span></span>`).join('');$('latest').innerHTML=html;$('landLatest').innerHTML=html||`<span style="font-size:11px;color:var(--muted);font-weight:900">${statusText()}</span>`;$('latest').classList.toggle('show',!!items.length);$('cycleLast').textContent=lastDetail('Last rhythm check','INTERRUPTION_STARTED');$('adrLast').textContent=lastDetail('Last adrenaline','ADRENALINE_ADMINISTERED')}
+function labelShort(e){return e.type==='ADRENALINE_ADMINISTERED'?'Adrenaline':e.type==='CYCLE_COMPLETED'?'Cycle':e.type==='AMIODARONE_ADMINISTERED'?'Amiodarone':e.type==='SHOCK_DELIVERED'?'Shock':e.type==='DSED_DELIVERED'?'DSED':'ROSC'}
+function lastDetail(prefix,type){let e=state.recentEvents.find(x=>x.type===type);return e?`${prefix} ${clock(e.wallTimeMillis)}`:''}
+function renderEvents(){let ev=state.recentEvents.filter(e=>!['INTERRUPTION_STARTED','INTERRUPTION_ENDED'].includes(e.type));$('recent').innerHTML=ev.length?ev.map(e=>`<div class="event"><time>${clock(e.wallTimeMillis)}</time><b>${e.label.replace(/\bno\.\s*(\d+)/i,'#$1')}</b>${e.note?`<small>${e.note}</small>`:''}</div>`).join(''):`<div class="event"><time></time><b>No CPR events yet</b></div>`}
+function calculateWaafles(age,ageGroup,scope){let weight=ageGroup==='Months'?age*.5+4:(age<=5?age*2+8:age*3+7),adr=weight*.01,ml=weight/10,amio=weight*5,min=weight*10,max=weight*20,dex=Math.min(weight*2.5,50),sbp=ageGroup==='Months'?Math.floor(age/12)*2+70:age*2+70;let sga=ageGroup==='Months'?(weight<=5?'Size 1':'Size 1.5'):(age<=5&&weight>=10&&weight<=24?'Size 2':weight>=25&&weight<=35?'Size 2.5':age>5&&weight>35?'Consider adult SGA sizes':'');let ett=(ageGroup==='Months'?age/12:age)<8?'Not used below 8 years':`Uncuffed ${num(Math.round(((ageGroup==='Months'?age/12:age)/4+4)*2)/2)}\nCuffed ${num(Math.round(((ageGroup==='Months'?age/12:age)/4+3.5)*2)/2)}`;let energy=scope==='AP'?`${num(Math.min(weight*4,360))} J`:[4,6,8,10].map(m=>`${num(Math.min(weight*m,360))} J`).join(' -> ');let needle=ageGroup==='Months'||age<2?'IV Catheter 22g\n(Color:Blue | Length:2.5cm)':age<=6?'IV Catheter 18g\n(Color:Green | Length:3.2cm)':age<=13?'IV Catheter 16g\n(Color:Grey | Length:4.5cm)':'IV Catheter 16g\n(Color:Grey | Length:4.5cm)\nConsider patient size\nLonger needle maybe required\nARS Needle 10g or 14g';return{Age:`${age} ${ageGroup.toLowerCase()}`,Weight:`${num(weight)}kg`,Adrenaline:`${num(adr)}mg (${num(ml)}ml)`,Amiodarone:`${num(amio)}mg (${num(ml)}ml)`,Fluids:`${num(min)}-${num(max)} ml`,SGA:sga,ETT:ett,Energy:energy,SBP:`${sbp} mmHg`,Dextrose:`${num(dex)}ml`,Needle:needle}}
+function num(v){return Number(v).toFixed(3).replace(/0+$/,'').replace(/\.$/,'')||'0'}
+function renderWa(){let age=+$('waAge').value;if(!Number.isInteger(age)||age<=0)return waErr('Enter a valid age.');if(wa.ageGroup==='Months'&&age>12)return waErr('Choose Years for ages above 12 months.');if(wa.ageGroup==='Years'&&age>14)return waErr('Age exceeds pediatric range. Refer to the CPG.');$('waError').style.display='none';let r=calculateWaafles(age,wa.ageGroup,wa.scope);let fields=[['Weight',r.Weight],['Adrenaline',r.Adrenaline],['Amiodarone',r.Amiodarone],['Energy',r.Energy],['Fluids',r.Fluids],['SGA',r.SGA]];$('waResults').innerHTML=`<div class="wa-title">${wa.scope} WAAFELSS</div>`+fields.map(([k,v])=>`<div class="wcell"><small>${k}</small><b>${v||'-'}</b></div>`).join('')}
+function waErr(t){$('waError').textContent=t;$('waError').style.display='block';$('waResults').innerHTML=''}
+function initButtonIcons(){document.querySelectorAll('[data-icon]').forEach(btn=>{btn.innerHTML=withIcon(btn.dataset.icon,btn.textContent.trim())})}
+function syncWaaflesPlacement(){
+  let landscape=matchMedia('(orientation: landscape) and (min-width: 700px)').matches;
+  let open=$('waPanel').classList.contains('show')&&settings.useWaafles;
+  let expanded=landscape&&open;
+  let target=expanded?$('waLandscapeHost'):$('waSection');
+  if($('waPanel').parentElement!==target)target.appendChild($('waPanel'));
+  $('landBottom').classList.toggle('wa-expanded',expanded);
 }
-['pointerdown','touchstart','keydown','click'].forEach(ev=>{ window.addEventListener(ev, primeAudio, {once:true, passive:true}); });
-async function ensureAudioReady(){ if(!audioCtx) primeAudio(); if(audioCtx && audioCtx.state==='suspended'){ try{ await audioCtx.resume(); }catch{} } }
-function play(name, vol=1){
-  const tryBuffer = () => {
-    const buf=buffers[name];
-    if(!audioCtx || !buf) return false;
-    const src=audioCtx.createBufferSource(), g=audioCtx.createGain();
-    g.gain.value=vol; src.buffer=buf; src.connect(g).connect(audioCtx.destination); src.start();
-    return true;
-  };
-  const beep = () => {
-    try{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
-      o.type='square'; o.frequency.value=800; g.gain.value=0.08*vol; o.connect(g).connect(audioCtx.destination);
-      o.start(); setTimeout(()=>{try{o.stop();}catch{}},20);}catch{}
-  };
-  ensureAudioReady().then(()=>{ if(!tryBuffer()) beep(); });
+function renderMainIntro(){
+  const card=CprIntroCards[mainIntroIndex];
+  $('mainIntroCount').textContent=`${mainIntroIndex+1} of ${CprIntroCards.length}`;
+  $('mainIntroTitle').textContent=card.title;
+  $('mainIntroMessage').textContent=card.message;
+  $('mainIntroIcon').innerHTML=cprIntroIconSvg(card.icon);
+  $('mainIntroDots').textContent=CprIntroCards.map((_,index)=>index===mainIntroIndex?'●':'○').join(' ');
+  $('mainIntroBack').hidden=mainIntroIndex===0;
+  $('mainIntroBack').parentElement.classList.toggle('first-page',mainIntroIndex===0);
+  $('mainIntroNext').textContent=mainIntroIndex===CprIntroCards.length-1?'Done':'Next';
 }
-
-/* ===== METRONOME ===== */
-let beatMuted=false, beatTimer=null, bpm=+($('bpm').value||110);
-$('muteBtn')?.addEventListener('click',()=>{
-  beatMuted=!beatMuted;
-  const mx=document.getElementById('muteX');
-  const wv=document.getElementById('wave');
-  if(mx) mx.style.opacity=beatMuted?'1':'0';
-  if(wv) wv.style.opacity=beatMuted?'0':'1';
-  if(beatMuted) stopBeat(); else if(cprRunning) startBeat();
-});
-$('bpm')?.addEventListener('change',e=>{ bpm=+e.target.value||110; if(cprRunning) restartBeat(); });
-function flashCycle(){ const card=$('cycleTimer'); if(!card) return; card.classList.remove('cycle-flash'); void card.offsetWidth; card.classList.add('cycle-flash'); }
-function startBeat(){ clearInterval(beatTimer); const iv=Math.max(200,60000/Math.max(1,bpm)); beatTimer=setInterval(()=>{ if(!beatMuted) play('beat',0.95); flashCycle(); }, iv); }
-function stopBeat(){ clearInterval(beatTimer); beatTimer=null; }
-function restartBeat(){ stopBeat(); startBeat(); }
-
-/* ===== STATE ===== */
-let totalStart=0,totalEnd=0;
-let cprStart=0,cprPausedAt=0,cprPausedAccum=0,cprRunning=false;
-let adrStart=0,adrPausedAt=0,adrPausedAccum=0,adrRunning=false,adrCount=0;
-let cue20=false, cue90=false, cue120=false;
-let cycleCount = 0;
-let counting=false, countdownTimer=null, countdownN=10;
-let showTotalZero = true;
-
-/* ====== AUTOSAVE (localStorage) ====== */
-const LOGS_KEY = 'cprLogs.v1';          // finalized logs array
-const DRAFT_KEY = 'cprActiveLog.v1';    // single active log (draft)
-
-function fmtTitle(ts){
-  const d = new Date(ts);
-  const date = d.toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'});
-  const time = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false});
-  return `CPR on ${date} ${time}`;
-}
-function loadDraft(){ try{ return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); }catch{ return null; } }
-function saveDraft(d){ try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); }catch{} }
-function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch{} }
-function loadAllLogs(){ try{ return JSON.parse(localStorage.getItem(LOGS_KEY)||'[]'); }catch{ return []; } }
-function saveAllLogs(arr){ try{ localStorage.setItem(LOGS_KEY, JSON.stringify(arr)); }catch{} }
-
-function currentCounts(){ return { adr: adrCount, shocks: (window.__shock||0), amio: (window.__amio||0) }; }
-function currentSummary(){
-  const fmt2 = s => { s=Math.max(0,Math.floor(s)); const m=String((s/60|0)).padStart(2,'0'); return `${m}:${String(s%60).padStart(2,'0')}`; };
-  const started = totalStart ? new Date(totalStart).toISOString() : null;
-  const ended   = totalEnd   ? new Date(totalEnd).toISOString()   : null;
-  const total   = (totalStart && totalEnd) ? fmt2((totalEnd-totalStart)/1000) : null;
-  return { started, ended, total, counts: currentCounts() };
-}
-function eventsToSerializable(){ return events.map(e => ({ t: (e.ts instanceof Date ? e.ts.toISOString() : e.ts), label: e.label })); }
-function hasFinalMarker(evts){ return evts.some(e => /CPR Timer Stopped|ROSC Achieved|CPR Stopped/i.test(e.label)); }
-let activeId = null;
-let sessionClosed = false;
-
-function startNewDraftIfNeeded(){
-  if (!totalStart) return;
-  activeId = String(totalStart);
-  const firstTitle = fmtTitle(totalStart);
-  const draft = {
-    id: activeId,
-    title: firstTitle,
-    meta: currentSummary(),
-    events: eventsToSerializable()
-  };
-  saveDraft(draft);
-}
-function autosave_bump(ts, label){
-  if (sessionClosed) return;
-  if (!activeId && totalStart){ startNewDraftIfNeeded(); }
-  const d = loadDraft() || {
-    id: String(totalStart || ts.getTime()),
-    title: fmtTitle(ts),
-    meta: currentSummary(),
-    events: []
-  };
-  const iso = ts instanceof Date ? ts.toISOString() : String(ts);
-  const newRow = { t: iso, label };
-  const last = d.events[0];
-  if (!(last && last.t===newRow.t && last.label===newRow.label)){
-    d.events.unshift(newRow);
-  }
-  d.title = fmtTitle(ts);
-  d.meta = currentSummary();
-  saveDraft(d);
-}
-
-/* Finalize helpers */
-function finalizeIntoSaved(finalLabel){
-  if (sessionClosed) return;
-  const nowIso = new Date();
-  const d = loadDraft() || { id: String(totalStart || nowIso.getTime()), title: fmtTitle(nowIso), meta: currentSummary(), events: [] };
-  if (!hasFinalMarker(d.events)){
-    d.events.unshift({ t: nowIso.toISOString(), label: finalLabel });
-    d.title = fmtTitle(nowIso);
-  }
-  if (!totalEnd){ totalEnd = Date.now(); }
-  d.meta = currentSummary();
-  const logs = loadAllLogs();
-  const idx = logs.findIndex(x => x.id === d.id);
-  if (idx>=0) logs[idx] = d; else logs.unshift(d);
-  saveAllLogs(logs);
-  saveDraft(d); // keep draft too
-  sessionClosed = true;
-}
-
-/* ===== OVERLAY CENTERING ===== */
-function centerOverlayOverDigits(overlayEl, digitsEl){
-  if(!overlayEl || !digitsEl) return;
-  const style = getComputedStyle(overlayEl);
-  if (style.display === 'none') return;
-  overlayEl.classList.add('overlay-center');
-  const timer = digitsEl.closest('.timer'); if(!timer) return;
-  const tr = timer.getBoundingClientRect();
-  const dr = digitsEl.getBoundingClientRect();
-  const cx = dr.left + dr.width/2 - tr.left;
-  const cy = dr.top  + dr.height/2 - tr.top;
-  overlayEl.style.left = `${cx}px`;
-  overlayEl.style.top  = `${cy}px`;
-}
-function alignOverlays(){
-  centerOverlayOverDigits(document.getElementById('countdown'), document.getElementById('cycleDigits'));
-  centerOverlayOverDigits(document.getElementById('adrPrompt'),  document.getElementById('adrDigits'));
-}
-window.addEventListener('resize', alignOverlays);
-window.addEventListener('orientationchange', alignOverlays);
-document.addEventListener('DOMContentLoaded', alignOverlays);
-
-/* ===== COUNTDOWN ===== */
-function showCountdown(){
-  if(counting) return;
-  counting=true; countdownN=10;
-  const box=$('countdown'); const card=$('cycleTimer');
-  box.textContent=countdownN; box.classList.add('show');
-  card.classList.add('cycle-hide');
-  alignOverlays();
-  stopBeat();
-  countdownTimer = setInterval(()=>{
-    countdownN--;
-    if (countdownN>0){
-      box.textContent = countdownN;
-    } else {
-      clearInterval(countdownTimer); countdownTimer=null;
-      box.classList.remove('show'); card.classList.remove('cycle-hide');
-      cprStart = Date.now(); cprPausedAccum=0; cprPausedAt=0; cue90=false; cue120=false; cprRunning=true; play('start'); if(!beatMuted) startBeat();
-      $('cprStart').disabled = true; $('cprPause').disabled = false;
-      counting=false;
-    }
-  },1000);
-}
-
-/* ===== TICK ===== */
-function now(){ return Date.now(); }
-function tick(){
-  const t=now();
-  if(showTotalZero){
-    $('totalDigits').textContent='00:00';
-  }else if(totalStart && !totalEnd){
-    $('totalDigits').textContent=fmt((t-totalStart)/1000);
-    if(!cue20 && (t-totalStart)>=20*60000){ cue20=true; play('total20'); }
-  }else if(totalStart && totalEnd){
-    $('totalDigits').textContent=fmt((totalEnd-totalStart)/1000);
-  }else{
-    $('totalDigits').textContent='00:00';
-  }
-  let c=0;
-  if(cprStart){
-    if(cprRunning) c=(t-cprStart-cprPausedAccum)/1000;
-    else if(cprPausedAt) c=(cprPausedAt-cprStart-cprPausedAccum)/1000;
-    else if(totalEnd) c=(totalEnd-cprStart-cprPausedAccum)/1000;
-    c = c|0;
-    if(!counting){ $('cycleDigits').textContent=fmt(c); }
-    if(!cue90 && c>=90){ cue90=true; play('cpr90'); }
-    if(!cue120 && c>=120){
-      cue120=true; play('cpr120');
-      cycleCount += 1; stamp(`Cycle ${cycleCount} finished`);
-      cprRunning=false; $('cprStart').disabled=false; $('cprPause').disabled=true;
-      showCountdown();
-    }
-  }else if(!counting){
-    $('cycleDigits').textContent='00:00';
-  }
-  if(adrStart){
-    let a=0;
-    if(adrRunning) a=(t-adrStart-adrPausedAccum)/1000;
-    else if(adrPausedAt) a=(adrPausedAt-adrStart-adrPausedAccum)/1000;
-    else if(totalEnd) a=(totalEnd-adrStart-adrPausedAccum)/1000;
-    a = a|0;
-    if(a>=240){
-      $('adrDigits').textContent='04:00'; play('adr4');
-      const adrCard=$('adrTimer'); adrCard.classList.add('adr-hide','adr-show');
-      alignOverlays();
-      adrCount += 1;
-      stamp(`Adrenaline no. ${adrCount} Administered`);
-      adrRunning = false;
-      setTimeout(()=>{
-        adrCard.classList.remove('adr-show','adr-hide');
-        adrStart=now(); adrPausedAccum=0; adrPausedAt=0; adrRunning=true;
-        $('adrStart').disabled = true; $('adrPause').disabled = false;
-      }, 2000);
-      a=0;
-    }
-    $('adrDigits').textContent=fmt(a);
-  }else $('adrDigits').textContent='00:00';
-
-  requestAnimationFrame(tick);
-  alignOverlays();
-}
-requestAnimationFrame(tick);
-
-/* ===== CONTROLS ===== */
-$('cprStart').onclick = () => {
-  primeAudio();
-  if(!totalStart){
-    totalStart=now(); totalEnd=0; showTotalZero=false;
-    sessionClosed = false; events.length = 0; activeId=null; clearDraft();
-    startNewDraftIfNeeded();
-    stamp('CPR Timer Started'); requestWake();
-  } else if(!cprStart){
-    stamp('CPR Timer Started');
-  }
-  if(!cprStart){ cprStart=totalStart; cprPausedAccum=0; cue90=false; cue120=false; play('start'); }
-  else if(cprPausedAt){ cprPausedAccum += (now()-cprPausedAt); cprPausedAt=0; play('start'); stamp('CPR Timer Resumed'); }
-  cprRunning=true; $('cprPause').disabled=false; $('cprStart').disabled=true; if(!beatMuted) startBeat();
-};
-$('cprPause').onclick = () => {
-  if(!cprRunning) return; primeAudio();
-  cprRunning=false; cprPausedAt=now(); play('pause'); stamp('CPR Timer Paused'); stopBeat();
-  $('cprPause').disabled=true; $('cprStart').disabled=false;
-};
-$('adrStart').onclick = () => {
-  primeAudio();
-  if(!totalStart){ $('cprStart').click(); }
-  if(!adrStart){ adrStart=now(); adrPausedAccum=0; adrPausedAt=0; adrRunning=true; adrCount++; stamp(`Adrenaline no. ${adrCount} Administered`); stamp('Adrenaline Timer Started'); }
-  else if(adrPausedAt){ adrPausedAccum += (now()-adrPausedAt); adrPausedAt=0; adrRunning=true; stamp('Adrenaline Timer Resumed'); }
-  $('adrPause').disabled=false; $('adrStart').disabled=true;
-};
-$('adrPause').onclick = () => {
-  if(!adrRunning) return; adrRunning=false; adrPausedAt=now(); stamp('Adrenaline Timer Paused');
-  $('adrPause').disabled=true; $('adrStart').disabled=false;
-};
-
-function resetSessionState(){
-  if(cprRunning){ cprRunning=false; cprPausedAt=0; }
-  cprStart=0; cprPausedAccum=0; cue90=false; cue120=false; counting=false;
-  if(countdownTimer){ clearInterval(countdownTimer); countdownTimer=null; }
-  const cd=$('countdown'); if(cd) cd.classList.remove('show'); $('cycleTimer').classList.remove('cycle-hide');
-  $('cprStart').disabled=false; $('cprPause').disabled=true;
-  if(adrRunning){ adrRunning=false; adrPausedAt=0; }
-  adrStart=0; adrPausedAccum=0;
-  $('adrStart').disabled=false; $('adrPause').disabled=true;
-  showTotalZero = true;
-  stopBeat(); releaseWake();
-}
-function endSession(label){
-  primeAudio();
-  if(!totalStart) return;
-  if (!hasFinalMarker(events.map(e => ({t:e.ts,label:e.label})))) {
-    stamp(label);
-  }
-  if(!totalEnd) totalEnd = now();
-  finalizeIntoSaved(label);
-  resetSessionState();
-  setExportEnabled(true);
-}
-$('stopb').onclick = () => { play('stop'); endSession('CPR Timer Stopped'); };
-$('roscb').onclick = () => { play('rosc'); stamp('ROSC Achieved'); endSession('CPR Timer Stopped'); };
-$('shockb').onclick = () => { window.__shock=(window.__shock||0)+1; stamp(`Shock no. ${window.__shock} Delivered`); };
-$('amiob').onclick  = () => { window.__amio =(window.__amio||0)+1; stamp(`Amiodarone no. ${window.__amio} Administered`); };
-$('dsedb').onclick  = () => { stamp('DSED Delivered'); };
-
-/* ===== EXPORT PDF (current session) ===== */
-function setExportEnabled(enabled){ $('printPdf').classList.toggle('is-disabled', !enabled); }
-setExportEnabled(false);
-function sessionEnded(){ return !!(totalStart && totalEnd); }
-async function loadScript(src){
-  return new Promise((res,rej)=>{
-    const s=document.createElement('script');
-    s.src=src; s.onload=()=>res(); s.onerror=()=>rej(new Error('load '+src));
-    document.head.appendChild(s);
-  });
-}
-async function ensureJsPdf(){
-  if(!window.jspdf){
-    await loadScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
-  }
-  if(!window.jspdf?.jsPDF) throw new Error('jsPDF failed');
-  if(!window.jspdf.jsPDF.API.autoTable){
-    try{ await loadScript('https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js'); }catch{}
-  }
-}
-function pdfFileName(){
-  const d=new Date();
-  const yyyy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0'), HH=String(d.getHours()).padStart(2,'0'), MM=String(d.getMinutes()).padStart(2,'0');
-  return `CPR Report ${yyyy}-${mm}-${dd} ${HH}-${MM}.pdf`;
-}
-function safeBaseName(base){
-  const cleaned = (base || 'CPR Report').replace(/[^A-Za-z0-9._ -]+/g,' ').replace(/\s+/g,' ').trim();
-  return cleaned || 'CPR Report';
-}
-function logFileLabel(meta, fallback){
-  if(meta?.started){
-    const d = new Date(meta.started);
-    if(!Number.isNaN(d.getTime())){
-      const yyyy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0'), HH=String(d.getHours()).padStart(2,'0'), MM=String(d.getMinutes()).padStart(2,'0');
-      return `CPR Log ${yyyy}-${mm}-${dd} ${HH}-${MM}`;
-    }
-  }
-  return fallback || 'CPR Log';
-}
-function toPdfName(base){
-  const safe = safeBaseName(base);
-  const collapsed = safe.replace(/\s+/g,'_') || 'CPR_Report';
-  return collapsed.toLowerCase().endsWith('.pdf') ? collapsed : `${collapsed}.pdf`;
-}
-async function shareOrDownloadPdf(blob, { fileName, shareTitle, shareText } = {}){
-  const pdfName = toPdfName(fileName || 'CPR Report');
-  const file = new File([blob], pdfName, { type: 'application/pdf' });
-  const payload = {
-    files: [file],
-    title: shareTitle || pdfName.replace(/\.pdf$/i,''),
-    text: shareText || ''
-  };
-  if (navigator.share){
-    try{
-      if(!navigator.canShare || navigator.canShare({ files: [file] })){
-        await navigator.share(payload);
-        return;
-      }
-    }catch(err){
-      console.warn('Share failed or was dismissed:', err);
-    }
-  }
-  const url = URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download=pdfName;
-  a.rel='noopener';
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(url), 1500);
-}
-async function buildPdfFromEvents(title, meta, evts){
-  await ensureJsPdf();
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'pt' });
-  doc.setFont('helvetica','bold'); doc.setFontSize(18);
-  doc.text(title || 'CPR Session Report', 40, 48);
-  doc.setFont('helvetica','normal'); doc.setFontSize(12);
-  const kv = [
-    ['Started', meta?.started ? new Date(meta.started).toLocaleString([], {hour12:false}) : 'N/A'],
-    ['Ended',   meta?.ended   ? new Date(meta.ended).toLocaleString([], {hour12:false})   : 'N/A'],
-    ['Total',   meta?.total ?? '—'],
-    ['Counts',  `Adrenaline: ${meta?.counts?.adr??0}; Shocks: ${meta?.counts?.shocks??0}; Amiodarone: ${meta?.counts?.amio??0}`]
-  ];
-  let y = 74;
-  kv.forEach(([k,v])=>{ doc.setFont('helvetica','bold'); doc.text(`${k}:`, 40, y); doc.setFont('helvetica','normal'); doc.text(String(v), 120, y); y += 18; });
-  const rows = (evts||[]).map(e=>[
-    new Date(e.t).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}),
-    e.label
-  ]);
-  if (doc.autoTable){
-    doc.autoTable({ head: [['Time','Event']], body: rows, startY: y+10, styles: { fontSize: 11, cellPadding: 6 }, headStyles: { fillColor: [25,118,210], textColor: 255 }, alternateRowStyles: { fillColor: [232,244,253] }, margin: { left: 40, right: 40 } });
-  } else {
-    y += 28; doc.setFont('helvetica','bold'); doc.text('Events:', 40, y); y += 16; doc.setFont('helvetica','normal');
-    rows.forEach(r=>{ if (y > 760){ doc.addPage(); y=48; } doc.text(`${r[0]}  |  ${r[1]}`, 40, y); y += 16; });
-  }
-  const pageCount = doc.getNumberOfPages();
-  for(let i=1;i<=pageCount;i++){
-    doc.setPage(i); doc.setFontSize(10); doc.setTextColor(120);
-    doc.text('Ambulance App (https://niwashibase.com)', 40, doc.internal.pageSize.getHeight()-24);
-  }
-  return doc.output('blob');
-}
-$('printPdf').onclick = async () => {
-  if ($('printPdf').classList.contains('is-disabled') || !sessionEnded()){
-    alert('Please finish the session first. Tap ROSC or Stop to finalize the report, then export the PDF.');
-    return;
-  }
-  try {
-    const blob = await buildPdfFromEvents('CPR Session Report', currentSummary(), eventsToSerializable().slice().reverse());
-    await shareOrDownloadPdf(blob, {
-      fileName: pdfFileName(),
-      shareTitle: 'CPR Session Report',
-      shareText: 'Generated by Ambulance App'
-    });
-  } catch (err) { console.error(err); alert('Could not generate the PDF.'); }
-};
-
-/* ===== LOGS: Save & View (in-app modal) ===== */
-function hasFinalInRuntime(){ return hasFinalMarker(events.map(e => ({t:e.ts,label:e.label}))); }
-function saveCurrentLog(){
-  if (!totalStart){
-    alert('No active CPR session to save. Start the timers and finish with Stop or ROSC first.');
-    return;
-  }
-  if (!hasFinalInRuntime()){
-    alert('Please tap Stop or ROSC to finish the session. Those buttons save automatically — use Save Log only afterward if the events are still on screen.');
-    return;
-  }
-  if (!totalEnd) totalEnd = Date.now();
-  finalizeIntoSaved('CPR Stopped');
-  resetSessionState();
-  setExportEnabled(true);
-  alert('Saved current CPR log.');
-}
-const retrieveBtn = document.getElementById('retrieveLog');
-retrieveBtn?.addEventListener('click', () => {
-  const draft = loadDraft();
-  if (!draft || !Array.isArray(draft.events) || !draft.events.length){
-    alert('No draft CPR log to retrieve.');
-    return;
-  }
-  openModal(()=>showDraftDetail(draft));
-});
-
-/* Modal state */
-const modal = $('logsModal');
-const logsList = $('logsList');
-const logsDetail = $('logsDetail');
-const logsListWrap = $('logsListWrap');
-const logsEmpty = $('logsEmpty');
-const logDelete = $('logDelete');
-const logsDeleteAll = $('logsDeleteAll');
-const logsExport = $('logsExport');
-const logsClose = $('logsClose');
-const logsTitle = $('logsModalTitle');
-let selectedLog = null;
-let modalHistoryActive = false;
-let modalPopHandler = null;
-
-function buildOverlayUrl() {
-  const p = new URLSearchParams((location.hash || "").replace(/^#/, ""));
-  p.set("overlay", "logs");
-  const hash = p.toString();
-  return `${location.pathname}${location.search}${hash ? `#${hash}` : ""}`;
-}
-function buildOverlayState() {
-  const baseState = history.state || {};
-  return { ...baseState, overlay: "logs" };
-}
-
-function hideModal(){
-  modal.classList.remove('open');
-  modal.setAttribute('aria-hidden','true');
-  selectedLog = null;
-  logsModalOpen = false;
-}
-
-function openModal(afterList){
-  modal.classList.add('open');
-  modal.setAttribute('aria-hidden','false');
-  logsModalOpen = true;
-  // default to list
-  showList();
-  if (typeof afterList === 'function'){ afterList(); }
-  // focus trap basic: focus Close
-  logsClose.focus();
-  if (!modalHistoryActive){
-    modalHistoryActive = true;
-    if (!modalPopHandler){
-      modalPopHandler = () => {
-        if (!modalHistoryActive) return;
-        modalHistoryActive = false;
-        hideModal();
-        window.removeEventListener('popstate', modalPopHandler);
-        modalPopHandler = null;
-      };
-      window.addEventListener('popstate', modalPopHandler);
-    }
-    history.pushState(buildOverlayState(), "", buildOverlayUrl());
-  }
-}
-function closeModal(){
-  if (modalHistoryActive){
-    history.back();
-  } else {
-    hideModal();
-  }
-}
-modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
-logsClose.addEventListener('click', closeModal);
-document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeModal(); });
-
-function showList(){
-  const logs = loadAllLogs();
-  logsTitle.textContent = 'Saved CPR Logs';
-  selectedLog = null;
-  logsDetail.hidden = true;
-  logDelete.hidden = true;
-  logsExport.hidden = true;
-  logsDeleteAll.hidden = logs.length === 0;
-  logsList.hidden = false;
-
-  logsListWrap.innerHTML = '';
-  if (!logs.length){
-    logsEmpty.style.display = '';
-  } else {
-    logsEmpty.style.display = 'none';
-    logs.forEach((L, i)=>{
-      const div = document.createElement('div');
-      div.className = 'list-item';
-      div.setAttribute('data-i', i);
-      const counts = `Adr ${L.meta?.counts?.adr??0} · Shocks ${L.meta?.counts?.shocks??0} · Amio ${L.meta?.counts?.amio??0}`;
-      div.innerHTML = `${L.title}<small>Total: ${L.meta?.total||'—'} · ${counts}</small>`;
-      div.addEventListener('click', ()=>showDetail(L));
-      logsListWrap.appendChild(div);
-    });
-  }
-}
-function populateDetailView(L){
-  $('dStarted').textContent = L.meta?.started ? new Date(L.meta.started).toLocaleString([], {hour12:false}) : '—';
-  $('dEnded').textContent   = L.meta?.ended   ? new Date(L.meta.ended).toLocaleString([], {hour12:false})   : '—';
-  $('dTotal').textContent   = L.meta?.total ?? '—';
-  $('dCounts').textContent  = `Adr ${L.meta?.counts?.adr??0} · Shocks ${L.meta?.counts?.shocks??0} · Amio ${L.meta?.counts?.amio??0}`;
-
-  const rows = (L.events||[]).slice().reverse().map(e=>{
-    const tr = document.createElement('tr');
-    const td1 = document.createElement('td'); td1.textContent = new Date(e.t).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
-    const td2 = document.createElement('td'); td2.textContent = e.label;
-    tr.appendChild(td1); tr.appendChild(td2);
-    return tr;
-  });
-  const dRows = $('dRows'); dRows.innerHTML = ''; rows.forEach(r=>dRows.appendChild(r));
-}
-function showDetail(L){
-  selectedLog = L;
-  logsTitle.textContent = L.title || 'CPR Log';
-  logsList.hidden = true;
-  logsDetail.hidden = false;
-  logDelete.hidden = false;
-  logsExport.hidden = false;
-  logsDeleteAll.hidden = true;
-  populateDetailView(L);
-}
-function showDraftDetail(draft){
-  selectedLog = draft;
-  logsTitle.textContent = (draft.title || 'CPR Draft') + ' (retrieved)';
-  logsList.hidden = true;
-  logsDetail.hidden = false;
-  logDelete.hidden = true;
-  logsExport.hidden = false;
-  logsDeleteAll.hidden = true;
-  populateDetailView(draft);
-}
-logsExport.addEventListener('click', async ()=>{
-  if(!selectedLog) return;
-  try{
-    const blob = await buildPdfFromEvents(selectedLog.title || 'CPR Log', selectedLog.meta, selectedLog.events.slice().reverse());
-    await shareOrDownloadPdf(blob, {
-      fileName: logFileLabel(selectedLog.meta, selectedLog.title),
-      shareTitle: selectedLog.title || 'CPR Log',
-      shareText: 'Saved CPR log from Ambulance App'
-    });
-  }catch(err){ console.error(err); alert('Could not export this log.'); }
-});
-logDelete.addEventListener('click', ()=>{
-  if(!selectedLog) return;
-  if(!confirm('Delete this CPR log? This cannot be undone.')) return;
-  const logs = loadAllLogs().filter(log => log.id !== selectedLog.id);
-  saveAllLogs(logs);
-  selectedLog = null;
-  showList();
-});
-logsDeleteAll.addEventListener('click', ()=>{
-  const logs = loadAllLogs();
-  if(!logs.length) return;
-  if(!confirm('Delete ALL saved CPR logs? This cannot be undone.')) return;
-  saveAllLogs([]);
-  selectedLog = null;
-  showList();
-});
-$('viewLogs')?.addEventListener('click', openModal);
-
-/* ===== WAAFELSS ===== */
-const age=$('age'), mBtn=$('mBtn'), yBtn=$('yBtn');
-function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
-function months(n){
-  const weight=n*0.5+4, adr=+(weight*0.01).toFixed(2), amio=+(weight*5).toFixed(1);
-  const minF=Math.round(weight*10), maxF=Math.round(weight*20);
-  const joules=Math.round(clamp(weight*4,0,360)), d10=+(clamp(weight*2.5,0,50)).toFixed(1);
-  const sga=(weight<=5)?'Size 1':'Size 1.5';
-  return {age:`${n} months`,weight,adr,amio,minF,maxF,sga,joules,d10};
-}
-function years(n){
-  let weight,sga; if(n<=5){weight=n*2+8; sga=(weight>=10&&weight<=24)?'Size 2':(weight>=25&&weight<=35)?'Size 2.5':'';}
-  else{weight=n*3+7; sga=(weight>=25&&weight<=35)?'Size 2.5':'Consider adult SGA sizes';}
-  const adr=+(weight*0.01).toFixed(2), amio=+(weight*5).toFixed(1);
-  const minF=Math.round(weight*10), maxF=Math.round(weight*20);
-  const joules=Math.round(clamp(weight*4,0,360)), d10=+(clamp(weight*2.5,0,50)).toFixed(1);
-  return {age:`${n} years`,weight,adr,amio,minF,maxF,sga,joules,d10};
-}
-function renderW(o){
-  $('wAge').textContent=o.age;
-  $('wWeight').textContent=`${o.weight.toFixed(1)} kg`;
-  $('wAdr').textContent=`${o.adr} mg`;
-  $('wAmio').textContent=`${o.amio} mg`;
-  $('wFluids').textContent=`${o.minF}–${o.maxF} mL`;
-  $('wSGA').textContent=o.sga||'—';
-  $('wJoules').textContent=`${o.joules} J`;
-  $('wD10').textContent=`${o.d10} mL`;
-}
-function parseAgeInt(){ const raw=String(age.value??'').trim(); if(raw==='') return NaN; if(raw.includes('.')||raw.includes(',')) return NaN; const n=Number(raw); return Number.isInteger(n)?n:NaN; }
-function isPositiveWholeAge(n){ return Number.isInteger(n)&&n>0; }
-function validateAgeBasic(showAlert=true){
-  const n=parseAgeInt(), ok=isPositiveWholeAge(n);
-  if(!ok && showAlert){ alert("Please enter the patient's age as a whole number only.\nAge must be a positive integer — no zero, negatives, or decimals."); }
-  return ok? n : NaN;
-}
-function updateButtonsEnabled(){ const n=parseAgeInt(); const enable=isPositiveWholeAge(n); mBtn.disabled=!enable; yBtn.disabled=!enable; }
-age?.addEventListener('input', updateButtonsEnabled); updateButtonsEnabled();
-mBtn?.addEventListener('click', ()=>{ const n=validateAgeBasic(true); if(!isPositiveWholeAge(n)) return; if(n>=13){ alert("This age is more than 12 months.\nPlease use the Years button - the Months calculator is for 0–12 months."); return; } renderW(months(n)); });
-yBtn?.addEventListener('click', ()=>{ const n=validateAgeBasic(true); if(!isPositiveWholeAge(n)) return; if(n>=15){ alert("Our guideline defines pediatric patients up to 14 years."); return; } renderW(years(n)); });
-
-/* ===== self-check ===== */
-(function(){ try{ console.assert(!document.getElementById('countdown').classList.contains('show'), 'countdown hidden initially'); }catch{} })();
+function openMainIntro(){mainIntroIndex=0;renderMainIntro();$('mainIntroModal').hidden=false}
+function closeMainIntro(){cprMarkIntroSeen();$('mainIntroModal').hidden=true}
+function openSubpage(page){$('subpageFrame').src=`${page}?embedded=1`;$('subpageHost').classList.add('show');$('subpageHost').setAttribute('aria-hidden','false')}
+function closeSubpage(){settings=load(settingsKey,defaults);$('subpageHost').classList.remove('show');$('subpageHost').setAttribute('aria-hidden','true');$('subpageFrame').src='about:blank';if(state.isRunning)startBeat();render()}
+document.addEventListener('click',e=>{let a=e.target.closest('[data-action]')?.dataset.action;if(a)action(a);let c=e.target.closest('[data-close]')?.dataset.close;if(c)$(c).classList.remove('show')});
+$('cycleStart').onclick=()=>action('START');$('cyclePause').onclick=()=>action('PAUSE');$('adrStart').onclick=()=>action('ADRENALINE');$('adrPause').onclick=()=>action('ADRENALINE_PAUSE');$('muteBtn').onclick=()=>{if(!session)return;state.isMetronomeMuted=!state.isMetronomeMuted;state.isMetronomeMuted?stopBeat():state.isRunning&&startBeat();render()};$('resumeAudioBtn').onclick=async()=>{try{stopBeat();resetSpokenPlayback();await unlockAudio({recreate:true});beep(880,80,.08);hideResumeAlert();if(state.isRunning){await wake();startBeat()}primeAudio();setTimeout(playNextCue,150);showFeedback('CPR audio reactivated')}catch(error){console.error('CPR resume audio unlock failed',error);showFeedback('Tap Continue again if audio is still muted')}};$('resumeDismissBtn').onclick=hideResumeAlert;$('settingsBtn').onclick=()=>openSubpage('settings.html');$('historyBtn').onclick=()=>openSubpage('history.html');$('homeBtn').onclick=()=>{if(session)showFeedback('CPR is active. Stop & Save before leaving.');else history.back()};$('waToggle').onclick=()=>{const open=$('waPanel').classList.toggle('show');$('waSection').classList.toggle('wa-open',open);syncWaaflesPlacement()};$('waCalc').onclick=renderWa;$('toggleRecent').onclick=()=>{$('recentCard').classList.toggle('recent-collapsed')};document.querySelectorAll('[data-wa-scope]').forEach(b=>b.onclick=()=>{wa.scope=b.dataset.waScope;document.querySelectorAll('[data-wa-scope]').forEach(x=>x.classList.toggle('on',x.dataset.waScope===wa.scope))});document.querySelectorAll('[data-wa-age]').forEach(b=>b.onclick=()=>{wa.ageGroup=b.dataset.waAge;$('waSuffix').textContent=wa.ageGroup.toLowerCase();document.querySelectorAll('[data-wa-age]').forEach(x=>x.classList.toggle('on',x.dataset.waAge===wa.ageGroup))});['pointerdown','touchstart','keydown','click'].forEach(ev=>window.addEventListener(ev,primeAudio,{once:true,passive:true}));document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&state.isRunning)wake()});matchMedia('(orientation: landscape) and (min-width: 700px)').addEventListener('change',syncWaaflesPlacement);window.addEventListener('message',event=>{if(event.source!==$('subpageFrame').contentWindow)return;let type=event.data?.type;if(type==='cpr-close-subpage')closeSubpage();if(type==='cpr-settings-changed'){settings=load(settingsKey,defaults);if(!settings.playAudioCues)stopSpokenCues();else primeAudio();if(state.isRunning&&!resumeAlertVisible)startBeat();persist();render()}if(type==='cpr-stop-active'){action('STOP');closeSubpage()}});window.addEventListener('beforeunload',e=>{if(session){e.preventDefault();e.returnValue=''}});
+$('mainIntroSkip').onclick=closeMainIntro;$('mainIntroBack').onclick=()=>{if(mainIntroIndex>0){mainIntroIndex--;renderMainIntro()}};$('mainIntroNext').onclick=()=>{if(mainIntroIndex===CprIntroCards.length-1)closeMainIntro();else{mainIntroIndex++;renderMainIntro()}};
+initButtonIcons();restore();render();if(!state.sessionId&&!cprIsIntroSeen())openMainIntro();
 })();
 </script>
 </body>

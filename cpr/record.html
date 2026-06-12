@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d63838">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CPR Record</title>
+<link rel="stylesheet" href="page-ui.css">
+<style>
+.record-summary-card{background:var(--red);color:#fff;border-radius:18px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:12px}
+.record-summary-top{display:flex;align-items:center;gap:8px}
+.record-status{border-radius:999px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.18);padding:5px 10px;color:#fff;font-size:12px;font-weight:900}
+.record-duration{margin-left:auto;color:#fff;font-size:27px;font-weight:900}
+.record-start{font-size:16px;font-weight:900}
+.record-end{color:#ffdada;font-size:13px;font-weight:800}
+.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.detail-stat{border-radius:12px;border:1px solid var(--border);background:var(--soft);padding:10px;text-align:center}
+.detail-stat b{display:block;color:var(--red);font-size:17px;font-weight:900}
+.detail-stat small{display:block;color:var(--muted);font-size:10px;white-space:nowrap}
+.timeline-title{margin:0;color:var(--text);font-size:18px;font-weight:900}
+.timeline{display:flex;flex-direction:column;gap:8px}
+.timeline-row{display:grid;grid-template-columns:9px 1fr;background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.timeline-strip{background:var(--red)}
+.timeline-main{padding:12px}
+.timeline-row b{font-size:14px;color:var(--text)}
+.timeline-row p{margin:2px 0;color:var(--muted);font-size:12px;line-height:16px;font-weight:700}
+</style>
+</head>
+<body class="portrait-only record-page">
+<header class="topbar">
+  <button class="topbar-btn" id="backBtn">Back</button>
+  <div class="topbar-title">CPR Record</div>
+  <span></span>
+</header>
+<main class="page" id="page"></main>
+<div class="page-toast" id="pageToast" hidden role="status"></div>
+<script src="cpr-storage.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const embedded = params.get("embedded") === "1" && window.parent !== window;
+const id = params.get("id");
+const page = document.getElementById("page");
+let toastTimer;
+
+function sendParent(type) {
+  if (embedded) window.parent.postMessage({ type }, "*");
+}
+
+function showToast(message) {
+  const toast = document.getElementById("pageToast");
+  toast.textContent = message;
+  toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.hidden = true;
+  }, 2000);
+}
+
+function loadRecord() {
+  const saved = cprLoadSessions().find((item) => item.id === id);
+  const active = cprLoadActive();
+  return saved || (active?.id === id ? active : null);
+}
+
+function eventColor(type) {
+  return {
+    CPR_STARTED: "#64748b",
+    CPR_PAUSED: "#64748b",
+    CPR_RESUMED: "#64748b",
+    CPR_STOPPED: "#64748b",
+    CYCLE_COMPLETED: "#ef4444",
+    ADRENALINE_STARTED: "#2563eb",
+    ADRENALINE_ADMINISTERED: "#2563eb",
+    ADRENALINE_PAUSED: "#2563eb",
+    AMIODARONE_ADMINISTERED: "#a855f7",
+    SHOCK_DELIVERED: "#eab308",
+    DSED_DELIVERED: "#fb9e24",
+    ROSC: "#22c55e",
+    TIMERS_RESET: "#64748b",
+    NOTE: "#64748b"
+  }[type] || "#64748b";
+}
+
+function render() {
+  const record = loadRecord();
+  if (!record) {
+    page.innerHTML = '<section class="card empty">CPR record is not available.</section>';
+    return;
+  }
+  const counts = cprCounts(record);
+  const active = !record.endedAtMillis && cprLoadActive()?.id === record.id;
+  page.innerHTML = `
+    <section class="record-summary-card">
+      <div class="record-summary-top">
+        <span class="record-status">${active ? "Active CPR" : record.outcome || "Completed"}</span>
+        <span class="record-duration">${cprFormatSeconds(record.totalSeconds)}</span>
+      </div>
+      <div class="record-start">Started ${cprRecordDateTime(record.startedAtMillis)}</div>
+      <div class="record-end">${record.endedAtMillis ? `Ended ${cprRecordDateTime(record.endedAtMillis)}` : "Still active / autosaved"}</div>
+    </section>
+    <section class="card">
+      <h1>Summary</h1>
+      <div class="detail-grid">
+        <div class="detail-stat"><b>${counts.cycle}</b><small>Cycles</small></div>
+        <div class="detail-stat"><b>${counts.adr}</b><small>Adrenaline</small></div>
+        <div class="detail-stat"><b>${counts.amio}</b><small>Amiodarone</small></div>
+        <div class="detail-stat"><b>${counts.shock}</b><small>Shock</small></div>
+        <div class="detail-stat"><b>${counts.dsed}</b><small>DSED</small></div>
+        <div class="detail-stat"><b>${counts.rosc}</b><small>ROSC</small></div>
+      </div>
+    </section>
+    <section class="card">
+      <h1>Export Record</h1>
+      <p>Share this CPR record as PDF, CSV, or JSON.</p>
+      <div class="exports">
+        <button class="export-btn pdf" data-export="pdf">PDF</button>
+        <button class="export-btn csv" data-export="csv">CSV</button>
+        <button class="primary" data-export="json">JSON</button>
+      </div>
+    </section>
+    ${active ? `<section class="banner"><h2>This CPR session is still active</h2><div class="banner-actions"><button class="primary" id="openCpr">Open CPR</button><button class="outline" id="stopActive">Stop & Save</button></div></section>` : ""}
+    <h2 class="timeline-title">Timeline · ${cprTimelineDateLabel(record.events, record.startedAtMillis)}</h2>
+    <section class="timeline">${timeline(record)}</section>
+  `;
+  document.querySelectorAll("[data-export]").forEach((button) => button.onclick = () => exportRecord(record, button.dataset.export));
+  const openCpr = document.getElementById("openCpr");
+  if (openCpr) openCpr.onclick = () => {
+    if (embedded) sendParent("cpr-close-subpage");
+    else location.href = "index.html";
+  };
+  const stopActive = document.getElementById("stopActive");
+  if (stopActive) stopActive.onclick = () => {
+    if (embedded) sendParent("cpr-stop-active");
+    else {
+      cprFinalizeActive();
+      showToast("CPR session saved.");
+      render();
+    }
+  };
+}
+
+function timeline(record) {
+  const events = cprHumanEvents(record);
+  if (!events.length) return '<div class="card empty">No events recorded.</div>';
+  return events.map((event) => {
+    const note = String(event.note || "").trim();
+    return `<article class="timeline-row">
+      <span class="timeline-strip" style="background:${eventColor(event.type)}"></span>
+      <div class="timeline-main">
+        <b>${cprDisplayLabel(event)}</b>
+        ${note ? `<p>${note}</p>` : ""}
+        <p>${cprClock(event.wallTimeMillis)} · Elapsed ${cprFormatSeconds(event.elapsedSeconds)}</p>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+function exportRecord(record, type) {
+  const stamp = cprExportStamp();
+  if (type === "json") {
+    cprDownloadText(cprAndroidJson([record]), `cpr_record_${stamp}.json`, "application/json");
+    return;
+  }
+  if (type === "csv") {
+    cprDownloadText(cprBuildRecordCsv(record), `cpr_record_${stamp}.csv`, "text/csv");
+    return;
+  }
+  cprDownloadBlob(cprBuildPdfBlob([record]), `cpr_record_${stamp}.pdf`);
+}
+
+document.getElementById("backBtn").onclick = () => {
+  location.href = `history.html${embedded ? "?embedded=1" : ""}`;
+};
+render();
+</script>
+</body>
+</html>

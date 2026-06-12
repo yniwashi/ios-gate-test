@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d63838">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CPR History</title>
+<link rel="stylesheet" href="page-ui.css">
+</head>
+<body class="portrait-only history-page">
+<header class="topbar">
+  <button class="topbar-btn" id="backBtn">Back</button>
+  <div class="topbar-title">CPR History</div>
+  <span></span>
+</header>
+<main class="page">
+  <section id="activeBanner" class="banner" hidden>
+    <h2>Active CPR</h2>
+    <p id="activeText">A CPR session is still running in the background.</p>
+    <div class="banner-actions"><button class="primary" id="openCpr">Open CPR</button><button class="outline" id="stopActive">Stop & Save</button></div>
+  </section>
+  <section class="intro" id="warning">
+    <h2>Data warning</h2>
+    <p>CPR records are saved on this device. If you uninstall the app or clear app data, saved CPR history will be lost. Use Backup & Restore &gt; Save Backup if you need a restorable copy.</p>
+    <button class="outline" id="hideWarning">Dismiss</button>
+  </section>
+  <button class="outline" id="showWarning" hidden>Show CPR data warning</button>
+  <section class="summary">
+    <h2 id="summaryTitle">All</h2>
+    <div class="summary-grid">
+      <div><small>Total CPR</small><b id="sumTotal">00:00</b></div>
+      <div><small>Records</small><b id="sumRecords">0</b></div>
+      <div><small>ROSC</small><b id="sumRosc">0</b></div>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Filter Records</h2>
+    <div class="filters">
+      <button class="filter on" data-filter="All">All</button>
+      <button class="filter" data-filter="Active">Active</button>
+      <button class="filter" data-filter="ROSC">ROSC</button>
+      <button class="filter" data-filter="Completed">Completed</button>
+    </div>
+  </section>
+  <section class="card">
+    <div class="export-head">
+      <div><h2>Export</h2><p id="exportCount">0 filtered record(s)</p></div>
+      <button class="primary" id="backupBtn">Backup</button>
+    </div>
+    <div class="exports">
+      <button class="export-btn pdf" id="pdfBtn">PDF</button>
+      <button class="export-btn csv" id="csvBtn">CSV</button>
+      <button class="export-btn json" id="jsonBtn">JSON</button>
+    </div>
+  </section>
+  <section class="records-head">
+    <h2>Records</h2>
+    <button class="outline" id="selectAllBtn">Select</button>
+    <button class="danger" id="deleteSelectedBtn">Delete</button>
+    <button class="danger" id="deleteAllBtn">Delete All</button>
+  </section>
+  <section id="records" class="records-list"></section>
+  <section id="selectedBar" class="selected-bar">
+    <b id="selectedText">0 selected · Export selected records</b>
+    <div class="exports">
+      <button class="export-btn pdf" data-selected-export="pdf">PDF</button>
+      <button class="export-btn csv" data-selected-export="csv">CSV</button>
+      <button class="export-btn json" data-selected-export="json">JSON</button>
+    </div>
+  </section>
+</main>
+<div class="page-toast" id="pageToast" hidden role="status"></div>
+<input type="file" id="restoreInput" accept="application/json,.json" hidden>
+<section class="intro-modal compact-modal" id="backupModal" hidden role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Backup & Restore</h2>
+    <p>Backup exports every CPR record as JSON. Restore can add backup records or overwrite current records.</p>
+    <button class="primary" id="saveBackupBtn">Save Backup</button>
+    <button class="restore-btn" id="restoreBackupBtn">Restore Backup</button>
+    <button class="outline" id="closeBackupBtn">Close</button>
+  </div>
+</section>
+<section class="intro-modal compact-modal" id="restoreModal" hidden role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Restore JSON backup?</h2>
+    <p id="restoreText"></p>
+    <button class="primary" id="addRestoreBtn">Add</button>
+    <button class="danger" id="overwriteRestoreBtn">Overwrite</button>
+    <button class="outline" id="cancelRestoreBtn">Cancel</button>
+  </div>
+</section>
+<section class="intro-modal compact-modal" id="limitModal" hidden role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2>Backup Too Large</h2>
+    <p id="limitText"></p>
+    <button class="primary" id="closeLimitBtn">OK</button>
+  </div>
+</section>
+<section class="intro-modal compact-modal" id="deleteModal" hidden role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h2 id="deleteTitle">Delete selected CPR records?</h2>
+    <p id="deleteText"></p>
+    <button class="danger" id="confirmDeleteBtn">Delete</button>
+    <button class="outline" id="cancelDeleteBtn">Cancel</button>
+  </div>
+</section>
+<script src="cpr-storage.js"></script>
+<script>
+const embedded = new URLSearchParams(location.search).get("embedded") === "1" && window.parent !== window;
+cprTryPortraitLock();
+let filter = "All";
+let selectedIds = new Set();
+let pendingRestore = null;
+let pendingDeleteMode = null;
+let toastTimer;
+
+function sendParent(type) {
+  if (embedded) window.parent.postMessage({ type }, "*");
+}
+
+function closePage() {
+  if (embedded) sendParent("cpr-close-subpage");
+  else location.href = "index.html";
+}
+
+function sessions() {
+  return cprLoadSessions();
+}
+
+function visible() {
+  return cprFilterSessions(sessions(), filter);
+}
+
+function showToast(message) {
+  const toast = document.getElementById("pageToast");
+  toast.textContent = message;
+  toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.hidden = true;
+  }, 2200);
+}
+
+function showLimit(message) {
+  document.getElementById("limitText").textContent = message;
+  document.getElementById("limitModal").hidden = false;
+}
+
+function setBackupModal(open) {
+  document.getElementById("backupModal").hidden = !open;
+}
+
+function setRestoreModal(open) {
+  document.getElementById("restoreModal").hidden = !open;
+}
+
+function setDeleteModal(open) {
+  document.getElementById("deleteModal").hidden = !open;
+}
+
+function saveAllSessions(list) {
+  cprSaveSessions([...list].sort((a, b) => (b.startedAtMillis || 0) - (a.startedAtMillis || 0)));
+}
+
+function exportSource() {
+  const list = visible();
+  return list.filter((session) => selectedIds.has(session.id));
+}
+
+function exportLabel() {
+  return "Selected Records";
+}
+
+function render() {
+  const list = visible();
+  const allIds = new Set(sessions().map((session) => session.id));
+  selectedIds = new Set([...selectedIds].filter((id) => allIds.has(id)));
+  const summary = cprSummary(list);
+  const active = cprLoadActive();
+  document.getElementById("summaryTitle").textContent = filter;
+  document.getElementById("sumTotal").textContent = cprFormatSeconds(summary.totalSeconds);
+  document.getElementById("sumRecords").textContent = summary.count;
+  document.getElementById("sumRosc").textContent = summary.rosc;
+  document.getElementById("exportCount").textContent = selectedIds.size ? `${selectedIds.size} selected record(s)` : `${list.length} filtered record(s)`;
+  document.querySelectorAll("[data-filter]").forEach((button) => button.classList.toggle("on", button.dataset.filter === filter));
+  document.getElementById("activeBanner").hidden = !active;
+  if (active) document.getElementById("activeText").textContent = `${cprSettingsDate(active.startedAtMillis)}. A CPR session is still running in the background.`;
+  document.getElementById("records").innerHTML = list.length ? list.map(card).join("") : '<div class="card empty">No CPR records found.</div>';
+  document.getElementById("selectAllBtn").hidden = !list.length;
+  document.getElementById("selectAllBtn").textContent = selectedIds.size && selectedIds.size === list.length ? "Clear" : "Select";
+  document.getElementById("deleteSelectedBtn").disabled = !selectedIds.size;
+  document.getElementById("selectedBar").classList.toggle("show", !!selectedIds.size);
+  document.getElementById("selectedText").textContent = `${selectedIds.size} selected · Export selected records`;
+  bindRecords();
+}
+
+function card(session) {
+  const counts = cprCounts(session);
+  const active = cprLoadActive()?.id === session.id;
+  const latest = cprLatestHumanEvent(session);
+  const selected = selectedIds.has(session.id);
+  return `<article class="record ${selected ? "selected" : ""}" data-open="${session.id}">
+    <button class="check ${selected ? "on" : ""}" data-select="${session.id}" aria-label="Select record"></button>
+    <div class="record-main">
+      <div class="record-top"><span class="pill ${active ? "active" : ""}">${active ? "Active CPR" : session.outcome || "Completed"}</span><span class="record-time">${cprFormatSeconds(session.totalSeconds)}</span></div>
+      <span class="date-pill">${cprSettingsDate(session.startedAtMillis)}</span>
+      ${latest ? `<div class="latest-row"><b>Latest</b><span>${cprClock(latest.wallTimeMillis)} · Elapsed ${cprFormatSeconds(latest.elapsedSeconds)} · ${cprDisplayLabel(latest)}</span></div>` : ""}
+      <div class="metrics">
+        <div class="metric"><small>Cycle</small><b>${counts.cycle}</b></div>
+        <div class="metric"><small>Adr</small><b>${counts.adr}</b></div>
+        <div class="metric"><small>Shock</small><b>${counts.shock}</b></div>
+        <div class="metric"><small>Amio</small><b>${counts.amio}</b></div>
+        <div class="metric"><small>DSED</small><b>${counts.dsed}</b></div>
+        <div class="metric"><small>ROSC</small><b>${counts.rosc}</b></div>
+      </div>
+    </div>
+  </article>`;
+}
+
+function bindRecords() {
+  document.querySelectorAll("[data-select]").forEach((button) => {
+    button.onclick = (event) => {
+      event.stopPropagation();
+      const id = button.dataset.select;
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+      render();
+    };
+  });
+  document.querySelectorAll("[data-open]").forEach((item) => {
+    item.onclick = () => {
+      location.href = `record.html?id=${encodeURIComponent(item.dataset.open)}${embedded ? "&embedded=1" : ""}`;
+    };
+  });
+}
+
+function exportData(type, list = exportSource()) {
+  if (!selectedIds.size) {
+    showToast("Select at least one CPR record to export.");
+    return;
+  }
+  if (!list.length) {
+    showToast("No CPR records to export.");
+    return;
+  }
+  const stamp = cprExportStamp();
+  if (type === "json") {
+    const json = cprAndroidJson(list);
+    if (cprJsonTooLarge(json)) {
+      showLimit("This JSON export is larger than 5 MB and cannot be restored. Export fewer CPR records, then try again.");
+      return;
+    }
+    cprDownloadText(json, `cpr_${stamp}.json`, "application/json");
+    return;
+  }
+  if (type === "csv") {
+    cprDownloadText(cprBuildHistoryCsv(list, exportLabel()), `cpr_${stamp}.csv`, "text/csv");
+    return;
+  }
+  cprDownloadBlob(cprBuildPdfBlob(list), `cpr_${stamp}.pdf`);
+}
+
+function saveBackup() {
+  const list = sessions().sort((a, b) => (b.startedAtMillis || 0) - (a.startedAtMillis || 0));
+  if (!list.length) {
+    showToast("No CPR records to save.");
+    return;
+  }
+  const json = cprAndroidJson(list);
+  if (cprJsonTooLarge(json)) {
+    showLimit("This JSON backup is larger than 5 MB and cannot be restored. Delete old CPR records before saving a restorable backup.");
+    return;
+  }
+  cprDownloadText(json, `cpr_backup_${cprExportStamp()}.json`, "application/json");
+  showToast("CPR backup saved.");
+}
+
+function restoreFromFile(file) {
+  if (!file) return;
+  if (cprLoadActive()) {
+    showToast("Stop CPR before restoring CPR records.");
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showLimit("The selected JSON backup is larger than 5 MB and cannot be restored. Select a smaller Ambulance backup file.");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const text = String(reader.result || "");
+      if (cprJsonTooLarge(text)) {
+        showLimit("The selected JSON backup is larger than 5 MB and cannot be restored. Select a smaller Ambulance backup file.");
+        return;
+      }
+      const restored = cprSanitizeImportedSessions(JSON.parse(text));
+      if (!restored.length) {
+        showToast("Unable to restore CPR JSON backup.");
+        return;
+      }
+      const current = sessions();
+      if (!current.length) {
+        saveAllSessions(restored);
+        selectedIds.clear();
+        render();
+        showToast(`Restored ${restored.length} ${restored.length === 1 ? "record" : "records"}.`);
+      } else {
+        pendingRestore = restored;
+        document.getElementById("restoreText").textContent = `You already have ${current.length} CPR record(s). The backup contains ${restored.length} record(s). Add them to current records or overwrite current records?`;
+        setRestoreModal(true);
+      }
+    } catch {
+      showToast("Unable to restore CPR JSON backup.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+document.querySelectorAll("[data-filter]").forEach((button) => button.onclick = () => {
+  filter = button.dataset.filter;
+  selectedIds.clear();
+  render();
+});
+document.getElementById("backBtn").onclick = closePage;
+document.getElementById("openCpr").onclick = closePage;
+document.getElementById("stopActive").onclick = () => {
+  if (embedded) sendParent("cpr-stop-active");
+  else {
+    cprFinalizeActive();
+    render();
+  }
+};
+document.getElementById("hideWarning").onclick = () => {
+  localStorage.setItem(CprKeys.warningHidden, "1");
+  document.getElementById("warning").hidden = true;
+  document.getElementById("showWarning").hidden = false;
+};
+document.getElementById("showWarning").onclick = () => {
+  localStorage.setItem(CprKeys.warningHidden, "0");
+  document.getElementById("warning").hidden = false;
+  document.getElementById("showWarning").hidden = true;
+};
+if (localStorage.getItem(CprKeys.warningHidden) === "1") {
+  document.getElementById("warning").hidden = true;
+  document.getElementById("showWarning").hidden = false;
+}
+document.getElementById("jsonBtn").onclick = () => exportData("json");
+document.getElementById("csvBtn").onclick = () => exportData("csv");
+document.getElementById("pdfBtn").onclick = () => exportData("pdf");
+document.getElementById("selectAllBtn").onclick = () => {
+  const list = visible();
+  if (selectedIds.size === list.length) selectedIds.clear();
+  else list.forEach((session) => selectedIds.add(session.id));
+  render();
+};
+document.getElementById("deleteSelectedBtn").onclick = () => {
+  if (!selectedIds.size) return;
+  const activeId = cprLoadActive()?.id;
+  if (activeId && selectedIds.has(activeId)) {
+    showToast("Stop CPR before deleting the active record.");
+    return;
+  }
+  pendingDeleteMode = "selected";
+  document.getElementById("deleteTitle").textContent = "Delete selected CPR records?";
+  document.getElementById("deleteText").textContent = `This will permanently delete ${selectedIds.size} selected CPR record(s).`;
+  setDeleteModal(true);
+};
+document.getElementById("deleteAllBtn").onclick = () => {
+  if (cprLoadActive()) {
+    showToast("Stop CPR before deleting all CPR records.");
+    return;
+  }
+  pendingDeleteMode = "all";
+  document.getElementById("deleteTitle").textContent = "Delete all CPR records?";
+  document.getElementById("deleteText").textContent = "This will permanently delete every saved CPR record. Export JSON first if you need a restorable copy.";
+  setDeleteModal(true);
+};
+document.querySelectorAll("[data-selected-export]").forEach((button) => button.onclick = () => exportData(button.dataset.selectedExport));
+document.getElementById("backupBtn").onclick = () => setBackupModal(true);
+document.getElementById("closeBackupBtn").onclick = () => setBackupModal(false);
+document.getElementById("saveBackupBtn").onclick = () => {
+  setBackupModal(false);
+  saveBackup();
+};
+document.getElementById("restoreBackupBtn").onclick = () => {
+  setBackupModal(false);
+  document.getElementById("restoreInput").click();
+};
+document.getElementById("restoreInput").onchange = (event) => {
+  restoreFromFile(event.target.files[0]);
+  event.target.value = "";
+};
+document.getElementById("cancelRestoreBtn").onclick = () => {
+  pendingRestore = null;
+  setRestoreModal(false);
+};
+document.getElementById("addRestoreBtn").onclick = () => {
+  const before = sessions().length;
+  const merged = cprMergeSessions(sessions(), pendingRestore || []);
+  saveAllSessions(merged);
+  selectedIds.clear();
+  pendingRestore = null;
+  setRestoreModal(false);
+  render();
+  showToast(`Added ${Math.max(0, merged.length - before)} record(s).`);
+};
+document.getElementById("overwriteRestoreBtn").onclick = () => {
+  const count = (pendingRestore || []).length;
+  saveAllSessions(pendingRestore || []);
+  selectedIds.clear();
+  pendingRestore = null;
+  setRestoreModal(false);
+  render();
+  showToast(`Restored ${count} record(s).`);
+};
+document.getElementById("closeLimitBtn").onclick = () => {
+  document.getElementById("limitModal").hidden = true;
+};
+document.getElementById("cancelDeleteBtn").onclick = () => {
+  pendingDeleteMode = null;
+  setDeleteModal(false);
+};
+document.getElementById("confirmDeleteBtn").onclick = () => {
+  if (pendingDeleteMode === "all") {
+    if (cprLoadActive()) {
+      showToast("Stop CPR before deleting all CPR records.");
+    } else {
+      saveAllSessions([]);
+      selectedIds.clear();
+      render();
+    }
+  } else if (pendingDeleteMode === "selected") {
+    const activeId = cprLoadActive()?.id;
+    if (activeId && selectedIds.has(activeId)) {
+      showToast("Stop CPR before deleting the active record.");
+    } else {
+      saveAllSessions(sessions().filter((session) => !selectedIds.has(session.id)));
+      selectedIds.clear();
+      render();
+    }
+  }
+  pendingDeleteMode = null;
+  setDeleteModal(false);
+};
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d63838">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CPR Settings</title>
+<link rel="stylesheet" href="page-ui.css">
+</head>
+<body class="portrait-only settings-page">
+<header class="topbar">
+  <button class="topbar-btn" id="backBtn">Back</button>
+  <div class="topbar-title">CPR Settings</div>
+  <button class="topbar-btn" id="resetBtn">Reset</button>
+</header>
+<main class="page">
+  <section id="activeBanner" class="banner" hidden>
+    <h2>CPR session still active</h2>
+    <p id="activeText"></p>
+    <div class="banner-actions">
+      <button class="primary" id="openCpr">Open CPR</button>
+      <button class="outline" id="stopSave">Stop & Save</button>
+    </div>
+  </section>
+  <section class="intro">
+    <h2>CPR Timer Settings</h2>
+    <p>Use this page to adjust CPR reminder times, the beat sound, WAAFELSS visibility, and audio cues. Changes save automatically.</p>
+    <button class="primary" id="introBtn">CPR Intro</button>
+  </section>
+  <section class="card">
+    <h1>Timer Defaults</h1>
+    <p>Choose when CPR reminders appear on the timer screen.</p>
+    <div class="section-head">CPR Timing</div>
+    <div id="timingRows"></div>
+    <div class="section-head">Adrenaline</div>
+    <div id="adrenalineRows"></div>
+    <div class="section-head">Shared Timer Behavior</div>
+    <div id="sharedRows"></div>
+  </section>
+  <section class="card">
+    <h1>CPR Screen</h1>
+    <p>Choose what extra tools appear on the CPR screen.</p>
+    <div id="screenRows"></div>
+  </section>
+  <section class="card">
+    <h1>Audio</h1>
+    <p>Control CPR voice cues, voice choice, and the compression beat.</p>
+    <div id="audioRows"></div>
+  </section>
+  <section class="card">
+    <h1>CPR Return Alert</h1>
+    <p>Choose when the app reminds you after you leave the CPR screen and come back.</p>
+    <div id="returnRows"></div>
+  </section>
+</main>
+<div class="page-toast" id="pageToast" hidden role="status"></div>
+<section class="intro-modal" id="introModal" hidden role="dialog" aria-modal="true" aria-labelledby="introTitle">
+  <div class="intro-dialog">
+    <div class="intro-count" id="introCount"></div>
+    <div class="intro-heading">
+      <span class="intro-icon" id="introIcon"></span>
+      <h2 id="introTitle"></h2>
+    </div>
+    <div class="intro-message" id="introMessage"></div>
+    <div class="intro-dots" id="introDots" aria-hidden="true"></div>
+    <div class="intro-actions">
+      <button class="intro-skip" id="introSkip">Skip</button>
+      <button class="intro-back" id="introBack">Back</button>
+      <button class="intro-next" id="introNext">Next</button>
+    </div>
+  </div>
+</section>
+<script src="cpr-storage.js"></script>
+<script>
+const embedded=new URLSearchParams(location.search).get('embedded')==='1'&&window.parent!==window;
+let settings = cprLoadSettings();
+let introIndex=0;
+function sendParent(type){if(embedded)window.parent.postMessage({type},'*')}
+function closePage(){if(embedded)sendParent('cpr-close-subpage');else location.href='index.html'}
+function save(){cprSaveSettings(settings);sendParent('cpr-settings-changed')}
+function fmt(seconds){if(seconds<60)return `${seconds} sec`;let m=Math.floor(seconds/60),s=seconds%60;return s?`${m} min ${s} sec`:`${m} min`}
+function row(k,title,description,min,max,step,valueText,enabled=true){let value=+settings[k],minusEnabled=enabled&&value>min,plusEnabled=enabled&&value<max;return `<div class="stepper ${enabled?'':'disabled'}"><div class="setting-top"><div class="setting-copy"><b>${title}</b><p>${description}</p></div><span class="value-pill">${valueText}</span></div><div class="step-row"><button class="step-btn" ${minusEnabled?'':'disabled'} data-step="${k}" data-delta="${-step}" data-min="${min}" data-max="${max}">-</button><div class="step-center">${valueText}</div><button class="step-btn" ${plusEnabled?'':'disabled'} data-step="${k}" data-delta="${step}" data-min="${min}" data-max="${max}">+</button></div></div>`}
+function toggle(k,title,description,enabled=true,checked=settings[k]){return `<div class="toggle ${enabled?'':'disabled'}"><div class="setting-copy"><b>${title}</b><p>${description}</p></div><button class="switch ${checked?'on':''}" ${enabled?'':'disabled'} data-toggle="${k}"></button></div>`}
+const voiceIcons={
+  female:`<svg class="voice-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12,2C8.7,2 6,4.7 6,8v2c0,2.1 1.1,3.9 2.8,4.9L7.7,17.2C7.3,18 7.9,19 8.8,19H11v2h2v-2h2.2c0.9,0 1.5,-1 1.1,-1.8l-1.1,-2.3C16.9,13.9 18,12.1 18,10V8C18,4.7 15.3,2 12,2zM12,4c2.2,0 4,1.8 4,4v2c0,2.2 -1.8,4 -4,4s-4,-1.8 -4,-4V8C8,5.8 9.8,4 12,4zM9.7,16h4.6l0.5,1H9.2l0.5,-1z"/><path d="M9,8.2C9.9,7.4 10.8,7 12,7s2.1,0.4 3,1.2V6.5C14.1,5.6 13.1,5.2 12,5.2s-2.1,0.4 -3,1.3v1.7z"/></svg>`,
+  male:`<svg class="voice-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12,2C8.7,2 6,4.7 6,8v2c0,3.3 2.7,6 6,6s6,-2.7 6,-6V8C18,4.7 15.3,2 12,2zM12,4c2.2,0 4,1.8 4,4v2c0,2.2 -1.8,4 -4,4s-4,-1.8 -4,-4V8C8,5.8 9.8,4 12,4z"/><path d="M8.7,7.5C9.5,6.4 10.6,5.8 12,5.8s2.5,0.6 3.3,1.7V6.1C14.4,5.2 13.3,4.8 12,4.8s-2.4,0.4 -3.3,1.3v1.4z"/><path d="M9,17h6c1.7,0 3,1.3 3,3v1H6v-1c0,-1.7 1.3,-3 3,-3z"/></svg>`
+};
+function choices(title,description,items,key,enabled=true){return `<div class="choice-card ${enabled?'':'disabled'}"><div class="setting-copy"><b>${title}</b><p>${description}</p></div><div class="choice-row ${items.length===4?'four':''}">${items.map(([label,value])=>`<button class="choice ${settings[key]===value?'on':''}" ${enabled?'':'disabled'} data-choice="${key}" data-value="${value}">${key==='audioCueVoice'?voiceIcons[value]:''}<span>${label}</span></button>`).join('')}</div></div>`}
+function render(){
+  document.getElementById('timingRows').innerHTML=[
+    row('interruptionSeconds','Interruption period','How long the rhythm-check countdown stays on screen.',5,30,5,fmt(settings.interruptionSeconds)),
+    row('cycleSeconds','Cycle duration','How often the app reminds you to check rhythm.',60,300,15,fmt(settings.cycleSeconds))
+  ].join('');
+  document.getElementById('adrenalineRows').innerHTML=[
+    row('adrenalineSeconds','Adrenaline duration','How often the app reminds you about adrenaline.',120,600,30,fmt(settings.adrenalineSeconds)),
+    toggle('confirmAdrenalineBeforeLogging','Confirm adrenaline before logging','Ask if adrenaline was given before saving the dose time. If there is no response after two prompts, the app logs the due time automatically.'),
+    settings.confirmAdrenalineBeforeLogging
+      ? row('adrenalineConfirmationDelaySeconds','Adrenaline confirmation delay','Time before the app repeats the adrenaline confirmation prompt.',5,60,5,fmt(settings.adrenalineConfirmationDelaySeconds))
+      : row('adrenalineAutoLogDelaySeconds','Auto-log delay','How long Give Adrenaline stays on screen before the dose is logged and the adrenaline timer restarts.',5,20,5,fmt(settings.adrenalineAutoLogDelaySeconds))
+  ].join('');
+  document.getElementById('sharedRows').innerHTML=row('pauseResetThresholdSeconds','Restart After Pause','If CPR is paused longer than this, the next start begins a fresh cycle. If adrenaline is paused longer than this, the next start records a dose and begins a new adrenaline timer.',1,60,1,fmt(settings.pauseResetThresholdSeconds));
+  document.getElementById('screenRows').innerHTML=toggle('useWaafles','Show WAAFELSS','Show the pediatric WAAFELSS calculator inside the CPR timer.');
+  document.getElementById('audioRows').innerHTML=[
+    toggle('playAudioCues','Audio cues','Play sounds for CPR timing, adrenaline reminders, pause, and ROSC.'),
+    choices('Voice','Select Female or Male for spoken CPR reminders.',[['Female','female'],['Male','male']],'audioCueVoice'),
+    row('bpm','Compression beat','Speed of the CPR beat sound.',60,160,5,`${settings.bpm} BPM`),
+    toggle('playCycleNinetySecondCue','90-second cycle cue',settings.cycleSeconds>=120?'Play the 1 minute 30 seconds cue before rhythm check.':'Available when CPR cycle duration is 2 minutes or longer.',settings.cycleSeconds>=120,settings.playCycleNinetySecondCue&&settings.cycleSeconds>=120)
+  ].join('');
+  document.getElementById('returnRows').innerHTML=[
+    choices('Show alert after leaving CPR','When you come back to CPR after this time, show a reminder to review timers and tap Continue to restore audio.',[['10 sec',10],['15 sec',15],['30 sec',30],['1 min',60]],'resumeAlertSeconds')
+  ].join('');
+  const active=cprLoadActive();
+  const banner=document.getElementById('activeBanner');
+  if(active){banner.hidden=false;document.getElementById('activeText').textContent=`Started ${cprSettingsDate(active.startedAtMillis)}. Open CPR to continue, or stop and save if the session is finished.`}else banner.hidden=true;
+  bind();
+}
+function renderIntro(){
+  const card=CprIntroCards[introIndex];
+  document.getElementById('introCount').textContent=`${introIndex+1} of ${CprIntroCards.length}`;
+  document.getElementById('introTitle').textContent=card.title;
+  document.getElementById('introMessage').textContent=card.message;
+  document.getElementById('introIcon').innerHTML=cprIntroIconSvg(card.icon);
+  document.getElementById('introDots').textContent=CprIntroCards.map((_,i)=>i===introIndex?'●':'○').join(' ');
+  document.getElementById('introBack').hidden=introIndex===0;
+  document.getElementById('introBack').parentElement.classList.toggle('first-page',introIndex===0);
+  document.getElementById('introNext').textContent=introIndex===CprIntroCards.length-1?'Done':'Next';
+}
+function openIntro(){introIndex=0;renderIntro();document.getElementById('introModal').hidden=false}
+function closeIntro(){document.getElementById('introModal').hidden=true}
+function bind(){
+  document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{let k=b.dataset.step;settings[k]=Math.max(+b.dataset.min,Math.min(+b.dataset.max,+settings[k]+ +b.dataset.delta));save();render()});
+  document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>{settings[b.dataset.toggle]=!settings[b.dataset.toggle];save();render()});
+  document.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{let v=b.dataset.value;if(/^\d+$/.test(v))v=+v;settings[b.dataset.choice]=v;save();render()});
+}
+document.getElementById('backBtn').onclick=closePage;
+document.getElementById('openCpr').onclick=closePage;
+let toastTimer;
+function showToast(message){const toast=document.getElementById('pageToast');toast.textContent=message;toast.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.hidden=true},1800)}
+document.getElementById('resetBtn').onclick=()=>{settings={...CprDefaults};save();render();showToast('CPR settings reset.')};
+document.getElementById('stopSave').onclick=()=>{if(embedded)sendParent('cpr-stop-active');else{cprFinalizeActive();render()}};
+cprTryPortraitLock();
+document.getElementById('introBtn').onclick=openIntro;
+document.getElementById('introSkip').onclick=closeIntro;
+document.getElementById('introBack').onclick=()=>{if(introIndex>0){introIndex--;renderIntro()}};
+document.getElementById('introNext').onclick=()=>{if(introIndex===CprIntroCards.length-1)closeIntro();else{introIndex++;renderIntro()}};
+render();
+</script>
+</body>
+</html>
