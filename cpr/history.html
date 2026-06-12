@@ -236,7 +236,7 @@ function bindRecords() {
   });
 }
 
-function exportData(type, list = exportSource()) {
+async function exportData(type, list = exportSource()) {
   if (!selectedIds.size) {
     showToast("Select at least one CPR record to export.");
     return;
@@ -252,17 +252,17 @@ function exportData(type, list = exportSource()) {
       showLimit("This JSON export is larger than 5 MB and cannot be restored. Export fewer CPR records, then try again.");
       return;
     }
-    cprDownloadText(json, `cpr_${stamp}.json`, "application/json");
+    await cprDownloadText(json, `cpr_${stamp}.json`, "application/json");
     return;
   }
   if (type === "csv") {
-    cprDownloadText(cprBuildHistoryCsv(list, exportLabel()), `cpr_${stamp}.csv`, "text/csv");
+    await cprDownloadText(cprBuildHistoryCsv(list, exportLabel()), `cpr_${stamp}.csv`, "text/csv");
     return;
   }
-  cprDownloadBlob(cprBuildPdfBlob(list), `cpr_${stamp}.pdf`);
+  await cprDownloadBlob(cprBuildPdfBlob(list), `cpr_${stamp}.pdf`);
 }
 
-function saveBackup() {
+async function saveBackup() {
   const list = sessions().sort((a, b) => (b.startedAtMillis || 0) - (a.startedAtMillis || 0));
   if (!list.length) {
     showToast("No CPR records to save.");
@@ -273,8 +273,9 @@ function saveBackup() {
     showLimit("This JSON backup is larger than 5 MB and cannot be restored. Delete old CPR records before saving a restorable backup.");
     return;
   }
-  cprDownloadText(json, `cpr_backup_${cprExportStamp()}.json`, "application/json");
-  showToast("CPR backup saved.");
+  if (await cprDownloadText(json, `cpr_backup_${cprExportStamp()}.json`, "application/json")) {
+    showToast("CPR backup shared.");
+  }
 }
 
 function restoreFromFile(file) {

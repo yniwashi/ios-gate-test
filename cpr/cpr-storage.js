@@ -334,7 +334,29 @@ function cprExportStamp() {
   return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}_${String(date.getHours()).padStart(2, "0")}${String(date.getMinutes()).padStart(2, "0")}`;
 }
 
-function cprDownloadBlob(blob, name) {
+async function cprDownloadBlob(blob, name) {
+  if (navigator.share && window.File) {
+    const files = [new File([blob], name, { type: blob.type || "application/octet-stream" })];
+    if (!navigator.canShare || navigator.canShare({ files })) {
+      try {
+        await navigator.share({ title: name, files });
+        return true;
+      } catch (error) {
+        if (error?.name === "AbortError") return false;
+      }
+    }
+    if (blob.type !== "application/pdf") {
+      const textFiles = [new File([blob], name, { type: "text/plain" })];
+      if (!navigator.canShare || navigator.canShare({ files: textFiles })) {
+        try {
+          await navigator.share({ title: name, files: textFiles });
+          return true;
+        } catch (error) {
+          if (error?.name === "AbortError") return false;
+        }
+      }
+    }
+  }
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = name;
@@ -342,10 +364,11 @@ function cprDownloadBlob(blob, name) {
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  return true;
 }
 
 function cprDownloadText(text, name, type) {
-  cprDownloadBlob(new Blob([text], { type }), name);
+  return cprDownloadBlob(new Blob([text], { type }), name);
 }
 
 function cprJsonTooLarge(json) {

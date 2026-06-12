@@ -157,17 +157,17 @@ function timeline(record) {
   }).join("");
 }
 
-function exportRecord(record, type) {
+async function exportRecord(record, type) {
   const stamp = cprExportStamp();
   if (type === "json") {
-    cprDownloadText(cprAndroidJson([record]), `cpr_record_${stamp}.json`, "application/json");
+    await cprDownloadText(cprAndroidJson([record]), `cpr_record_${stamp}.json`, "application/json");
     return;
   }
   if (type === "csv") {
-    cprDownloadText(cprBuildRecordCsv(record), `cpr_record_${stamp}.csv`, "text/csv");
+    await cprDownloadText(cprBuildRecordCsv(record), `cpr_record_${stamp}.csv`, "text/csv");
     return;
   }
-  cprDownloadBlob(cprBuildPdfBlob([record]), `cpr_record_${stamp}.pdf`);
+  await cprDownloadBlob(cprBuildPdfBlob([record]), `cpr_record_${stamp}.pdf`);
 }
 
 document.getElementById("backBtn").onclick = () => {
