@@ -141,11 +141,7 @@ async function shareFile(root) {
   const { jsonFile, statusFilename } = await statusModule();
   const data = await reportData(root);
   const file = jsonFile(data, statusFilename("ambulance_issue_report"));
-  const shareData = {
-    title: "Ambulance App Issue Report",
-    text: `Please send this diagnostic file to ${SUPPORT_EMAIL}.`,
-    files: [file]
-  };
+  const shareData = { files: [file] };
   const emailCopied = await copyText(SUPPORT_EMAIL);
   if (!await showShareInstructions(root, emailCopied)) return;
   try {

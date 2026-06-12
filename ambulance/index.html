@@ -887,7 +887,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.4";
-  const ASSET_VERSION = "asset-20260612-gate-test-cpr-3";
+  const ASSET_VERSION = "asset-20260612-gate-test-cpr-4";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -2177,7 +2177,7 @@
       const { jsonFile, statusFilename } = await getAppStatusModule();
       const file = jsonFile(JSON.parse(jsonEl.textContent), statusFilename("ambulance_admin_panel"));
       if (navigator.canShare?.({ files:[file] }) && navigator.share) {
-        await navigator.share({ title:"Ambulance Admin Panel JSON", files:[file] }).catch(() => {});
+        await navigator.share({ files:[file] }).catch(() => {});
       } else {
         const url = URL.createObjectURL(file);
         const anchor = document.createElement("a");

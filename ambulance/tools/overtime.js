@@ -370,7 +370,7 @@ async function shareOrDownload(blob, filename, title = "Export Overtime") {
   const file = new File([blob], filename, { type: blob.type });
   try {
     if (navigator.share && navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ title, files: [file] });
+      await navigator.share({ files: [file] });
       return;
     }
   } catch (error) {

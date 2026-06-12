@@ -339,7 +339,7 @@ async function cprDownloadBlob(blob, name) {
     const files = [new File([blob], name, { type: blob.type || "application/octet-stream" })];
     if (!navigator.canShare || navigator.canShare({ files })) {
       try {
-        await navigator.share({ title: name, files });
+        await navigator.share({ files });
         return true;
       } catch (error) {
         if (error?.name === "AbortError") return false;
@@ -349,7 +349,7 @@ async function cprDownloadBlob(blob, name) {
       const textFiles = [new File([blob], name, { type: "text/plain" })];
       if (!navigator.canShare || navigator.canShare({ files: textFiles })) {
         try {
-          await navigator.share({ title: name, files: textFiles });
+          await navigator.share({ files: textFiles });
           return true;
         } catch (error) {
           if (error?.name === "AbortError") return false;
