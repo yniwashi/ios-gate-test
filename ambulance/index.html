@@ -794,7 +794,10 @@
         <button id="adminShareText" class="admin-btn" type="button">Share Text</button>
         <button id="adminShareFile" class="admin-btn" type="button">Share File</button>
       </div>
-      <button id="adminRefreshJson" class="admin-btn secondary" type="button" style="width:100%;flex:none;margin-top:9px">Refresh JSON</button>
+      <div class="admin-actions" style="margin-top:9px">
+        <button id="adminRefreshJson" class="admin-btn secondary" type="button">Refresh JSON</button>
+        <button id="adminClearCache" class="admin-btn warning" type="button">Clear Cache</button>
+      </div>
       <pre id="adminStatusJson" class="admin-json">Loading Admin Panel JSON...</pre>
     </div>
   </div>
@@ -884,7 +887,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.4";
-  const ASSET_VERSION = "asset-20260607-ios-1";
+  const ASSET_VERSION = "asset-20260612-gate-test-cpr-1";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -1090,7 +1093,7 @@
 
     // Resuscitation & Timers
     { text:"CPR",              iconType:"material", icon:"monitor_heart", color:"btn-cpr",
-      href: `${HOST}/cpr/`, showDefault:true },
+      href: `${HOST}/cpr/${ASSET_QUERY}`, showDefault:true },
 
     { text:"RSI Checklist",    iconType:"material", icon:"checklist",     color:"btn-rsi",
       href: `${HOST}/helpers/rsi_checklist_js.html`, showDefault:true, appLabel:"RSI" },
@@ -2067,6 +2070,35 @@
         jsonEl.textContent = JSON.stringify({ status_error:`Status report unavailable: ${error?.name || "Error"}` }, null, 2);
       }
     }
+    async function clearTestingCache(){
+      const localPrefixes = [
+        "amb_ios_app_config_",
+        "amb_search_data_",
+        "amb_reference_",
+        "amb_pediatric_",
+        "amb_websites_data_",
+        "amb_as_call_data_",
+        "amb_hos_sites_"
+      ];
+      const localKeys = [];
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index) || "";
+        if (localPrefixes.some(prefix => key.startsWith(prefix))) localKeys.push(key);
+      }
+      localKeys.forEach(key => localStorage.removeItem(key));
+
+      let cacheCount = 0;
+      if (window.caches?.keys) {
+        const names = await caches.keys();
+        await Promise.all(names.map(name => caches.delete(name)));
+        cacheCount = names.length;
+      }
+
+      showMiniToast(`Cleared ${localKeys.length} app cache keys and ${cacheCount} browser caches`);
+      const url = new URL(location.href);
+      url.searchParams.set("cache_clear", String(Date.now()));
+      setTimeout(() => location.replace(url.href), 700);
+    }
     async function openPanel(){
       hide(pinOverlay);
       show(panelOverlay);
@@ -2131,6 +2163,7 @@
     pinInput?.addEventListener("keydown", (event) => { if (event.key === "Enter") pinOpen.click(); });
     document.getElementById("adminPanelClose")?.addEventListener("click", () => hide(panelOverlay));
     document.getElementById("adminRefreshJson")?.addEventListener("click", refreshAdminJson);
+    document.getElementById("adminClearCache")?.addEventListener("click", clearTestingCache);
     document.getElementById("adminCopyJson")?.addEventListener("click", async () => {
       showMiniToast(await copyText(jsonEl.textContent) ? "Status copied" : "Could not copy status");
     });
