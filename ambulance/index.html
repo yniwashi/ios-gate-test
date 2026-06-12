@@ -887,7 +887,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.4";
-  const ASSET_VERSION = "asset-20260612-gate-test-cpr-4";
+  const ASSET_VERSION = "asset-20260612-gate-test-cpr-5";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -1086,6 +1086,19 @@
   let latestNotices = [];
   let noticesReady = false;
   let noticesLoadPromise = null;
+  const CPR_ACTIVE_KEY = "cpr_android_parity_active_v1";
+
+  function hasActiveCprSession() {
+    try {
+      const active = JSON.parse(localStorage.getItem(CPR_ACTIVE_KEY) || "null");
+      if (!active || active.endedAtMillis) return false;
+      if ((active.events || []).some(event => event?.type === "CPR_STOPPED")) return false;
+      const snapshot = active.activeTimerSnapshot || {};
+      return !!snapshot.sessionId && (snapshot.isRunning || snapshot.isAwaitingSave);
+    } catch (_) {
+      return false;
+    }
+  }
 
   const BUTTONS = [
     { text:"Search",           iconType:"material", icon:"search",        color:"btn-search",
@@ -2477,7 +2490,7 @@ function render(){
             ? `<img class="home-btn-icon" src="${btn.icon}" alt="" aria-hidden="true">`
           : "";
 
-      const displayLabel = btn.appLabel || btn.text;
+      const displayLabel = btn.text === "CPR" && hasActiveCprSession() ? "Active CPR" : (btn.appLabel || btn.text);
       if (displayLabel.length >= 17) {
         a.classList.add("label-long");
       } else if (displayLabel.length >= 13) {
@@ -2769,6 +2782,15 @@ function wireCharlieModal(){
 
     document.getElementById("panel-back").addEventListener("click", () => closePanel());
     render();
+
+    function refreshHomeCprTile() {
+      if (!document.body.classList.contains("panel-open")) render();
+    }
+    window.addEventListener("pageshow", refreshHomeCprTile);
+    window.addEventListener("focus", refreshHomeCprTile);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") refreshHomeCprTile();
+    });
 
     const { tool, ...params } = parseHash();
     if (tool) {
