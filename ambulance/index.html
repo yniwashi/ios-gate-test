@@ -887,7 +887,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.4";
-  const ASSET_VERSION = "asset-20260613-gate-test-cpr-18";
+  const ASSET_VERSION = "asset-20260925-gate-test-rsi-1";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -1109,7 +1109,7 @@
       href: `${HOST}/cpr/${ASSET_QUERY}`, showDefault:true },
 
     { text:"RSI Checklist",    iconType:"material", icon:"checklist",     color:"btn-rsi",
-      href: `${HOST}/helpers/rsi_checklist_js.html`, showDefault:true, appLabel:"RSI" },
+      href: `${HOST}/helpers/rsi_checklist_js.html?ver=${encodeURIComponent(ASSET_VERSION)}`, showDefault:true, appLabel:"RSI" },
 
     { text:"WAAFELSS",         iconType:"material", icon:"face",          color:"btn-waafelss",
       href:"#", showDefault:true, actionId:"waafels" },
