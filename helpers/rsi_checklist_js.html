@@ -1,14 +1,5 @@
 <!DOCTYPE html>
-<!--
-  CHANGELOG (2026-05-02):
-  - Updated the RSI checklist to v4.0.
-  - Added green highlighting for checked checkbox cells and their related checklist text cells.
 
-  CHANELOG (2026-01-15):
-  - Force RSI back to return home first to avoid iOS WebClip history quirks.
-  - Updated checkbox done highlighting: checked box cell + related text cell turn green.
-  - Moved step numbers into the related text cells; checkbox cells now contain only checkboxes.
--->
 <html>
 <head>
   <title>SOAPPPME</title>
@@ -148,11 +139,11 @@
       font-size:44px;
       font-weight:bold;
       color:#ffffff;
-      background: linear-gradient(180deg,#2a66ff,#1447ff);
-      border:2px solid #0e2fb3;
+      background: linear-gradient(180deg,#AFC0D7,#687C98);
+      border:2px solid #5f718b;
       border-radius:20px;
       cursor:pointer;
-      box-shadow:0 6px 18px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.25);
+      box-shadow:0 6px 18px rgba(48,63,84,.28), inset 0 1px 0 rgba(255,255,255,.30);
       text-shadow:0 1px 0 rgba(0,0,0,.25);
     }
     .countdown-btn:hover{ filter: brightness(1.05); }
@@ -201,7 +192,7 @@
     .timer{ display:none; font-size:24px; text-align:center; margin-top:8px; }
 
 
-    /* Screenshot-style RSI checklist update: keep checkboxes, add cleaner numbered badges */
+
     .rsi-checklist-title{
       font-family: Tahoma, sans-serif;
       text-align:center;
@@ -320,7 +311,7 @@
       vertical-align:middle;
     }
 
-    /* iPhone/WebApp-safe custom checkbox: native checkbox hidden, visual box drawn with CSS */
+
     #soapmetable.rsi-checklist .check-number input[type="checkbox"]{
       position:absolute;
       opacity:0;
@@ -363,8 +354,7 @@
       transform:rotate(45deg);
     }
 
-    /* Done state: the checked box cell + its related text cell turn green.
-       JS below adds .is-done for iPhone/WebView compatibility. */
+
     #soapmetable.rsi-checklist .check-cell.is-done,
     #soapmetable.rsi-checklist .text-cell.is-done{
       background:#bff3c7 !important;
@@ -398,7 +388,7 @@
       background-color:#92dff3 !important;
     }
 
-    /* Keep long Checklist 2 and 3 items on one line without shrinking the rest of the checklist */
+
     #soapmetable.rsi-checklist .countdown-row td.text-cell,
     #soapmetable.rsi-checklist .post-row td.text-cell{
       font-size:16px;
@@ -420,10 +410,9 @@
       #soapmetable.rsi-checklist .post-row td.text-cell{ font-size:14px; white-space:nowrap; letter-spacing:-0.35px; }
     }
 
-  
 
-    /* Final override: checked step must always show green, even over original row colors.
-       When unchecked, JS removes .is-done and the original colors return automatically. */
+
+
     #soapmetable.rsi-checklist td.check-cell.is-done,
     #soapmetable.rsi-checklist td.text-cell.is-done,
     #soapmetable.rsi-checklist tr.countdown-row td.text-cell.is-done,
@@ -442,7 +431,7 @@
 </head>
 <body>
 
-<!-- ---------- LIGHT HEADER (RSI) ---------- -->
+
 <style>
   .rsi-header{
     position: sticky; top: 0; z-index: 999;
@@ -458,11 +447,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 64px;          /* bigger tap area */
+  width: 64px;
   height: 64px;
-  font-size: 32px;      /* larger arrow */
-  border: 2px solid #0c1230;  /* visible border */
-  background: #f9fbff;  /* light but visible */
+  font-size: 32px;
+  border: 2px solid #0c1230;
+  background: #f9fbff;
   border-radius: 14px;
   color: #0c1230;
   box-shadow: 0 2px 4px rgba(0,0,0,.08);
@@ -487,7 +476,6 @@
 
 
 <script>
-  // Smart back: prefer stored home to avoid WebClip history quirks
   const HOME = sessionStorage.getItem('ambulance_home_url') || "https://ios.niwashibase.com/ambulance";
   document.getElementById('backBtn').addEventListener('click', () => {
     if (HOME) {
@@ -506,7 +494,7 @@
   });
 </script>
 
-<!-- ===== AUDIO (CPR-style priming, using Web Audio) ===== -->
+
 <script>
 let audioCtx;
 const audioBuffers = {};
@@ -526,7 +514,6 @@ function primeAudio(){
   try {
     if(!audioCtx){ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
     if(audioCtx.state === 'suspended'){ audioCtx.resume().catch(()=>{}); }
-    // iOS unlock hack (silent blip)
     const osc = audioCtx.createOscillator();
     const g = audioCtx.createGain();
     g.gain.value = 0.0001;
@@ -534,7 +521,6 @@ function primeAudio(){
     osc.start();
     setTimeout(()=>{ try{osc.stop();}catch{} }, 1);
 
-    // Preload all files (once)
     (async ()=>{
       for(const [k, url] of Object.entries(audioFiles)){
         if(audioBuffers[k]) continue;
@@ -568,7 +554,6 @@ function playBuffer(key, vol=1){
   }catch(e){ return false; }
 }
 
-// Fallback beep if buffer isn't ready
 function beep(vol=1){
   try{
     if(!audioCtx) return;
@@ -595,29 +580,26 @@ function playTime(){
   });
 }
 
-// Prime on first user interaction (covers iOS)
 ['pointerdown','touchstart','click','keydown'].forEach(ev=>{
   window.addEventListener(ev, primeAudio, {once:true, passive:true});
 });
 </script>
 
-<!-- ===== WAKE LOCK (prevent dimming/sleep while timer runs) ===== -->
+
 <script>
 let wakeLock = null;
-let keepAliveTimer = null; // tiny fallback nudge for older iOS
+let keepAliveTimer = null;
 
 async function requestWake(){
   try{
     if ('wakeLock' in navigator) {
       wakeLock = await navigator.wakeLock.request('screen');
-      wakeLock.addEventListener?.('release', ()=>{ /* released */ });
+      wakeLock.addEventListener?.('release', ()=>{  });
     } else {
-      // Fallback: periodic no-op to keep JS active (helps on some browsers)
       clearInterval(keepAliveTimer);
-      keepAliveTimer = setInterval(()=>{ /* noop */ }, 30000);
+      keepAliveTimer = setInterval(()=>{  }, 30000);
     }
   }catch(e){
-    // ignore
   }
 }
 async function releaseWake(){
@@ -627,7 +609,6 @@ async function releaseWake(){
   clearInterval(keepAliveTimer); keepAliveTimer = null;
 }
 
-// Reacquire if tab becomes visible again and timer is running
 document.addEventListener('visibilitychange', ()=>{
   if (document.visibilityState === 'visible' && window.__rsiTimerRunning) {
     requestWake();
@@ -636,14 +617,14 @@ document.addEventListener('visibilitychange', ()=>{
 window.addEventListener('beforeunload', releaseWake);
 </script>
 
-<!-- Countdown Button at Top -->
+
 <button class="countdown-btn" id="countdownTop">Start 60s Countdown</button>
 <div class="timer" id="timerTop" aria-live="polite"></div>
 
-<!-- Image -->
+
 <img class="hero-img" src="../ambulance/images/rsi_quick_ref.jpg" alt="RSI quick reference" />
 
-<!-- Shock Index card -->
+
 <section class="si-card" aria-label="Shock Index guidance">
   <h2 class="si-title">Shock Index (SI)</h2>
   <div class="si-formula"><strong>Formula:</strong> SI = HR ÷ SBP</div>
@@ -914,9 +895,6 @@ window.addEventListener('beforeunload', releaseWake);
 
 
 <script>
-  // Done highlighting.
-  // Left checkbox highlights the text cell on its left.
-  // Right checkbox highlights the text cell on its right.
   (function(){
     function relatedTextCell(checkCell){
       if (!checkCell || !checkCell.parentElement) return null;
@@ -941,7 +919,7 @@ window.addEventListener('beforeunload', releaseWake);
     });  })();
 </script>
 
-<!-- Countdown Button at Bottom -->
+
 <button class="countdown-btn" id="countdownBottom">Start 60s Countdown</button>
 <div class="timer" id="timerBottom" aria-live="polite"></div>
 
@@ -967,7 +945,7 @@ window.addEventListener('beforeunload', releaseWake);
       return `${m}:${s}`;
     };
 
-    window.__rsiTimerRunning = false;  // shared flag for wake lock
+    window.__rsiTimerRunning = false;
     let interval = null;
     let remaining = 60;
 
@@ -984,8 +962,8 @@ window.addEventListener('beforeunload', releaseWake);
     function start(){
       if (window.__rsiTimerRunning) { stop(); return; }
       window.__rsiTimerRunning = true;
-      requestWake();                // keep screen on
-      ensureAudioReady();           // unlock audio immediately
+      requestWake();
+      ensureAudioReady();
       setButtonsLabel('Stop 60s');
 
       remaining = 60;
@@ -1015,7 +993,7 @@ window.addEventListener('beforeunload', releaseWake);
     function stop(){
       if (interval) { clearInterval(interval); interval = null; }
       window.__rsiTimerRunning = false;
-      releaseWake();                // allow sleep again
+      releaseWake();
       hideOverlay();
       setButtonsLabel('Start 60s Countdown');
       if (topOut) topOut.style.display = 'none';
