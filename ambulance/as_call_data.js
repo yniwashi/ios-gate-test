@@ -1,4 +1,7 @@
 // /ambulance/as_call_data.js
+// CHANGELOG (2026-06-12):
+// - Track AS-Call helper source/error state for Admin Panel diagnostics.
+//
 // CHANGELOG (2026-06-06):
 // - Load AS-Call through iOS App config and decode Android-style number_ref helper values.
 //
@@ -13,10 +16,24 @@ const DEFAULT_CONFIG = {
 };
 
 const CACHE_KEY = "amb_as_call_data_v1";
+const RESOURCE_ID = "helpers.as_call";
 
 let config = { ...DEFAULT_CONFIG };
 let contacts = null;
 let freshPromise = null;
+let resourceStatusPromise = null;
+
+function resourceStatusModule() {
+  if (!resourceStatusPromise) {
+    const version = globalThis.window?.__AMBULANCE_ASSET_VERSION || "dev";
+    resourceStatusPromise = import(`./resource_status.js?ver=${version}`).catch(() => null);
+  }
+  return resourceStatusPromise;
+}
+
+function trackResource(method, ...args) {
+  resourceStatusModule().then(mod => mod?.[method]?.(...args)).catch(() => {});
+}
 
 async function appConfigModule() {
   if (window.__AMBULANCE_SHARED_MODULES?.appConfigData) return window.__AMBULANCE_SHARED_MODULES.appConfigData;
@@ -129,6 +146,11 @@ function readCache() {
     if (!cached || !Array.isArray(cached.contacts) || !cached.savedAt) return null;
     if (String(cached.version) !== String(config.version) || String(cached.schemaVersion) !== String(config.schema_version)) return null;
     contacts = cached.contacts;
+    trackResource("markUsed", RESOURCE_ID, "cache", {
+      active_version:String(config.version || cached.version || ""),
+      active_schema_version:String(config.schema_version || cached.schemaVersion || ""),
+      contact_count:contacts.length
+    });
     return contacts;
   } catch (_) {
     return null;
@@ -150,12 +172,23 @@ async function fetchFresh() {
   const cfg = await helperConfig();
   if (!cfg) throw new Error("AS-Call is disabled");
   config = { ...config, ...cfg };
-  const res = await fetch(config.url, { cache: "no-cache" });
-  if (!res.ok) throw new Error(`Failed to load AS-Call (${res.status})`);
-  const items = validate(await res.json(), config);
-  contacts = items;
-  writeCache(items);
-  return items;
+  try {
+    trackResource("markChecked", RESOURCE_ID);
+    const res = await fetch(config.url, { cache: "no-cache" });
+    if (!res.ok) throw new Error(`Failed to load AS-Call (${res.status})`);
+    const items = validate(await res.json(), config);
+    contacts = items;
+    writeCache(items);
+    trackResource("markDownloaded", RESOURCE_ID, "remote", {
+      active_version:String(config.version || ""),
+      active_schema_version:String(config.schema_version || ""),
+      contact_count:items.length
+    });
+    return items;
+  } catch (error) {
+    trackResource("markError", RESOURCE_ID, error);
+    throw error;
+  }
 }
 
 export function configureAsCallData(nextConfig = {}) {

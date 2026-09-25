@@ -1,4 +1,7 @@
 // /ambulance/tools/overtime.js
+// CHANGELOG (2026-06-12):
+// - Share export files without a companion text attachment on iOS.
+//
 // CHANGELOG (2026-06-07):
 // - Add salary hints, strengthen saved-salary reuse, structure full-width history records, and match Android PDF styling.
 // - Rebuild Overtime with Android-aligned Add, History, Calculator, and Settings workflows.

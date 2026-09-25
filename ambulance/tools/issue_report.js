@@ -1,4 +1,7 @@
 // /ambulance/tools/issue_report.js
+// CHANGELOG (2026-06-12):
+// - Share the diagnostics file without a companion text attachment on iOS.
+//
 // CHANGELOG (2026-06-07):
 // - Keep one Share Diagnostics File action and replace native alerts with an App-styled email instruction dialog.
 // - Add the Android-aligned Report Issue form and user-safe diagnostic JSON sharing.

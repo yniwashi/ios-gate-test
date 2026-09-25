@@ -1,4 +1,7 @@
 // /ambulance/reference_data.js
+// CHANGELOG (2026-06-12):
+// - Track Flowcharts/Formulary source/error state for Admin Panel diagnostics.
+//
 // CHANGELOG (2026-06-05):
 // - Add version-aware Flowcharts/Formulary loading from iOS App config and API endpoints.
 
@@ -19,6 +22,19 @@ const DEFAULTS = {
 
 const memory = new Map();
 const pending = new Map();
+let resourceStatusPromise = null;
+
+function resourceStatusModule() {
+  if (!resourceStatusPromise) {
+    const version = globalThis.window?.__AMBULANCE_ASSET_VERSION || "dev";
+    resourceStatusPromise = import(`./resource_status.js?ver=${version}`).catch(() => null);
+  }
+  return resourceStatusPromise;
+}
+
+function trackResource(method, ...args) {
+  resourceStatusModule().then(mod => mod?.[method]?.(...args)).catch(() => {});
+}
 
 async function appConfigModule() {
   if (window.__AMBULANCE_SHARED_MODULES?.appConfigData) {
@@ -111,6 +127,18 @@ function writeCache(type, cfg, items) {
   } catch (_) {}
 }
 
+function resourceId(type) {
+  return `helpers.${type}`;
+}
+
+function details(cfg, items) {
+  return {
+    active_version:String(cfg?.version || ""),
+    active_schema_version:String(cfg?.schema_version || ""),
+    item_count:Array.isArray(items) ? items.length : 0
+  };
+}
+
 async function load(type) {
   if (!DEFAULTS[type]) throw new Error(`Unknown reference helper: ${type}`);
   if (memory.has(type)) return memory.get(type);
@@ -120,21 +148,26 @@ async function load(type) {
     if (!cfg) throw new Error(`${type} is disabled`);
     const cached = readCache(type, cfg);
     if (cached) {
+      trackResource("markUsed", resourceId(type), "cache", details(cfg, cached));
       const result = { config:cfg, items:cached, source:"cache" };
       memory.set(type, result);
       return result;
     }
     try {
+      trackResource("markChecked", resourceId(type));
       const response = await fetch(cfg.url, { cache:"no-cache" });
       if (!response.ok) throw new Error(`Failed to load ${type} (${response.status})`);
       const items = validate(await response.json(), type);
       writeCache(type, cfg, items);
+      trackResource("markDownloaded", resourceId(type), "remote", details(cfg, items));
       const result = { config:cfg, items, source:"remote" };
       memory.set(type, result);
       return result;
     } catch (error) {
       const stale = readCache(type, cfg, true);
+      trackResource("markError", resourceId(type), error);
       if (stale) {
+        trackResource("markUsed", resourceId(type), "stale-cache", details(cfg, stale));
         const result = { config:cfg, items:stale, source:"stale-cache" };
         memory.set(type, result);
         return result;

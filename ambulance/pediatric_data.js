@@ -1,4 +1,7 @@
 // /ambulance/pediatric_data.js
+// CHANGELOG (2026-06-12):
+// - Track pediatric helper source/error state for Admin Panel diagnostics.
+//
 // CHANGELOG (2026-06-05):
 // - Add Android-aligned AP/CCP pediatric helper loading from iOS App config with versioned local cache.
 
@@ -15,6 +18,19 @@ const FALLBACK = {
 
 const memory = new Map();
 const pending = new Map();
+let resourceStatusPromise = null;
+
+function resourceStatusModule() {
+  if (!resourceStatusPromise) {
+    const version = globalThis.window?.__AMBULANCE_ASSET_VERSION || "dev";
+    resourceStatusPromise = import(`./resource_status.js?ver=${version}`).catch(() => null);
+  }
+  return resourceStatusPromise;
+}
+
+function trackResource(method, ...args) {
+  resourceStatusModule().then(mod => mod?.[method]?.(...args)).catch(() => {});
+}
 
 async function appConfigModule() {
   if (window.__AMBULANCE_SHARED_MODULES?.appConfigData) return window.__AMBULANCE_SHARED_MODULES.appConfigData;
@@ -60,6 +76,18 @@ function writeCache(cfg, data) {
   } catch (_) {}
 }
 
+function resourceId(id) {
+  return `pediatric.${String(id || "").replace(/_pediatric_dosing$/, "")}_dosing`;
+}
+
+function details(cfg, data) {
+  return {
+    active_version:String(cfg?.version || ""),
+    active_schema_version:String(cfg?.schema_version || ""),
+    medication_count:Array.isArray(data?.medications) ? data.medications.length : 0
+  };
+}
+
 async function load(id) {
   if (memory.has(id)) return memory.get(id);
   if (pending.has(id)) return pending.get(id);
@@ -67,17 +95,28 @@ async function load(id) {
     const cfg = await helperConfig(id);
     if (!cfg) throw new Error("Pediatric dosing is disabled");
     const cached = readCache(cfg);
-    if (cached) { memory.set(id, { config:cfg, data:cached, source:"cache" }); return memory.get(id); }
+    if (cached) {
+      trackResource("markUsed", resourceId(id), "cache", details(cfg, cached));
+      memory.set(id, { config:cfg, data:cached, source:"cache" });
+      return memory.get(id);
+    }
     try {
+      trackResource("markChecked", resourceId(id));
       const response = await fetch(cfg.url, { cache:"no-cache" });
       if (!response.ok) throw new Error(`Failed to load pediatric helper (${response.status})`);
       const data = validate(await response.json(), cfg);
       writeCache(cfg, data);
+      trackResource("markDownloaded", resourceId(id), "remote", details(cfg, data));
       memory.set(id, { config:cfg, data, source:"remote" });
       return memory.get(id);
     } catch (error) {
       const stale = readCache(cfg, true);
-      if (stale) { memory.set(id, { config:cfg, data:stale, source:"cache" }); return memory.get(id); }
+      trackResource("markError", resourceId(id), error);
+      if (stale) {
+        trackResource("markUsed", resourceId(id), "stale-cache", details(cfg, stale));
+        memory.set(id, { config:cfg, data:stale, source:"cache" });
+        return memory.get(id);
+      }
       throw error;
     }
   })().finally(() => pending.delete(id));

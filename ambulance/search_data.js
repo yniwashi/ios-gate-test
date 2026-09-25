@@ -1,4 +1,8 @@
 // /ambulance/search_data.js
+// CHANGELOG (2026-06-12):
+// - Make search cache version-aware using App Config document/helper versions and URLs.
+// - Track search helper cache/source/error state for Admin Panel diagnostics.
+//
 // CHANGELOG (2026-06-05):
 // - Include PAT in version-aware document config, caching, and global search targets.
 // - Resolve document and reference helper URLs from iOS App config, with API-route defaults.
@@ -15,16 +19,32 @@ const DEFAULT_CONFIG = {
   urlCpmIndex: "https://api.niwashibase.com/api/v1/ambulance/app-data/cpm-index",
   urlPatIndex: "https://api.niwashibase.com/api/v1/ambulance/app-data/pat-index",
   urlFlowcharts: "https://api.niwashibase.com/api/v1/ambulance/app-data/flowcharts",
-  urlFormulary: "https://api.niwashibase.com/api/v1/ambulance/app-data/formulary"
+  urlFormulary: "https://api.niwashibase.com/api/v1/ambulance/app-data/formulary",
+  documentVersions: {},
+  helperVersions: {}
 };
 
 const CACHE_KEY = "amb_search_data_v2";
+const RESOURCE_ID = "helpers.search";
 const MAX_CACHE_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 let config = { ...DEFAULT_CONFIG };
 let rawData = null;
 let targets = null;
 let freshPromise = null;
+let resourceStatusPromise = null;
+
+function resourceStatusModule() {
+  if (!resourceStatusPromise) {
+    const version = globalThis.window?.__AMBULANCE_ASSET_VERSION || "dev";
+    resourceStatusPromise = import(`./resource_status.js?ver=${version}`).catch(() => null);
+  }
+  return resourceStatusPromise;
+}
+
+function trackResource(method, ...args) {
+  resourceStatusModule().then(mod => mod?.[method]?.(...args)).catch(() => {});
+}
 let searchCorePromise = null;
 let searchCoreModule = null;
 let appConfigApplied = false;
@@ -52,11 +72,16 @@ async function getSearchCore() {
 
 async function readCache() {
   try {
+    await applyIosAppConfig();
     const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
     if (!cached || !cached.rawData || !cached.savedAt) return null;
     if (Date.now() - cached.savedAt > MAX_CACHE_AGE_MS) return null;
+    const signature = searchCacheSignature();
+    if (cached.signature && cached.signature !== signature) return null;
+    if (!cached.signature) return null;
     rawData = cached.rawData;
     targets = buildTargets(rawData, await getSearchCore());
+    trackResource("markUsed", RESOURCE_ID, "cache", searchStatusDetails(rawData));
     return rawData;
   } catch (_) {
     return null;
@@ -65,7 +90,12 @@ async function readCache() {
 
 function writeCache(data) {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), rawData: data }));
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      savedAt: Date.now(),
+      version: searchCacheVersionLabel(),
+      signature: searchCacheSignature(),
+      rawData: data
+    }));
   } catch (_) {}
 }
 
@@ -87,6 +117,9 @@ async function applyIosAppConfig() {
     const documentUrl = type => documents.find(item =>
       String(item?.type || "").toUpperCase() === type
     )?.index_url;
+    const documentVersion = type => documents.find(item =>
+      String(item?.type || "").toUpperCase() === type
+    )?.version;
     config = {
       ...config,
       urlIndex: documentUrl("CPG") || config.urlIndex,
@@ -94,15 +127,62 @@ async function applyIosAppConfig() {
       urlCpmIndex: documentUrl("CPM") || config.urlCpmIndex,
       urlPatIndex: documentUrl("PAT") || config.urlPatIndex,
       urlFlowcharts: data?.flowcharts?.url || config.urlFlowcharts,
-      urlFormulary: data?.formulary?.url || config.urlFormulary
+      urlFormulary: data?.formulary?.url || config.urlFormulary,
+      documentVersions: {
+        cpg: String(documentVersion("CPG") || ""),
+        sop: String(documentVersion("SOP") || ""),
+        cpm: String(documentVersion("CPM") || ""),
+        pat: String(documentVersion("PAT") || "")
+      },
+      helperVersions: {
+        flowcharts: {
+          version: String(data?.flowcharts?.version || ""),
+          schema_version: String(data?.flowcharts?.schema_version || "")
+        },
+        formulary: {
+          version: String(data?.formulary?.version || ""),
+          schema_version: String(data?.formulary?.schema_version || "")
+        }
+      }
     };
   } catch (_) {
     // API defaults remain usable when App config is temporarily unavailable.
   }
 }
 
+function searchCacheSignature() {
+  return JSON.stringify({
+    cpg: { url: config.urlIndex, version: config.documentVersions?.cpg || "" },
+    sop: { url: config.urlSopIndex, version: config.documentVersions?.sop || "" },
+    cpm: { url: config.urlCpmIndex, version: config.documentVersions?.cpm || "" },
+    pat: { url: config.urlPatIndex, version: config.documentVersions?.pat || "" },
+    flowcharts: {
+      url: config.urlFlowcharts,
+      version: config.helperVersions?.flowcharts?.version || "",
+      schema_version: config.helperVersions?.flowcharts?.schema_version || ""
+    },
+    formulary: {
+      url: config.urlFormulary,
+      version: config.helperVersions?.formulary?.version || "",
+      schema_version: config.helperVersions?.formulary?.schema_version || ""
+    }
+  });
+}
+
+function searchCacheVersionLabel() {
+  return [
+    `CPG:${config.documentVersions?.cpg || ""}`,
+    `SOP:${config.documentVersions?.sop || ""}`,
+    `CPM:${config.documentVersions?.cpm || ""}`,
+    `PAT:${config.documentVersions?.pat || ""}`,
+    `flowcharts:${config.helperVersions?.flowcharts?.version || ""}`,
+    `formulary:${config.helperVersions?.formulary?.version || ""}`
+  ].join("|");
+}
+
 async function fetchFresh() {
   await applyIosAppConfig();
+  trackResource("markChecked", RESOURCE_ID);
   const [core, cpg, sop, cpm, pat, flowcharts, formulary] = await Promise.all([
     getSearchCore(),
     fetchJson(config.urlIndex).catch(() => []),
@@ -115,7 +195,28 @@ async function fetchFresh() {
   rawData = { cpg, sop, cpm, pat, flowcharts, formulary };
   targets = buildTargets(rawData, core);
   writeCache(rawData);
+  trackResource("markDownloaded", RESOURCE_ID, "remote", searchStatusDetails(rawData));
   return rawData;
+}
+
+function countItems(value) {
+  if (Array.isArray(value)) return value.length;
+  if (Array.isArray(value?.items)) return value.items.length;
+  if (Array.isArray(value?.flowcharts)) return value.flowcharts.length;
+  if (Array.isArray(value?.formulary)) return value.formulary.length;
+  if (value && typeof value === "object") return Object.keys(value).length;
+  return 0;
+}
+
+function searchStatusDetails(data) {
+  return {
+    cpg_items: countItems(data?.cpg),
+    sop_items: countItems(data?.sop),
+    cpm_items: countItems(data?.cpm),
+    pat_items: countItems(data?.pat),
+    flowchart_items: countItems(data?.flowcharts),
+    formulary_items: countItems(data?.formulary)
+  };
 }
 
 function buildTargets(data, core) {
@@ -150,7 +251,10 @@ export async function getSearchData(nextConfig = {}) {
     return cached;
   }
   if (!freshPromise) freshPromise = fetchFresh().finally(() => { freshPromise = null; });
-  return freshPromise;
+  return freshPromise.catch((error) => {
+    trackResource("markError", RESOURCE_ID, error);
+    throw error;
+  });
 }
 
 export async function getGlobalDocumentTargets(nextConfig = {}) {

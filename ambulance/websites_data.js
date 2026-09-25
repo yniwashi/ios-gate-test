@@ -1,4 +1,7 @@
 // /ambulance/websites_data.js
+// CHANGELOG (2026-06-12):
+// - Track Websites helper source/error state for Admin Panel diagnostics.
+//
 // CHANGELOG (2026-06-06):
 // - Load Websites through iOS App config with versioned cache and Android-style helper validation.
 //
@@ -15,10 +18,24 @@ const DEFAULT_CONFIG = {
 };
 
 const CACHE_KEY = "amb_websites_data_v1";
+const RESOURCE_ID = "helpers.websites";
 
 let config = { ...DEFAULT_CONFIG };
 let websites = null;
 let freshPromise = null;
+let resourceStatusPromise = null;
+
+function resourceStatusModule() {
+  if (!resourceStatusPromise) {
+    const version = globalThis.window?.__AMBULANCE_ASSET_VERSION || "dev";
+    resourceStatusPromise = import(`./resource_status.js?ver=${version}`).catch(() => null);
+  }
+  return resourceStatusPromise;
+}
+
+function trackResource(method, ...args) {
+  resourceStatusModule().then(mod => mod?.[method]?.(...args)).catch(() => {});
+}
 let warmedIcons = false;
 
 async function appConfigModule() {
@@ -85,6 +102,11 @@ function readCache() {
     if (!cached || !Array.isArray(cached.websites) || !cached.savedAt) return null;
     if (String(cached.version) !== String(config.version) || String(cached.schemaVersion) !== String(config.schema_version)) return null;
     websites = cached.websites;
+    trackResource("markUsed", RESOURCE_ID, "cache", {
+      active_version:String(config.version || cached.version || ""),
+      active_schema_version:String(config.schema_version || cached.schemaVersion || ""),
+      website_count:websites.length
+    });
     return websites;
   } catch (_) {
     return null;
@@ -106,13 +128,24 @@ async function fetchFresh() {
   const cfg = await helperConfig();
   if (!cfg) throw new Error("Websites are disabled");
   config = { ...config, ...cfg };
-  const res = await fetch(config.url, { cache: "no-cache" });
-  if (!res.ok) throw new Error(`Failed to load websites (${res.status})`);
-  const items = validate(await res.json(), config);
-  websites = items;
-  writeCache(items);
-  warmWebsiteIcons(items);
-  return items;
+  try {
+    trackResource("markChecked", RESOURCE_ID);
+    const res = await fetch(config.url, { cache: "no-cache" });
+    if (!res.ok) throw new Error(`Failed to load websites (${res.status})`);
+    const items = validate(await res.json(), config);
+    websites = items;
+    writeCache(items);
+    trackResource("markDownloaded", RESOURCE_ID, "remote", {
+      active_version:String(config.version || ""),
+      active_schema_version:String(config.schema_version || ""),
+      website_count:items.length
+    });
+    warmWebsiteIcons(items);
+    return items;
+  } catch (error) {
+    trackResource("markError", RESOURCE_ID, error);
+    throw error;
+  }
 }
 
 export function configureWebsitesData(nextConfig = {}) {

@@ -1,4 +1,7 @@
 // /ambulance/app_config_data.js
+// CHANGELOG (2026-06-12):
+// - Track App Config source, checks, downloads, and errors for Admin Panel diagnostics.
+//
 // CHANGELOG (2026-06-07):
 // - Switch to the production iOS App Config endpoint and reject cached testing configs after the environment change.
 // - Parse the App Config notices array for the bell inbox without coupling it to the index.html-managed Notice button.
@@ -15,10 +18,24 @@ const DEFAULT_CONFIG = {
 };
 
 const CACHE_KEY = "amb_ios_app_config_v2";
+const RESOURCE_ID = "app_config";
 
 let config = { ...DEFAULT_CONFIG };
 let appConfig = null;
 let freshPromise = null;
+let resourceStatusPromise = null;
+
+function resourceStatusModule() {
+  if (!resourceStatusPromise) {
+    const version = globalThis.window?.__AMBULANCE_ASSET_VERSION || "dev";
+    resourceStatusPromise = import(`./resource_status.js?ver=${version}`).catch(() => null);
+  }
+  return resourceStatusPromise;
+}
+
+function trackResource(method, ...args) {
+  resourceStatusModule().then(mod => mod?.[method]?.(...args)).catch(() => {});
+}
 
 function toObject(value) {
   return value && typeof value === "object" && !Array.isArray(value) ? value : null;
@@ -57,6 +74,11 @@ function readCache({ allowStale = false } = {}) {
     if (!savedAt) return null;
     if (!allowStale && Date.now() - savedAt > getCheckIntervalMs(data)) return null;
     appConfig = data;
+    trackResource("markUsed", RESOURCE_ID, "cache", {
+      active_version: String(data?.config_version || ""),
+      active_schema_version: String(data?.schema_version || ""),
+      config_source: String(cached?.source || "cache")
+    });
     return data;
   } catch (_) {
     return null;
@@ -82,17 +104,34 @@ async function fetchJson(url, allowedEnvironments) {
 }
 
 async function fetchFresh() {
+  trackResource("markChecked", RESOURCE_ID);
   try {
     const data = await fetchJson(config.urlAppConfig, [config.environment]);
     appConfig = data;
     writeCache(data, "primary");
+    trackResource("markDownloaded", RESOURCE_ID, "primary", {
+      active_version: String(data?.config_version || ""),
+      active_schema_version: String(data?.schema_version || ""),
+      config_source: "primary"
+    });
     return data;
   } catch (primaryError) {
+    trackResource("markError", RESOURCE_ID, primaryError, { failed_source: "primary" });
     if (!config.urlBackupAppConfig) throw primaryError;
-    const data = await fetchJson(config.urlBackupAppConfig, ["backup"]);
-    appConfig = data;
-    writeCache(data, "backup");
-    return data;
+    try {
+      const data = await fetchJson(config.urlBackupAppConfig, ["backup"]);
+      appConfig = data;
+      writeCache(data, "backup");
+      trackResource("markDownloaded", RESOURCE_ID, "backup", {
+        active_version: String(data?.config_version || ""),
+        active_schema_version: String(data?.schema_version || ""),
+        config_source: "backup"
+      });
+      return data;
+    } catch (backupError) {
+      trackResource("markError", RESOURCE_ID, backupError, { failed_source: "backup" });
+      throw backupError;
+    }
   }
 }
 

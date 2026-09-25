@@ -1,4 +1,12 @@
 // tools/waafels.js
+// CHANGELOG (2026-09-25):
+// - Align WAAFELSS CCP energy and Dextrose 10% with the approved CPG v2.6 web update.
+// - Show the CPG v2.6 fluid bolus amount with its three-dose note below.
+// - Show decompression catheter color, length, and additional guidance as a note.
+// - Show the CPG v2.6 J/kg sequence below the patient-specific energy values.
+// - Align result values in one column and enlarge the AP/CCP controls.
+// - Give Months/Years and AP/CCP controls distinct inactive colors.
+//
 export async function run(mountEl) {
   mountEl.innerHTML = `
     <style>
@@ -31,7 +39,10 @@ export async function run(mountEl) {
       .waaf-col{ flex:1 1 260px; min-width:240px; display:flex; flex-direction:column; justify-content:flex-end; }
       .waaf-field{ margin-bottom:10px }
 
-      .waaf-label{ font-size:12px; font-weight:700; color:#6e7b91; margin:0 0 4px 2px }
+      .waaf-label, .waaf-actions-title{
+        margin:0 0 6px 2px; font-weight:900; font-size:12px; color:#6e7b91;
+        text-transform:uppercase; letter-spacing:.12em;
+      }
       .waaf-input-wrap{ position:relative }
      /* LANDMARK H — make input width obey its box and align flush */
 .waaf-input{
@@ -55,10 +66,11 @@ export async function run(mountEl) {
         background:#3a1e2a; color:#ffd7e2; border-color:#6b2a42;
       }
 
-      .waaf-radio{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+      .waaf-radio{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:8px; }
       .waaf-chip{
-        border-radius:999px; border:1px solid var(--border,#dbe0ea);
-        background:var(--surface,#f3f6fb);
+        box-sizing:border-box; width:100%; min-width:0; min-height:48px;
+        border-radius:999px; border:1px solid #cbd5e1;
+        background:#e9edf3; color:#5b6473;
         padding:12px 16px; font-weight:900; font-size:14px; cursor:pointer;
       }
       .waaf-chip[data-active="true"]{
@@ -66,11 +78,7 @@ export async function run(mountEl) {
       }
 
       .waaf-actions-wrap{ margin-top:12px }
-      .waaf-actions-title{
-        margin:0 0 6px 2px; font-weight:900; font-size:12px; color:#6e7b91;
-        text-transform:uppercase; letter-spacing:.12em;
-      }
-      .waaf-actions{ display:flex; gap:10px; }
+      .waaf-actions{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)) auto; gap:10px; }
 
       /* AP/CCP toggle look */
       .waaf-btn{
@@ -80,23 +88,28 @@ export async function run(mountEl) {
       .waaf-btn.push-right{ margin-left:auto }
       .waaf-btn:hover{ filter:brightness(1.02) }
       .waaf-btn.mode{ color:var(--text,#0c1230); background:var(--surface,#f3f6fb); border:1px solid var(--border,#dbe0ea); }
+      .waaf-btn.mode:not(.push-right){ min-height:54px; font-size:17px; }
+      .waaf-btn.mode:not(.push-right):not([data-active="true"]){ background:#e9edf3; border-color:#cbd5e1; color:#5b6473; }
       .waaf-btn.mode[data-active="true"]{ color:#fff; background:linear-gradient(180deg,#ff4f8d,#fa3473); border:none; }
 
       .waaf-results{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
       .waaf-rowitem{
         background:var(--surface,#f6f8fd); border:1px solid var(--border,#e7ecf3);
-        border-radius:12px; padding:10px 12px; display:flex; align-items:baseline; gap:8px;
+        border-radius:12px; padding:10px 12px; display:grid; grid-template-columns:clamp(110px,36%,150px) minmax(0,1fr); align-items:start; gap:8px;
       }
-      .waaf-k{ font-size:12px; font-weight:800; color:#6e7b91; min-width:150px }
-      .waaf-v{ font-size:16px; font-weight:900; color:var(--text,#0c1230); word-break:break-word }
+      .waaf-k{ font-size:12px; font-weight:800; color:#6e7b91; min-width:0 }
+      .waaf-v{ min-width:0; font-size:16px; font-weight:900; color:var(--text,#0c1230); word-break:break-word }
+      .waaf-result-note{ display:block; margin-top:3px; font-size:12px; font-weight:700; color:var(--muted,#6e7b91); white-space:pre-line }
+      .waaf-result-note:empty{ display:none }
 
       /* Dark tweaks */
       :root[data-theme="dark"] .waaf-card{ --waaf-bg:#151921; --waaf-bd:#232a37; }
       :root[data-theme="dark"] .waaf-input{ background:#12151c; border-color:#232a37; color:#eef2ff; }
-      :root[data-theme="dark"] .waaf-chip{ background:#12151c; border-color:#232a37; color:#eef2ff; }
+      :root[data-theme="dark"] .waaf-chip{ background:#27303d; border-color:#465263; color:#c3ccd8; }
       :root[data-theme="dark"] .waaf-chip[data-active="true"]{ background:#4c1329; border-color:#8b2146; color:#ffd7e6; }
       :root[data-theme="dark"] .waaf-rowitem{ background:#12151c; border-color:#232a37; }
       :root[data-theme="dark"] .waaf-btn.mode{ background:#12151c; border:1px solid #232a37; color:#eef2ff; }
+      :root[data-theme="dark"] .waaf-btn.mode:not(.push-right):not([data-active="true"]){ background:#27303d; border-color:#465263; color:#c3ccd8; }
       :root[data-theme="dark"] .waaf-btn.mode[data-active="true"]{ color:#fff; background:linear-gradient(180deg,#ff4f8d,#fa3473); border:none; }
     </style>
 
@@ -144,12 +157,12 @@ export async function run(mountEl) {
           <div class="waaf-rowitem"><div class="waaf-k">Weight</div><div id="valWeight" class="waaf-v">—</div></div>
           <div class="waaf-rowitem"><div class="waaf-k">Adrenaline</div><div id="valAdr" class="waaf-v">—</div></div>
           <div class="waaf-rowitem"><div class="waaf-k">Amiodarone</div><div id="valAmi" class="waaf-v">—</div></div>
-          <div class="waaf-rowitem"><div class="waaf-k">Fluids (10–20 mL/kg)</div><div id="valFluids" class="waaf-v">—</div></div>
+          <div class="waaf-rowitem"><div class="waaf-k">Fluids</div><div class="waaf-v"><span id="valFluids">—</span><small id="valFluidsNote" class="waaf-result-note"></small></div></div>
           <div class="waaf-rowitem"><div class="waaf-k">SGA Size</div><div id="valTube" class="waaf-v">—</div></div>
-          <div class="waaf-rowitem"><div class="waaf-k">Energy</div><div id="valEnergy" class="waaf-v">—</div></div>
+          <div class="waaf-rowitem"><div class="waaf-k">Energy</div><div class="waaf-v"><span id="valEnergy">—</span><small id="valEnergyNote" class="waaf-result-note"></small></div></div>
           <div class="waaf-rowitem"><div class="waaf-k">SBP (mmHg)</div><div id="valSbp" class="waaf-v">—</div></div>
           <div class="waaf-rowitem"><div class="waaf-k">Dextrose 10% (ROSC)</div><div id="valDex" class="waaf-v">—</div></div>
-          <div class="waaf-rowitem"><div class="waaf-k">Chest Wall Decompression</div><div id="valNeedle" class="waaf-v">—</div></div>
+          <div class="waaf-rowitem"><div class="waaf-k">Chest Wall Decompression</div><div class="waaf-v"><span id="valNeedle">—</span><small id="valNeedleNote" class="waaf-result-note"></small></div></div>
         </div>
       </div>
     </div>
@@ -172,11 +185,14 @@ export async function run(mountEl) {
     adr: $('#valAdr'),
     ami: $('#valAmi'),
     fluids: $('#valFluids'),
+    fluidsNote: $('#valFluidsNote'),
     tube: $('#valTube'),
     energy: $('#valEnergy'),
+    energyNote: $('#valEnergyNote'),
     sbp: $('#valSbp'),
     dex: $('#valDex'),
     needle: $('#valNeedle'),
+    needleNote: $('#valNeedleNote'),
   };
 
   let currentMode = null; // 'AP' | 'CCP' | null
@@ -206,6 +222,9 @@ function fmtSmart(v) {
 }
 
   const clamp = (v,max) => (v > max ? max : v);
+  const ccpEnergySequence = weight => [4,6,8,8]
+    .map(multiplier => `${fmtSmart(clamp(weight * multiplier, 360))} J`)
+    .join(' → ');
   const fmtAgeLabel = (age, grp) => {
     const n = Math.round(age);
     return grp === 'Months'
@@ -220,6 +239,9 @@ function fmtSmart(v) {
   }
   function clearOutputsKeepMode(){
     Object.values(out).forEach(el => el.textContent = '—');
+    out.fluidsNote.textContent = '';
+    out.energyNote.textContent = '';
+    out.needleNote.textContent = '';
   }
   function validateAge(){
     const grp = activeAgeGroup();
@@ -271,16 +293,14 @@ function fmtSmart(v) {
     // Age row
     out.age.textContent = fmtAgeLabel(age, grp);
 
-    let weight, adrMg, adrMl, amiMg, minFl, maxFl, energy, energySeq, dex, sBP, tube, needle;
+    let weight, adrMg, adrMl, amiMg, fluidBolus, energy, energySeq, dex, sBP, tube, needle;
 
     if (grp === 'Months'){
       weight = age * 0.5 + 4;
       adrMg = weight * 0.01;
       adrMl = weight / 10;
       amiMg = weight * 5;
-      minFl = weight * 10;
-      maxFl = weight * 20;
-      dex   = clamp(weight * 2.5, 50);
+      fluidBolus = weight * 10;
       sBP   = ((age / 12) * 2) + 70;
       tube  = (weight <= 5) ? 'Size 1' : 'Size 1.5';
       needle = 'IV Catheter 22g\n(Color: Blue | Length: 2.5cm)';
@@ -289,13 +309,7 @@ function fmtSmart(v) {
         energy = clamp(weight * 4, 360);
         energySeq = null;
       } else {
-        const s1 = clamp(weight * 4, 360);
-        const s2 = clamp(weight * 4, 360);
-        const s3 = clamp(weight * 4, 360);
-        const s4 = clamp(weight * 6, 360);
-        const s5 = clamp(weight * 8, 360);
-        const s6 = clamp(weight * 10, 360);
-        energySeq = `${fmtSmart(s1)} J → ${fmtSmart(s2)} J → ${fmtSmart(s3)} J → ${fmtSmart(s4)} J → ${fmtSmart(s5)} J → ${fmtSmart(s6)} J`;
+        energySeq = ccpEnergySequence(weight);
       }
 
     } else { // Years
@@ -304,9 +318,7 @@ function fmtSmart(v) {
         adrMg = weight * 0.01;
         adrMl = weight / 10;
         amiMg = weight * 5;
-        minFl = weight * 10;
-        maxFl = weight * 20;
-        dex   = clamp(weight * 2.5, 50);
+        fluidBolus = weight * 10;
         sBP   = age * 2 + 70;
         tube  = (weight >= 10 && weight <= 24) ? 'Size 2'
              : (weight >= 25 && weight <= 35) ? 'Size 2.5'
@@ -319,13 +331,7 @@ function fmtSmart(v) {
           energy = clamp(weight * 4, 360);
           energySeq = null;
         } else {
-          const s1 = clamp(weight * 4, 360);
-          const s2 = clamp(weight * 4, 360);
-          const s3 = clamp(weight * 4, 360);
-          const s4 = clamp(weight * 6, 360);
-          const s5 = clamp(weight * 8, 360);
-          const s6 = clamp(weight * 10, 360);
-          energySeq = `${fmtSmart(s1)} J → ${fmtSmart(s2)} J → ${fmtSmart(s3)} J → ${fmtSmart(s4)} J → ${fmtSmart(s5)} J → ${fmtSmart(s6)} J`;
+          energySeq = ccpEnergySequence(weight);
         }
 
       } else {
@@ -333,9 +339,7 @@ function fmtSmart(v) {
         adrMg = weight * 0.01;
         adrMl = weight / 10;
         amiMg = weight * 5;
-        minFl = weight * 10;
-        maxFl = weight * 20;
-        dex   = clamp(weight * 2.5, 50);
+        fluidBolus = weight * 10;
         sBP   = age * 2 + 70;
         tube  = (weight >= 25 && weight <= 35) ? 'Size 2.5'
              : (weight > 35) ? 'Consider adult SGA sizes'
@@ -352,27 +356,31 @@ function fmtSmart(v) {
           energy = clamp(weight * 4, 360);
           energySeq = null;
         } else {
-          const s1 = clamp(weight * 4, 360);
-          const s2 = clamp(weight * 4, 360);
-          const s3 = clamp(weight * 4, 360);
-          const s4 = clamp(weight * 6, 360);
-          const s5 = clamp(weight * 8, 360);
-          const s6 = clamp(weight * 10, 360);
-          energySeq = `${fmtSmart(s1)} J → ${fmtSmart(s2)} J → ${fmtSmart(s3)} J → ${fmtSmart(s4)} J → ${fmtSmart(s5)} J → ${fmtSmart(s6)} J`;
+          energySeq = ccpEnergySequence(weight);
         }
       }
     }
+
+    dex = grp === 'Months' && (age <= 2 || weight <= 4)
+      ? weight * 2
+      : clamp(weight * 2.5, 50);
 
     // Outputs with smart formatting
     out.weight.textContent = `${fmtSmart(weight)} kg`;
     out.adr.textContent    = `${fmtSmart(adrMg)} mg (${fmtSmart(adrMl)} mL)`;
     out.ami.textContent    = `${fmtSmart(amiMg)} mg (${fmtSmart(adrMl)} mL)`;
-    out.fluids.textContent = `${Math.round(minFl)} – ${Math.round(maxFl)} mL`;
+    out.fluids.textContent = `${fmtSmart(fluidBolus)} mL`;
+    out.fluidsNote.textContent = 'Up to 3 doses total (10ml/kg x 3)';
     out.tube.textContent   = tube || '—';
     out.energy.textContent = energySeq ? energySeq : `${fmtSmart(energy)} J`;
+    out.energyNote.textContent = mode === 'CCP'
+      ? '4 J/kg → 6 J/kg → 8 J/kg → 8 J/kg'
+      : '4 J/kg';
     out.sbp.textContent    = `${Math.round(sBP)} mmHg`;
     out.dex.textContent    = `${fmtSmart(dex)} mL`;
-    out.needle.textContent = needle;
+    const [needleType, ...needleDetails] = needle.split('\n');
+    out.needle.textContent = needleType;
+    out.needleNote.textContent = needleDetails.join('\n');
   }
 
   /* ===== Wiring ===== */

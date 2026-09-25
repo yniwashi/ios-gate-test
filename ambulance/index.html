@@ -1,5 +1,19 @@
 <!--
+  CHANGELOG (2026-06-12):
+  - Release the redesigned CPR route, Active CPR home state, production cache key, and CPR What’s New message.
+  - Make the What’s New message body independently scrollable on small screens.
+  - Share Admin Panel JSON as a file-only payload to avoid an extra text attachment on iOS.
+  - Bump ASSET_VERSION for Admin Panel diagnostics/cache reporting updates.
+  - Improve Admin PIN validation with a placeholder, blank-entry prompt, and red incorrect-PIN message.
+
+  CHANGELOG (2026-06-08):
+  - Keep the bottom iOS safe area on the active page background while preserving the blue status-bar header.
+  - Match the dark-mode iOS status-bar background to the solid Ambulance header blue.
+
   CHANGELOG (2026-06-07):
+  - Fix production release defaults so old Auto theme storage migrates to Light.
+  - Limit the iOS status-bar blue to the top header area so it does not bleed behind the greeting card.
+
   - Prepare the app for iOS production deployment with v0.4 asset naming and no hidden gate test controls.
   - Fail closed to limited access when the gate session is missing, invalid, or unavailable.
   - Bump the testing asset key for the production App Config and access-policy switch.
@@ -187,13 +201,13 @@
     })();
   </script>
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#0575da">
-  <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#0575da">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#2268c4">
 
   <!-- Material Symbols Rounded (filled) -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0&family=Baloo+Thambi+2:wght@700;800" rel="stylesheet">
 
   <style>
-    :root{ --radius:12px; --speed:.22s; --shadow:0 8px 18px rgba(0,0,0,.28); --shadow-2:0 12px 28px rgba(0,0,0,.35); --gap:8px }
+    :root{ --radius:12px; --speed:.22s; --shadow:0 8px 18px rgba(0,0,0,.28); --shadow-2:0 12px 28px rgba(0,0,0,.35); --gap:8px; --header-bg:#0575da }
     @media (prefers-color-scheme: light){ :root{
       --bg:#f2f5f9; --surface:#ffffff; --border:#e1e7f0; --text:#0c1230; --muted:#616b86;
       --accent:#1f6fff; --accent-2:#19b36b; --surface-2:#f1f5fb;
@@ -203,9 +217,10 @@
       --accent:#2f81f7; --accent-2:#20c385; --surface-2:#12151c;
     }}
     [data-theme="light"]{ --bg:#f2f5f9; --surface:#ffffff; --border:#e1e7f0; --text:#0c1230; --muted:#616b86; --accent:#1f6fff; --accent-2:#19b36b; --surface-2:#f1f5fb }
-    [data-theme="dark"] { --bg:#0d1119; --surface:#171a21; --border:#232a37; --text:#eef2ff; --muted:#9aa6c3; --accent:#2f81f7; --accent-2:#20c385; --surface-2:#12151c }
+    [data-theme="dark"] { --bg:#0d1119; --surface:#171a21; --border:#232a37; --text:#eef2ff; --muted:#9aa6c3; --accent:#2f81f7; --accent-2:#20c385; --surface-2:#12151c; --header-bg:#2268c4 }
 
-    html,body{height:100%}
+    html{height:100%;background:var(--bg)}
+    body{height:100%}
     body{
       margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,system-ui,Arial,sans-serif;
       background:var(--bg); color:var(--text); -webkit-tap-highlight-color:transparent;
@@ -215,10 +230,11 @@
 
     /* Topbar */
     .home-pinned{position:sticky;top:0;z-index:70;background:var(--bg);padding-bottom:8px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 calc(-1 * clamp(9px,3.6vw,14px)) 0;padding:calc(env(safe-area-inset-top) + 4px) clamp(17px,5vw,26px) 12px;background:linear-gradient(135deg,#108bf1 0%,#0575da 48%,#0066c8 100%);box-shadow:0 6px 16px rgba(0,91,180,.22)}
-    [data-theme="dark"] .topbar{background:linear-gradient(135deg,#2b78d6 0%,#2268c4 52%,#1959ad 100%);box-shadow:0 6px 16px rgba(0,52,112,.34)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 calc(-1 * clamp(9px,3.6vw,14px)) 0;padding:calc(env(safe-area-inset-top) + 4px) clamp(17px,5vw,26px) 12px;background:var(--header-bg);box-shadow:0 6px 16px rgba(0,91,180,.22)}
+    [data-theme="dark"] .topbar{box-shadow:0 6px 16px rgba(0,52,112,.34)}
     @media (prefers-color-scheme: dark){
-      [data-theme="auto"] .topbar{background:linear-gradient(135deg,#2b78d6 0%,#2268c4 52%,#1959ad 100%);box-shadow:0 6px 16px rgba(0,52,112,.34)}
+      [data-theme="auto"]{--header-bg:#2268c4}
+      [data-theme="auto"] .topbar{box-shadow:0 6px 16px rgba(0,52,112,.34)}
     }
     .brand{display:flex;align-items:center;gap:7px;min-width:0;flex:1}
     .logo{width:50px;height:50px;object-fit:contain;border-radius:50%;background:#fff;padding:3px;transform:scaleX(-1);box-shadow:0 2px 8px rgba(4,38,84,.22);flex:none}
@@ -589,7 +605,7 @@
     .admin-pin-head,.admin-panel-head{display:flex;align-items:center;gap:13px;padding:17px 18px;background:linear-gradient(135deg,#0d63b2,#084b8d);color:#fff}
     .admin-pin-icon{display:grid;place-items:center;width:50px;height:50px;flex:none;border-radius:50%;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34)}
     .admin-pin-icon .material-symbols-rounded{font-size:29px}.admin-pin-copy{min-width:0}.admin-pin-copy strong{display:block;font-size:21px;font-weight:950}.admin-pin-copy span{display:block;margin-top:4px;color:#e0f2fe;font-size:12px}
-    .admin-pin-body{padding:16px 18px 18px}.admin-pin-message{margin:0;padding:13px;border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;color:#374151;font-size:13px;line-height:1.45}
+    .admin-pin-body{padding:16px 18px 18px}.admin-pin-message{margin:0;padding:13px;border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;color:#374151;font-size:13px;line-height:1.45}.admin-pin-message.error{border-color:#fecaca;background:#fef2f2;color:#b91c1c}
     .admin-pin-input{box-sizing:border-box;width:100%;height:52px;margin-top:14px;border:1.5px solid #93c5fd;border-radius:8px;background:var(--surface);color:var(--text);font:900 20px/1 system-ui;text-align:center;outline:none}
     .admin-pin-actions,.admin-actions{display:flex;gap:9px;margin-top:14px}.admin-btn{appearance:none;min-height:46px;flex:1;border:1.5px solid #0d63b2;border-radius:8px;background:#0d63b2;color:#fff;font:900 13px/1 system-ui;padding:9px;cursor:pointer}
     .admin-btn.secondary{background:var(--surface);color:#0d63b2}.admin-btn.danger{border-color:#b83b31;background:#b83b31}.admin-btn.warning{border-color:#a06d00;background:#a06d00}
@@ -602,7 +618,7 @@
     .intro-title{margin:18px 0 0;text-align:center;color:var(--intro-color,#005fcb);font-size:25px;font-weight:950}.intro-message{margin:14px 0 0;padding:14px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);text-align:center;font-size:16px;font-weight:800;line-height:1.45}
     .intro-dots{margin:17px 0 0;color:#2563eb;text-align:center;font-size:20px;font-weight:900;letter-spacing:4px}.intro-actions{display:flex;gap:16px;margin-top:17px}.intro-actions .admin-btn{min-height:48px}.intro-back{background:#64748b;border-color:#64748b}
     .app-mini-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));z-index:100002;padding:10px 14px;border-radius:8px;background:#111827;color:#fff;font-size:12px;font-weight:850;opacity:0;transform:translate(-50%,10px);pointer-events:none;transition:.18s}.app-mini-toast.show{opacity:1;transform:translate(-50%,0)}
-    [data-theme="dark"] .admin-pin-message{border-color:#315878;background:#17283a;color:#d9e8f6}
+    [data-theme="dark"] .admin-pin-message{border-color:#315878;background:#17283a;color:#d9e8f6}[data-theme="dark"] .admin-pin-message.error{border-color:#7f1d1d;background:#2b1416;color:#fecaca}
     @media(max-width:520px){.admin-actions{display:grid;grid-template-columns:repeat(3,1fr)}.admin-actions .admin-btn{font-size:11px;padding-inline:4px}.intro-card{padding:18px}}
 
     /* What's New modal */
@@ -620,6 +636,12 @@
     .wn-links{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
     .wn-link{flex:1 1 120px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;font:700 12px/1 system-ui;padding:10px;border-radius:12px;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.16)}
     .wn-link img{width:36px;height:36px;object-fit:contain;margin-bottom:4px}
+    #whatsNewOverlay .wn-card{display:flex;flex-direction:column;max-height:min(78dvh,680px);overflow:hidden}
+    #whatsNewOverlay .wn-header,#whatsNewOverlay .wn-title{flex:0 0 auto}
+    #whatsNewOverlay .wn-body{min-height:0;overflow-y:scroll;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable;padding-right:10px;scrollbar-width:auto;scrollbar-color:color-mix(in oklab,var(--accent) 72%,var(--muted)) color-mix(in oklab,var(--border) 72%,transparent)}
+    #whatsNewOverlay .wn-body::-webkit-scrollbar{width:8px}
+    #whatsNewOverlay .wn-body::-webkit-scrollbar-track{background:color-mix(in oklab,var(--border) 72%,transparent);border-radius:999px}
+    #whatsNewOverlay .wn-body::-webkit-scrollbar-thumb{background:color-mix(in oklab,var(--accent) 72%,var(--muted));border-radius:999px}
     body.wn-open{overflow:hidden}
     @keyframes wnpop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
     .notices-card{padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:min(88dvh,760px)}
@@ -773,7 +795,7 @@
     </header>
     <div class="admin-pin-body">
       <p id="adminPinMessage" class="admin-pin-message">Enter the admin PIN to open diagnostics and app configuration status.</p>
-      <input id="adminPinInput" class="admin-pin-input" type="password" inputmode="numeric" maxlength="8" autocomplete="off" aria-label="Admin PIN">
+      <input id="adminPinInput" class="admin-pin-input" type="password" inputmode="numeric" maxlength="8" autocomplete="off" aria-label="Admin PIN" placeholder="Enter PIN">
       <div class="admin-pin-actions">
         <button id="adminPinCancel" class="admin-btn secondary" type="button">Cancel</button>
         <button id="adminPinOpen" class="admin-btn" type="button">Open</button>
@@ -794,10 +816,7 @@
         <button id="adminShareText" class="admin-btn" type="button">Share Text</button>
         <button id="adminShareFile" class="admin-btn" type="button">Share File</button>
       </div>
-      <div class="admin-actions" style="margin-top:9px">
-        <button id="adminRefreshJson" class="admin-btn secondary" type="button">Refresh JSON</button>
-        <button id="adminClearCache" class="admin-btn warning" type="button">Clear Cache</button>
-      </div>
+      <button id="adminRefreshJson" class="admin-btn secondary" type="button" style="width:100%;flex:none;margin-top:9px">Refresh JSON</button>
       <pre id="adminStatusJson" class="admin-json">Loading Admin Panel JSON...</pre>
     </div>
   </div>
@@ -825,10 +844,10 @@
 <section id="whatsNewOverlay" class="wn-overlay" hidden aria-modal="true" role="dialog">
   <article class="wn-card" role="document">
     <div class="wn-header">
-      <p class="wn-pill" id="wnVersionPill">🚑 New update</p>
+      <p class="wn-pill" id="wnVersionPill">📘 Guidelines update</p>
       <button id="wnClose" class="wn-close" aria-label="Dismiss What’s New">Close</button>
     </div>
-    <h2 class="wn-title">What’s New</h2>
+    <h2 class="wn-title">📘 CPG v2.6 Is Here</h2>
     <div id="whatsNewBody" class="wn-body"></div>
   </article>
 </section>
@@ -887,7 +906,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.4";
-  const ASSET_VERSION = "asset-20260925-gate-test-rsi-1";
+  const ASSET_VERSION = "asset-20260925-gate-test-full-1";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -971,8 +990,6 @@
     if (appVersionLabel) appVersionLabel.textContent = displayedAppVersion;
     const appStatusCopy = document.getElementById("appStatusCopy");
     if (appStatusCopy) appStatusCopy.textContent = `Up to date · Ambulance ${displayedAppVersion}`;
-    const versionPill = document.getElementById("wnVersionPill");
-    if (versionPill) versionPill.textContent = `🚑 ${displayedAppVersion} released`;
   }
 
   const ACCESS_TYPES = {
@@ -1047,15 +1064,9 @@
 
     // -- What's New modal --
     WHATS_NEW_ENABLED: true,
-    WHATS_NEW_KEY: "amb_whats_new_v04_release",
+    WHATS_NEW_KEY: "amb_whats_new_cpg_v26_20261001",
     WHATS_NEW_MESSAGE: `
-  <ul>
-    <li><strong>Ambulance App v0.4 released.</strong> The App now opens into a full home screen with the main tools organized like the Android app.</li>
-    <li><strong>No more Shortcuts mode.</strong> The tools that were previously opened through Shortcuts are now being moved directly into the App experience.</li>
-    <li><strong>Guidelines, Pediatrics, Calculators, Scores, Visual Guides, HOS, AS-Call, Websites, Overtime, and Shift Schedule</strong> have been refreshed so they feel closer to the Android app.</li>
-    <li><strong>Access registration is ready.</strong> Ambulance staff and other users now get the correct App access for their account type.</li>
-    <li><strong>Notices are now in the bell.</strong> Use the bell icon to read App notices. For the full What's New page, press the <strong>Updates</strong> button on the home screen.</li>
-  </ul>
+  <p>The Ambulance App now includes CPG v2.6, effective 1 October 2026. Related sections and tools have also been updated where needed. Please review the new guidelines before use.</p>
   <button id="wnMeetCharlie" type="button" style="width:100%;padding:13px 16px;margin:4px 0 10px;border-radius:12px;border:none;background:linear-gradient(180deg,#D4A574,#C8935A);color:#fff;font:800 15px/1 system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 4px 16px rgba(200,147,90,.40)"><img src="images/charlie.png" alt="" style="width:32px;height:32px;border-radius:6px;object-fit:contain;flex:none"> Meet Charlie →</button>
   <p><strong>Stay connected:</strong> use these buttons for Charlie, community updates, and App support channels.</p>
   <div class="wn-links">
@@ -1072,7 +1083,6 @@
       <span>WhatsApp</span>
     </a>
   </div>
-  <p class="wn-footer">Thanks for the ongoing feedback - more upgrades are on the way.</p>
 `
   };
 
@@ -1106,7 +1116,7 @@
 
     // Resuscitation & Timers
     { text:"CPR",              iconType:"material", icon:"monitor_heart", color:"btn-cpr",
-      href: `${HOST}/cpr/${ASSET_QUERY}`, showDefault:true },
+      href: `${HOST}/cpr/?ver=${encodeURIComponent(ASSET_VERSION)}`, showDefault:true },
 
     { text:"RSI Checklist",    iconType:"material", icon:"checklist",     color:"btn-rsi",
       href: `${HOST}/helpers/rsi_checklist_js.html?ver=${encodeURIComponent(ASSET_VERSION)}`, showDefault:true, appLabel:"RSI" },
@@ -1806,7 +1816,8 @@
   }
 
   function setThemeColorFromCSS(){
-    themeMeta.setAttribute("content", "#0575da");
+    const headerColor = getComputedStyle(document.documentElement).getPropertyValue("--header-bg").trim() || "#0575da";
+    themeMeta.setAttribute("content", headerColor);
   }
   function applyTheme(val){
     document.documentElement.setAttribute("data-theme", val);
@@ -1814,7 +1825,14 @@
     setThemeColorFromCSS();
   }
   function initTheme(){
-    const saved = localStorage.getItem(THEME_KEY) || "light";
+    const migrationKey = "amb_theme_auto_default_migrated_v1";
+    let saved = localStorage.getItem(THEME_KEY);
+    if (!saved) saved = "light";
+    if (saved === "auto" && localStorage.getItem(migrationKey) !== "1") {
+      saved = "light";
+      localStorage.setItem(THEME_KEY, saved);
+      localStorage.setItem(migrationKey, "1");
+    }
     document.getElementById("themeSelect").value = saved;
     applyTheme(saved);
     if (saved === "auto"){
@@ -2068,6 +2086,7 @@
       pinInput.disabled = locked;
       pinOpen.disabled = locked;
       pinOpen.style.opacity = locked ? ".5" : "1";
+      pinMessage.classList.toggle("error", locked);
       pinMessage.textContent = locked
         ? `Too many incorrect attempts. Try again in ${Math.max(1, Math.ceil(remaining / 60000))} min.`
         : "Enter the admin PIN to open diagnostics and app configuration status.";
@@ -2082,35 +2101,6 @@
       } catch (error) {
         jsonEl.textContent = JSON.stringify({ status_error:`Status report unavailable: ${error?.name || "Error"}` }, null, 2);
       }
-    }
-    async function clearTestingCache(){
-      const localPrefixes = [
-        "amb_ios_app_config_",
-        "amb_search_data_",
-        "amb_reference_",
-        "amb_pediatric_",
-        "amb_websites_data_",
-        "amb_as_call_data_",
-        "amb_hos_sites_"
-      ];
-      const localKeys = [];
-      for (let index = 0; index < localStorage.length; index += 1) {
-        const key = localStorage.key(index) || "";
-        if (localPrefixes.some(prefix => key.startsWith(prefix))) localKeys.push(key);
-      }
-      localKeys.forEach(key => localStorage.removeItem(key));
-
-      let cacheCount = 0;
-      if (window.caches?.keys) {
-        const names = await caches.keys();
-        await Promise.all(names.map(name => caches.delete(name)));
-        cacheCount = names.length;
-      }
-
-      showMiniToast(`Cleared ${localKeys.length} app cache keys and ${cacheCount} browser caches`);
-      const url = new URL(location.href);
-      url.searchParams.set("cache_clear", String(Date.now()));
-      setTimeout(() => location.replace(url.href), 700);
     }
     async function openPanel(){
       hide(pinOverlay);
@@ -2155,7 +2145,14 @@
     document.getElementById("adminPinCancel")?.addEventListener("click", () => hide(pinOverlay));
     pinOpen?.addEventListener("click", async () => {
       if (applyLockState()) return;
-      const valid = await sha256(PIN_SALT + pinInput.value) === PIN_HASH;
+      const enteredPin = pinInput.value.trim();
+      if (!enteredPin) {
+        pinMessage.classList.add("error");
+        pinMessage.textContent = "Enter the admin PIN first.";
+        pinInput.focus();
+        return;
+      }
+      const valid = await sha256(PIN_SALT + enteredPin) === PIN_HASH;
       if (valid) {
         localStorage.removeItem(FAIL_KEY);
         localStorage.removeItem(LOCK_KEY);
@@ -2170,13 +2167,19 @@
         applyLockState();
       } else {
         localStorage.setItem(FAIL_KEY, String(failures));
+        pinMessage.classList.add("error");
         pinMessage.textContent = `Incorrect PIN. ${5 - failures} attempts remaining.`;
+      }
+    });
+    pinInput?.addEventListener("input", () => {
+      if (pinInput.value.trim() && !lockRemaining()) {
+        pinMessage.classList.remove("error");
+        pinMessage.textContent = "Enter the admin PIN to open diagnostics and app configuration status.";
       }
     });
     pinInput?.addEventListener("keydown", (event) => { if (event.key === "Enter") pinOpen.click(); });
     document.getElementById("adminPanelClose")?.addEventListener("click", () => hide(panelOverlay));
     document.getElementById("adminRefreshJson")?.addEventListener("click", refreshAdminJson);
-    document.getElementById("adminClearCache")?.addEventListener("click", clearTestingCache);
     document.getElementById("adminCopyJson")?.addEventListener("click", async () => {
       showMiniToast(await copyText(jsonEl.textContent) ? "Status copied" : "Could not copy status");
     });
@@ -2687,9 +2690,7 @@ function wireNoticesControls(){
 function handleWhatsNew(){
   const overlay = document.getElementById("whatsNewOverlay");
   const body = document.getElementById("whatsNewBody");
-  const versionPill = document.getElementById("wnVersionPill");
   if (!overlay || !body) return;
-  if (versionPill) versionPill.textContent = `🚑 ${displayedAppVersion} released`;
   const dismissed = localStorage.getItem(WHATS_NEW_KEY) === "1";
   const message = WHATS_NEW_MESSAGE.trim();
   const shouldShow = WHATS_NEW_ENABLED && !dismissed && message;

@@ -1,4 +1,7 @@
 // /ambulance/hos_data.js
+// CHANGELOG (2026-06-12):
+// - Track HOS helper source/error state for Admin Panel diagnostics.
+//
 // CHANGELOG (2026-06-06):
 // - Add Android-aligned HOS helper loader using iOS App config, versioned cache, and location_ref decoding.
 
@@ -10,10 +13,24 @@ const DEFAULT_CONFIG = {
 };
 
 const CACHE_KEY = "amb_hos_sites_v1";
+const RESOURCE_ID = "helpers.hos_sites";
 
 let sites = null;
 let activeConfig = null;
 let freshPromise = null;
+let resourceStatusPromise = null;
+
+function resourceStatusModule() {
+  if (!resourceStatusPromise) {
+    const version = globalThis.window?.__AMBULANCE_ASSET_VERSION || "dev";
+    resourceStatusPromise = import(`./resource_status.js?ver=${version}`).catch(() => null);
+  }
+  return resourceStatusPromise;
+}
+
+function trackResource(method, ...args) {
+  resourceStatusModule().then(mod => mod?.[method]?.(...args)).catch(() => {});
+}
 
 async function appConfigModule() {
   if (window.__AMBULANCE_SHARED_MODULES?.appConfigData) return window.__AMBULANCE_SHARED_MODULES.appConfigData;
@@ -118,6 +135,14 @@ function writeCache(cfg, data) {
   } catch (_) {}
 }
 
+function statusDetails(cfg, data) {
+  return {
+    active_version:String(cfg?.version || ""),
+    active_schema_version:String(cfg?.schema_version || ""),
+    site_count:Array.isArray(data) ? data.length : 0
+  };
+}
+
 async function load() {
   const cfg = await helperConfig();
   if (!cfg) throw new Error("HOS sites are disabled");
@@ -126,21 +151,26 @@ async function load() {
   const cached = readCache(cfg);
   if (cached) {
     sites = cached;
+    trackResource("markUsed", RESOURCE_ID, "cache", statusDetails(cfg, sites));
     return { config: cfg, sites, source: "cache" };
   }
   if (!freshPromise) {
     freshPromise = (async () => {
       try {
+        trackResource("markChecked", RESOURCE_ID);
         const response = await fetch(cfg.url, { cache: "no-cache" });
         if (!response.ok) throw new Error(`Failed to load HOS sites (${response.status})`);
         const nextSites = validate(await response.json(), cfg);
         sites = nextSites;
         writeCache(cfg, nextSites);
+        trackResource("markDownloaded", RESOURCE_ID, "remote", statusDetails(cfg, nextSites));
         return { config: cfg, sites: nextSites, source: "remote" };
       } catch (error) {
         const stale = readCache(cfg, true);
+        trackResource("markError", RESOURCE_ID, error);
         if (stale) {
           sites = stale;
+          trackResource("markUsed", RESOURCE_ID, "stale-cache", statusDetails(cfg, stale));
           return { config: cfg, sites: stale, source: "stale-cache" };
         }
         throw error;

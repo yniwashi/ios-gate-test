@@ -1,10 +1,5 @@
 <!DOCTYPE html>
-<!--
-THIS FILE IS FOR THE AMBULANCE SHORTCUT USE ONLY - THE SHORTCUT WILL FETCH THIS FILE TO VIEW THE CHECKLIST.
-  CHANGELOG (2026-05-02):
-  - Updated the RSI checklist to v4.0.
-  - Added green highlighting for checked checkbox cells and their related checklist text cells.
--->
+
 <html>
 <head>
 <meta charset="UTF-8">
@@ -91,7 +86,7 @@ input[type="checkbox"] {
   font-size: 18px;
 }
 
-    /* Screenshot-style RSI checklist update: keep checkboxes, add cleaner numbered badges */
+
     .rsi-checklist-title{
       font-family: Tahoma, sans-serif;
       text-align:center;
@@ -210,7 +205,7 @@ input[type="checkbox"] {
       vertical-align:middle;
     }
 
-    /* iPhone/WebApp-safe custom checkbox: native checkbox hidden, visual box drawn with CSS */
+
     #soapmetable.rsi-checklist .check-number input[type="checkbox"]{
       position:absolute;
       opacity:0;
@@ -253,8 +248,7 @@ input[type="checkbox"] {
       transform:rotate(45deg);
     }
 
-    /* Done state: the checked box cell + its related text cell turn green.
-       JS below adds .is-done for iPhone/WebView compatibility. */
+
     #soapmetable.rsi-checklist .check-cell.is-done,
     #soapmetable.rsi-checklist .text-cell.is-done{
       background:#bff3c7 !important;
@@ -288,7 +282,7 @@ input[type="checkbox"] {
       background-color:#92dff3 !important;
     }
 
-    /* Keep long Checklist 2 and 3 items on one line without shrinking the rest of the checklist */
+
     #soapmetable.rsi-checklist .countdown-row td.text-cell,
     #soapmetable.rsi-checklist .post-row td.text-cell{
       font-size:16px;
@@ -310,10 +304,9 @@ input[type="checkbox"] {
       #soapmetable.rsi-checklist .post-row td.text-cell{ font-size:14px; white-space:nowrap; letter-spacing:-0.35px; }
     }
 
-  
 
-    /* Final override: checked step must always show green, even over original row colors.
-       When unchecked, JS removes .is-done and the original colors return automatically. */
+
+
     #soapmetable.rsi-checklist td.check-cell.is-done,
     #soapmetable.rsi-checklist td.text-cell.is-done,
     #soapmetable.rsi-checklist tr.countdown-row td.text-cell.is-done,
@@ -588,9 +581,6 @@ input[type="checkbox"] {
 
 
 <script>
-  // Done highlighting.
-  // Left checkbox highlights the text cell on its left.
-  // Right checkbox highlights the text cell on its right.
   (function(){
     function relatedTextCell(checkCell){
       if (!checkCell || !checkCell.parentElement) return null;

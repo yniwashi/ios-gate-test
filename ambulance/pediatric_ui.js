@@ -1,4 +1,11 @@
 // /ambulance/pediatric_ui.js
+// CHANGELOG (2026-09-25):
+// - Align WAAFELSS CCP energy and Dextrose 10% with the approved CPG v2.6 web update.
+// - Show whole-number WAAFELSS systolic BP only when age is available.
+// - Show the CPG v2.6 fluid bolus amount with its three-dose note below.
+// - Show decompression catheter color, length, and additional guidance as a note.
+// - Show the CPG v2.6 J/kg sequence below the patient-specific energy values.
+//
 // CHANGELOG (2026-06-07):
 // - Add spacing between medication concentration and vital-sign panels.
 // - Open pediatric references in their resolved document and route AP Fluids to PAT page 12.
@@ -58,7 +65,9 @@ function buildWaafels(scope, mode, ageText, weightText, formatNumber) {
     ? Number(weightText)
     : mode === "months" ? age * 0.5 + 4 : age <= 5 ? age * 2 + 8 : age * 3 + 7;
   const adrenalineMl = weight / 10;
-  const rosc = Math.min(weight * 2.5, 50);
+  const rosc = mode === "months" && ((age !== null && age <= 2) || weight <= 4)
+    ? weight * 2
+    : Math.min(weight * 2.5, 50);
   const sga = mode === "months"
     ? (weight <= 5 ? "Size 1" : "Size 1.5")
     : weight >= 10 && weight <= 24 ? "Size 2" : weight >= 25 && weight <= 35 ? "Size 2.5" : "Consider adult SGA sizes";
@@ -71,9 +80,16 @@ function buildWaafels(scope, mode, ageText, weightText, formatNumber) {
       : ageYears <= 13
         ? "IV Catheter 16g\n(Color: Grey | Length: 4.5cm)"
         : "IV Catheter 16g\n(Color: Grey | Length: 4.5cm)\nConsider patient size\nLonger needle may be required\nARS Needle 10g or 14g";
+  const [decompressionDevice, ...decompressionDetails] = decompression.split("\n");
   const energy = scope === "CCP"
-    ? `${formatNumber(Math.min(weight*4,360))} J → ${formatNumber(Math.min(weight*6,360))} J → ${formatNumber(Math.min(weight*8,360))} J → ${formatNumber(Math.min(weight*10,360))} J`
+    ? [4,6,8,8].map(multiplier => `${formatNumber(Math.min(weight*multiplier,360))} J`).join(" → ")
     : `${formatNumber(Math.min(weight*4,360))} J`;
+  const energyNote = scope === "CCP"
+    ? "4 J/kg → 6 J/kg → 8 J/kg → 8 J/kg"
+    : "4 J/kg";
+  const systolicBp = age === null
+    ? "Age required"
+    : `${Math.round((mode === "months" ? age / 12 : age) * 2 + 70)} mmHg`;
   return {
     medicationId:null, displayName:"WAAFELSS", header:"The WAAFELSS for your patient:", warnings:[],
     reference:{ type:"reference", query:"WAAFELSS" }, weightKg:weight, concentration:null, kv:true,
@@ -81,11 +97,11 @@ function buildWaafels(scope, mode, ageText, weightText, formatNumber) {
       ["Weight",`${formatNumber(weight)} kg`],
       ["Adrenaline",`${formatNumber(weight*0.01)} mg (${formatNumber(adrenalineMl)} ml)`,"Concentration: 1:10,000 (1 mg/10 ml)"],
       ["Amiodarone",`${formatNumber(weight*5)} mg (${formatNumber(adrenalineMl)} ml)`,"Concentration: 150 mg/3 ml (50 mg/ml)"],
-      ["Fluids",`${formatNumber(weight*10)}-${formatNumber(weight*20)} ml`],
-      ["SGA",sga], ["ETT",ett], ["Energy",energy],
-      ["Systolic BP",`${formatNumber((mode==="months" ? age/12 : age)*2+70)} mmHg`],
+      ["Fluids",`${formatNumber(weight*10)} ml`,"Up to 3 doses total (10ml/kg x 3)"],
+      ["SGA",sga], ["ETT",ett], ["Energy",energy,energyNote],
+      ["Systolic BP",systolicBp],
       ["Dextrose 10%",`${formatNumber(rosc)} ml`],
-      ["Chest Wall Decompression",decompression]
+      ["Chest Wall Decompression",decompressionDevice,decompressionDetails.join("\n")]
     ].map(([indication,dose,notes]) => ({ indication,dose,route:"—",notes:notes||null,doseLabel:"Dose",showVolumeCalculator:false }))
   };
 }
