@@ -1,4 +1,7 @@
 <!--
+  CHANGELOG (2026-09-26 18:27 +03):
+  - Add the Staff-only DHP CPD test screen, place its short CPD home button below Websites, and refresh the Gate Test asset key.
+
   CHANGELOG (2026-06-12):
   - Release the redesigned CPR route, Active CPR home state, production cache key, and CPR What’s New message.
   - Make the What’s New message body independently scrollable on small screens.
@@ -422,6 +425,7 @@
     .btn-ascall{background:linear-gradient(180deg,#FFED78,#FFD000)}
     .btn-hos{background:linear-gradient(180deg,#6B8BFF,#003DEB)}
     .btn-websites{background:linear-gradient(180deg,#64748b,#475569)}
+    .btn-cpd{background:linear-gradient(180deg,#2bbda9,#0f766e);--btn-fg:#fff}
     .btn-westley{background:linear-gradient(180deg,#FFE26D,#FFC107); --btn-fg:#000}
     .btn-overtime{background:linear-gradient(180deg,#75C0FF,#2F6FED); --btn-fg:#fff}
     .btn-address{background:linear-gradient(180deg,#2FD7A7,#12A085); --btn-fg:#fff}
@@ -454,6 +458,7 @@
     [data-theme="dark"] .btn-ascall{background:linear-gradient(180deg,#d9c65f,#c6a90d);--btn-fg:#111827}
     [data-theme="dark"] .btn-hos{background:linear-gradient(180deg,#5e78d7,#244fc0)}
     [data-theme="dark"] .btn-websites{background:linear-gradient(180deg,#5f6f82,#4b5968)}
+    [data-theme="dark"] .btn-cpd{background:linear-gradient(180deg,#249786,#116b64)}
     [data-theme="dark"] .btn-westley{background:linear-gradient(180deg,#d8bb55,#d19e16);--btn-fg:#111827}
     [data-theme="dark"] .btn-overtime{background:linear-gradient(180deg,#5da5df,#3864c6)}
     [data-theme="dark"] .btn-address{background:linear-gradient(180deg,#29ba92,#188873)}
@@ -474,6 +479,7 @@
       [data-theme="auto"] .btn-waafelss{background:linear-gradient(180deg,#d963c5,#b83aa6)}
       [data-theme="auto"] .btn-flowcharts{background:linear-gradient(180deg,#5fb963,#347e3d)}
       [data-theme="auto"] .btn-hos{background:linear-gradient(180deg,#5e78d7,#244fc0)}
+      [data-theme="auto"] .btn-cpd{background:linear-gradient(180deg,#249786,#116b64)}
       [data-theme="auto"] .btn-vent{background:linear-gradient(180deg,#68b7de,#3090c6)}
       [data-theme="auto"] .btn-community{background:linear-gradient(180deg,#58bf72,#38896f)}
       [data-theme="auto"] .btn-search{background:linear-gradient(180deg,#438edf,#2e62c0)}
@@ -906,7 +912,7 @@
   // Bump ASSET_VERSION whenever deployed app-owned JS/HTML changes need a fresh load.
   // =========================
   const APP_VERSION = "v0.4";
-  const ASSET_VERSION = "asset-20260925-gate-test-cache-b-3";
+  const ASSET_VERSION = "asset-20260926-gate-test-cpd-1";
   const ASSET_QUERY = `?ver=${encodeURIComponent(ASSET_VERSION)}`;
   const TOOL_MODULE_VERSION = ASSET_VERSION;
   window.__AMBULANCE_ASSET_VERSION = ASSET_VERSION;
@@ -996,7 +1002,7 @@
     AMBULANCE_STAFF: "ambulance_staff",
     NON_AMBULANCE_STAFF: "non_ambulance_staff"
   };
-  const PROTECTED_ACTIONS = new Set(["category_guidelines", "cpg_wizard", "sop", "flowcharts", "formulary", "as_call", "hos"]);
+  const PROTECTED_ACTIONS = new Set(["category_guidelines", "cpg_wizard", "sop", "flowcharts", "formulary", "as_call", "hos", "cpd_opportunities"]);
   const PROTECTED_SEARCH_TYPES = new Set(["cpg", "sop", "cpm", "pat", "flowchart", "formulary"]);
   let gateSessionPromise = null;
   let gateAccessType = ACCESS_TYPES.NON_AMBULANCE_STAFF;
@@ -1152,6 +1158,9 @@
 
     { text:"Websites",         iconType:"material", icon:"language",      color:"btn-websites",
       href:"https://example.com", showDefault:true, actionId:"websites" },
+
+    { text:"CPD",              iconType:"material", icon:"school",        color:"btn-cpd",
+      href:"#", showDefault:true, protectedHome:true, actionId:"cpd_opportunities" },
 
     { text:"Stay Connected",   iconType:"image", icon:"images/ic_main_stay_connected.svg", color:"btn-community",
       href:"#", showDefault:true, actionId:"community" },
@@ -1399,6 +1408,7 @@
       "Overtime": ["overtime calculator", "ot", "pay", "hours", "shift", "history", "logger"],
       "Shift Schedule": ["shifts", "roster", "team calendar", "date lookup", "coverage", "swap", "team a", "team b", "team c", "team d"],
       "Websites": ["links", "resources"],
+      "CPD": ["dhp", "continuing professional development", "education", "category 1", "category 2", "category 3", "events"],
       "AS-Call": ["phone", "call", "contacts", "directory", "numbers"],
       "Stay Connected": ["community", "discord", "telegram", "whatsapp"]
     };
@@ -2819,7 +2829,7 @@ function wireCharlieModal(){
     { title: "Quick Actions", items: ["Search","Stay Connected"] },
     { title: "Resuscitation & Timers", items: ["CPR","WAAFELSS","RSI Checklist","Ventilator Settings"] },
     { title: "Clinical · Calculators", items: ["Pediatrics","Guidelines","Flowcharts","Calculators","Visual Guides","Scores"] },
-    { title: "Operations", items: ["Overtime","HOS","AS-Call","Websites","Shift Schedule"] }
+    { title: "Operations", items: ["Overtime","HOS","AS-Call","Websites","Shift Schedule","CPD"] }
   ];
 
   let currentTool = null;

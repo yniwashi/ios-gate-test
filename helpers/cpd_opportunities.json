@@ -1,0 +1,4104 @@
+{
+  "helper_type": "cpd_opportunities",
+  "schema_version": "1.0",
+  "version": "2026-09-26-3",
+  "coverage": {
+    "start_date": "2026-01-01",
+    "end_date": "2027-12-31",
+    "timezone": "Asia/Qatar"
+  },
+  "updated_at": "2026-09-26T18:10:55+03:00",
+  "activities": [
+    {
+      "id": "aspetar-tuesday-lecture-series-2026-2027",
+      "title": "Aspetar Tuesday Lecture Series 2026/2027",
+      "kind": "series",
+      "provider": {
+        "name": "Aspetar Orthopaedic and Sports Medicine Hospital",
+        "url": "https://www.aspetar.com/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-15",
+          "start_date": "2026-09-15",
+          "end_date": "2026-09-15",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-09-22",
+          "start_date": "2026-09-22",
+          "end_date": "2026-09-22",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-09-29",
+          "start_date": "2026-09-29",
+          "end_date": "2026-09-29",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-10-06",
+          "start_date": "2026-10-06",
+          "end_date": "2026-10-06",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-10-13",
+          "start_date": "2026-10-13",
+          "end_date": "2026-10-13",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-10-20",
+          "start_date": "2026-10-20",
+          "end_date": "2026-10-20",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-10-27",
+          "start_date": "2026-10-27",
+          "end_date": "2026-10-27",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-11-03",
+          "start_date": "2026-11-03",
+          "end_date": "2026-11-03",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-11-10",
+          "start_date": "2026-11-10",
+          "end_date": "2026-11-10",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-11-17",
+          "start_date": "2026-11-17",
+          "end_date": "2026-11-17",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-11-24",
+          "start_date": "2026-11-24",
+          "end_date": "2026-11-24",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-12-01",
+          "start_date": "2026-12-01",
+          "end_date": "2026-12-01",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-12-08",
+          "start_date": "2026-12-08",
+          "end_date": "2026-12-08",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2026-12-15",
+          "start_date": "2026-12-15",
+          "end_date": "2026-12-15",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-01-05",
+          "start_date": "2027-01-05",
+          "end_date": "2027-01-05",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-01-12",
+          "start_date": "2027-01-12",
+          "end_date": "2027-01-12",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-01-19",
+          "start_date": "2027-01-19",
+          "end_date": "2027-01-19",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-01-26",
+          "start_date": "2027-01-26",
+          "end_date": "2027-01-26",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-02-02",
+          "start_date": "2027-02-02",
+          "end_date": "2027-02-02",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-03-23",
+          "start_date": "2027-03-23",
+          "end_date": "2027-03-23",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-03-30",
+          "start_date": "2027-03-30",
+          "end_date": "2027-03-30",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-04-06",
+          "start_date": "2027-04-06",
+          "end_date": "2027-04-06",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-04-13",
+          "start_date": "2027-04-13",
+          "end_date": "2027-04-13",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-04-20",
+          "start_date": "2027-04-20",
+          "end_date": "2027-04-20",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-04-27",
+          "start_date": "2027-04-27",
+          "end_date": "2027-04-27",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-05-04",
+          "start_date": "2027-05-04",
+          "end_date": "2027-05-04",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-05-11",
+          "start_date": "2027-05-11",
+          "end_date": "2027-05-11",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-05-25",
+          "start_date": "2027-05-25",
+          "end_date": "2027-05-25",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        },
+        {
+          "id": "2027-06-01",
+          "start_date": "2027-06-01",
+          "end_date": "2027-06-01",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1.0,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Full series",
+          "audience": null,
+          "format": "hybrid",
+          "amount": 250,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "AZF employee",
+          "audience": "Aspire Zone Foundation employees using work email",
+          "format": "hybrid",
+          "amount": 0,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Provider includes Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "HGI-03-P142",
+        "evidence_url": "https://www.aspetar.com/en/professionals/our-events/tuesday-lecture2026"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "open",
+        "url": "https://www.aspetar.com/en/professionals/our-events/tuesday-lecture2026",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.aspetar.com/en/professionals/our-events/tuesday-lecture2026",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "price",
+            "eligibility",
+            "accreditation",
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": "Registration is for the entire series; dates are subject to change."
+    },
+    {
+      "id": "aspetar-wednesday-webinar-series-2026-2027",
+      "title": "Aspetar Wednesday Webinar Series 2026–2027",
+      "kind": "series",
+      "provider": {
+        "name": "Aspetar Orthopaedic and Sports Medicine Hospital",
+        "url": "https://www.aspetar.com/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-16",
+          "start_date": "2026-09-16",
+          "end_date": "2026-09-16",
+          "start_time": "16:30",
+          "end_time": "18:00",
+          "format": "online",
+          "venue": "Microsoft Teams"
+        },
+        {
+          "id": "2026-10-21",
+          "start_date": "2026-10-21",
+          "end_date": "2026-10-21",
+          "start_time": "16:30",
+          "end_time": "18:00",
+          "format": "online",
+          "venue": "Microsoft Teams"
+        },
+        {
+          "id": "2026-11-18",
+          "start_date": "2026-11-18",
+          "end_date": "2026-11-18",
+          "start_time": "16:30",
+          "end_time": "18:00",
+          "format": "online",
+          "venue": "Microsoft Teams"
+        },
+        {
+          "id": "2026-12-16",
+          "start_date": "2026-12-16",
+          "end_date": "2026-12-16",
+          "start_time": "16:30",
+          "end_time": "18:00",
+          "format": "online",
+          "venue": "Microsoft Teams"
+        },
+        {
+          "id": "2027-01-20",
+          "start_date": "2027-01-20",
+          "end_date": "2027-01-20",
+          "start_time": "16:30",
+          "end_time": "18:00",
+          "format": "online",
+          "venue": "Microsoft Teams"
+        },
+        {
+          "id": "2027-03-17",
+          "start_date": "2027-03-17",
+          "end_date": "2027-03-17",
+          "start_time": "16:30",
+          "end_time": "18:00",
+          "format": "online",
+          "venue": "Microsoft Teams"
+        },
+        {
+          "id": "2027-04-21",
+          "start_date": "2027-04-21",
+          "end_date": "2027-04-21",
+          "start_time": "16:30",
+          "end_time": "18:00",
+          "format": "online",
+          "venue": "Microsoft Teams"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1.5,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Full series",
+          "audience": null,
+          "format": "online",
+          "amount": 100,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "AZF employee",
+          "audience": "Aspire Zone Foundation employees using work email",
+          "format": "online",
+          "amount": 0,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Provider includes Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "HGI-03-P135",
+        "evidence_url": "https://www.aspetar.com/en/professionals/our-events/aspetar-wednesday-webinar-series-26"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "open",
+        "url": "https://www.aspetar.com/en/professionals/our-events/aspetar-wednesday-webinar-series-26",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.aspetar.com/en/professionals/our-events/aspetar-wednesday-webinar-series-26",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "price",
+            "eligibility",
+            "accreditation",
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": "Registration is for the entire series."
+    },
+    {
+      "id": "aspetar-orthopaedic-masterclass-2026",
+      "title": "Aspetar Orthopaedic Masterclass: Live Surgery and Multidisciplinary Insights",
+      "kind": "single",
+      "provider": {
+        "name": "Aspetar Orthopaedic and Sports Medicine Hospital",
+        "url": "https://www.aspetar.com/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-19",
+          "start_date": "2026-09-19",
+          "end_date": "2026-09-19",
+          "start_time": "08:00",
+          "end_time": "16:00",
+          "format": "hybrid",
+          "venue": "Aspetar Auditorium or Microsoft Teams"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 6.5,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Registration",
+          "audience": null,
+          "format": "hybrid",
+          "amount": 300,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Provider includes Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "HGI-03-P191",
+        "evidence_url": "https://www.aspetar.com/en/professionals/our-events/orthopaedic-masterclass-live"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": "https://www.aspetar.com/en/professionals/our-events/orthopaedic-masterclass-live",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.aspetar.com/en/professionals/our-events/orthopaedic-masterclass-live",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "price",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "aspetar-healthcare-coaching-workshop-2026",
+      "title": "Healthcare Coaching Workshop",
+      "kind": "single",
+      "provider": {
+        "name": "Aspetar Orthopaedic and Sports Medicine Hospital",
+        "url": "https://www.aspetar.com/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-12-13",
+          "start_date": "2026-09-12",
+          "end_date": "2026-09-13",
+          "start_time": "09:00",
+          "end_time": "15:00",
+          "format": "in_person",
+          "venue": "Victory & Success Ballroom, Al Aziziyah Boutique Hotel"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 10.0,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Registration",
+          "audience": null,
+          "format": "in_person",
+          "amount": 300,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Provider includes Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": null,
+        "evidence_url": "https://www.aspetar.com/en/professionals/our-events/healthcare-coaching-workshop"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": "https://www.aspetar.com/en/professionals/our-events/healthcare-coaching-workshop",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.aspetar.com/en/professionals/our-events/healthcare-coaching-workshop",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "price",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "hmc-3rd-qatar-nephrology-conference-2026",
+      "title": "3rd Qatar Nephrology Conference",
+      "kind": "single",
+      "provider": {
+        "name": "Hamad Medical Corporation",
+        "url": "https://hamad.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-12-10",
+          "start_date": "2026-12-10",
+          "end_date": "2026-12-12",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": "Sheraton Grand Doha Resort & Convention Hotel or virtual"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 19,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Other medical/paramedical – physical",
+          "audience": null,
+          "format": "in_person",
+          "amount": 300,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "Other medical/paramedical – virtual",
+          "audience": null,
+          "format": "online",
+          "amount": 150,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "Physician – physical",
+          "audience": null,
+          "format": "in_person",
+          "amount": 400,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "Physician – virtual",
+          "audience": null,
+          "format": "online",
+          "amount": 200,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "unknown",
+        "paramedic": "unknown",
+        "explanation": "Registration offers a medical/paramedical rate but does not explicitly confirm paramedic eligibility."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "HGI-02-MED-P1212",
+        "evidence_url": "https://www.hamad.qa/EN/All-Events/3QNC2026/Pages/default.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "open",
+        "url": "https://www.hamad.qa/EN/Forms/Pages/Dynamic-Form.aspx?formId=86GLUCpPz-TzvnJYNx-leQ%3D%3D",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.hamad.qa/EN/All-Events/3QNC2026/Pages/default.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://www.hamad.qa/EN/All-Events/3QNC2026/Registration/Pages/default.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "format",
+            "price",
+            "registration",
+            "eligibility"
+          ]
+        },
+        {
+          "url": "https://www.hamad.qa/EN/Forms/Pages/Dynamic-Form.aspx?formId=86GLUCpPz-TzvnJYNx-leQ%3D%3D",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "sidra-mena-microbiome-conference-2026",
+      "title": "MENA Microbiome Conference 2026",
+      "kind": "single",
+      "provider": {
+        "name": "Sidra Medicine",
+        "url": "https://www.sidra.org/"
+      },
+      "sessions": [
+        {
+          "id": "2026-10-17",
+          "start_date": "2026-10-17",
+          "end_date": "2026-10-18",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": "Andaz Hotel – Sahara Ballroom"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 12,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Healthcare professionals and researchers",
+          "audience": "Physicians, nurses, allied health, pharmacists, scientists, researchers",
+          "format": "in_person",
+          "amount": 500,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "Student",
+          "audience": "Students; limited seats",
+          "format": "in_person",
+          "amount": 250,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Allied Health Professionals are named; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": null,
+        "evidence_url": "https://sidraweb.sidra.org/events/research/mena-microbiome-conference-2026/"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "open",
+        "url": "https://registration.masterbadge.com/newOnlineRegisterSidra.aspx?Eventid=859",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://sidraweb.sidra.org/events/research/mena-microbiome-conference-2026/",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://sidraweb.sidra.org/events/research/mena-microbiome-conference-2026/registration-fees/",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "price",
+            "registration"
+          ]
+        },
+        {
+          "url": "https://registration.masterbadge.com/newOnlineRegisterSidra.aspx?Eventid=859",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "wcmq-certificate-in-lifestyle-medicine-2026",
+      "title": "Certificate in Lifestyle Medicine",
+      "kind": "single",
+      "provider": {
+        "name": "Weill Cornell Medicine-Qatar",
+        "url": "https://qatar-weill.cornell.edu/"
+      },
+      "sessions": [
+        {
+          "id": "2026-10-09",
+          "start_date": "2026-10-09",
+          "end_date": "2026-10-13",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": "Weill Cornell Medicine-Qatar plus online component"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 30,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Course fee",
+          "audience": null,
+          "format": "hybrid",
+          "amount": 2868,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Allied health professionals are included; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": null,
+        "evidence_url": "https://qatar-weill.cornell.edu/event/certificate-in-lifestyle-medicine/accreditation"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "closed",
+        "url": "https://qatar-weill.cornell.edu/event/certificate-in-lifestyle-medicine/registration",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://qatar-weill.cornell.edu/event/certificate-in-lifestyle-medicine/accreditation",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://qatar-weill.cornell.edu/event/certificate-in-lifestyle-medicine/registration",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "format",
+            "price",
+            "eligibility",
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": "Registration page offers a waitlist."
+    },
+    {
+      "id": "wcmq-updates-in-primary-care-2026",
+      "title": "Updates in Primary Care: Specialist-Led Case-Based Discussions 2026",
+      "kind": "single",
+      "provider": {
+        "name": "Weill Cornell Medicine-Qatar",
+        "url": "https://qatar-weill.cornell.edu/"
+      },
+      "sessions": [
+        {
+          "id": "2026-12-04",
+          "start_date": "2026-12-04",
+          "end_date": "2026-12-05",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": "InterContinental Doha Beach & Spa"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 9.25,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Early bird through 4 November",
+          "audience": null,
+          "format": "in_person",
+          "amount": 300,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "Regular from 5 November",
+          "audience": null,
+          "format": "in_person",
+          "amount": 400,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "unknown",
+        "paramedic": "unknown",
+        "explanation": null
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": null,
+        "evidence_url": "https://qatar-weill.cornell.edu/event/alumni-conference/accreditation"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "open",
+        "url": "https://wcmq.cloud-cme.com/course/courseoverview?EID=4725&P=5",
+        "deadline_date": "2026-12-02"
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://qatar-weill.cornell.edu/event/alumni-conference/accreditation",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://qatar-weill.cornell.edu/event/alumni-conference/registration",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "price",
+            "registration"
+          ]
+        },
+        {
+          "url": "https://wcmq.cloud-cme.com/course/courseoverview?EID=4725&P=5",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "wcmq-understanding-basics-of-health-research-2026",
+      "title": "Understanding Basics of Health Research",
+      "kind": "single",
+      "provider": {
+        "name": "Weill Cornell Medicine-Qatar",
+        "url": "https://qatar-weill.cornell.edu/"
+      },
+      "sessions": [
+        {
+          "id": "2026-05-09",
+          "start_date": "2026-05-09",
+          "end_date": "2026-05-10",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": "Hilton Doha Hotel"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 14,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Fee not confirmed",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Allied health practitioners are included; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": null,
+        "evidence_url": "https://qatar-weill.cornell.edu/event/understanding-basics-of-health-research/accreditation"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "closed",
+        "url": "https://qatar-weill.cornell.edu/event/understanding-basics-of-health-research/registration",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://qatar-weill.cornell.edu/event/understanding-basics-of-health-research/accreditation",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://qatar-weill.cornell.edu/event/understanding-basics-of-health-research/registration",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "eligibility",
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "dhp-national-clinical-guidelines-rounds-2026",
+      "title": "National Clinical Guidelines (NCG) Educational Rounds",
+      "kind": "series",
+      "provider": {
+        "name": "DHP Accreditation Section",
+        "url": "https://dhp.moph.gov.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-10-07",
+          "start_date": "2026-10-07",
+          "end_date": "2026-10-07",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": "Microsoft Teams"
+        },
+        {
+          "id": "2026-11-09",
+          "start_date": "2026-11-09",
+          "end_date": "2026-11-09",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": "Microsoft Teams"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 2,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "online",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Official listing includes Allied Health Practitioner; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "A463",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "format",
+            "eligibility"
+          ]
+        }
+      ],
+      "public_notes": "Open for all; follow official DHP joining instructions."
+    },
+    {
+      "id": "dhp-mental-health-educational-rounds-2026",
+      "title": "Mental Health Educational Rounds",
+      "kind": "single",
+      "provider": {
+        "name": "DHP Accreditation Section",
+        "url": "https://dhp.moph.gov.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-10-08",
+          "start_date": "2026-10-08",
+          "end_date": "2026-10-08",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 2,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "online",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Official listing includes Allied Health Practitioner; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "A607",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "format",
+            "eligibility"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "aman-bls-provider-2025-guidelines-2026",
+      "title": "Basic Life Support (BLS) Provider 2025 Guidelines",
+      "kind": "series",
+      "provider": {
+        "name": "Aman Hospital",
+        "url": "https://amanhospital.org/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-27",
+          "start_date": "2026-09-27",
+          "end_date": "2026-09-27",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-10-04",
+          "start_date": "2026-10-04",
+          "end_date": "2026-10-04",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-10-15",
+          "start_date": "2026-10-15",
+          "end_date": "2026-10-15",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-10-25",
+          "start_date": "2026-10-25",
+          "end_date": "2026-10-25",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Official listing includes Allied Health Practitioner; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-04-P1",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "format",
+            "eligibility"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "al-ahli-diabetes-endocrine-conference-2026",
+      "title": "Al-Ahli Hospital 2nd Diabetes and Endocrine Conference",
+      "kind": "single",
+      "provider": {
+        "name": "Al-Ahli Hospital",
+        "url": "https://www.ahlihospital.com/"
+      },
+      "sessions": [
+        {
+          "id": "2026-10-16",
+          "start_date": "2026-10-16",
+          "end_date": "2026-10-16",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 7.75,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "hybrid",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Official listing includes Allied Health Practitioner; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-02-P50",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "format",
+            "eligibility"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "al-ahli-journal-club-educational-session-2026",
+      "title": "Journal Club and Educational Session",
+      "kind": "series",
+      "provider": {
+        "name": "Al-Ahli Hospital",
+        "url": "https://www.ahlihospital.com/"
+      },
+      "sessions": [
+        {
+          "id": "2026-10-06",
+          "start_date": "2026-10-06",
+          "end_date": "2026-10-06",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-10-20",
+          "start_date": "2026-10-20",
+          "end_date": "2026-10-20",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-11-03",
+          "start_date": "2026-11-03",
+          "end_date": "2026-11-03",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-11-17",
+          "start_date": "2026-11-17",
+          "end_date": "2026-11-17",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-12-01",
+          "start_date": "2026-12-01",
+          "end_date": "2026-12-01",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-12-15",
+          "start_date": "2026-12-15",
+          "end_date": "2026-12-15",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "online",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Official listing includes Allied Health Practitioner; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-02-P47",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "format",
+            "eligibility"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "aman-acls-provider-2025-guidelines-2026",
+      "title": "Advanced Cardiac Life Support (ACLS) Provider, AHA 2025 Guidelines",
+      "kind": "series",
+      "provider": {
+        "name": "Aman Hospital",
+        "url": "https://amanhospital.org/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-30-10-01",
+          "start_date": "2026-09-30",
+          "end_date": "2026-10-01",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-10-15-16",
+          "start_date": "2026-10-15",
+          "end_date": "2026-10-16",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-10-21-22",
+          "start_date": "2026-10-21",
+          "end_date": "2026-10-22",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 13.5,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Official listing includes Allied Health Practitioner; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-04-P2",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "format",
+            "eligibility"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "aspetar-surgery-department-journal-club-2026-2027",
+      "title": "Aspetar Surgery Department Journal Club",
+      "kind": "series",
+      "provider": {
+        "name": "Aspetar Orthopaedic and Sports Medicine Hospital",
+        "url": "https://www.aspetar.com/"
+      },
+      "sessions": [
+        {
+          "id": "2026-10-05",
+          "start_date": "2026-10-05",
+          "end_date": "2026-10-05",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        },
+        {
+          "id": "2026-11-02",
+          "start_date": "2026-11-02",
+          "end_date": "2026-11-02",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        },
+        {
+          "id": "2026-12-06",
+          "start_date": "2026-12-06",
+          "end_date": "2026-12-06",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        },
+        {
+          "id": "2027-01-04",
+          "start_date": "2027-01-04",
+          "end_date": "2027-01-04",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        },
+        {
+          "id": "2027-02-01",
+          "start_date": "2027-02-01",
+          "end_date": "2027-02-01",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        },
+        {
+          "id": "2027-04-05",
+          "start_date": "2027-04-05",
+          "end_date": "2027-04-05",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 0.75,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "hybrid",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Official listing includes Allied Health Practitioner; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "HGI-03-P165",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "format",
+            "eligibility"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "al-emadi-transforming-nursing-2026",
+      "title": "Transforming Nursing: Current Trends and Emerging Challenges",
+      "kind": "single",
+      "provider": {
+        "name": "Al Emadi Hospital",
+        "url": "https://alemadihospital.com.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-11-21",
+          "start_date": "2026-11-21",
+          "end_date": "2026-11-21",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 2,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "yes",
+        "explanation": "Official DHP listing explicitly includes paramedics, but registration is limited to internal staff."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-01-P62",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "format",
+            "eligibility"
+          ]
+        }
+      ],
+      "public_notes": "Internal staff only."
+    },
+    {
+      "id": "wcmq-smart-health-changing-world-2026",
+      "title": "Smart Health for a Changing World: Trends and Tools",
+      "kind": "single",
+      "provider": {
+        "name": "Weill Cornell Medicine-Qatar",
+        "url": "https://qatar-weill.cornell.edu/"
+      },
+      "sessions": [
+        {
+          "id": "2026-01-24-26",
+          "start_date": "2026-01-24",
+          "end_date": "2026-01-26",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 20,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "unknown",
+        "paramedic": "unknown",
+        "explanation": null
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": null,
+        "evidence_url": "https://qatar-weill.cornell.edu/event/shcw/accreditation"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "closed",
+        "url": "https://qatar-weill.cornell.edu/event/shcw/registration",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://qatar-weill.cornell.edu/event/shcw/accreditation",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://qatar-weill.cornell.edu/event/shcw/registration",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "dates",
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "wcmq-introduction-systematic-review-meta-analysis-2026",
+      "title": "Introduction to Systematic Review and Meta-analysis: Principles and Practice",
+      "kind": "single",
+      "provider": {
+        "name": "Weill Cornell Medicine-Qatar",
+        "url": "https://qatar-weill.cornell.edu/"
+      },
+      "sessions": [
+        {
+          "id": "2026-05-16-17",
+          "start_date": "2026-05-16",
+          "end_date": "2026-05-17",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": "Hilton Doha Hotel"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 14,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "unknown",
+        "paramedic": "unknown",
+        "explanation": null
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": null,
+        "evidence_url": "https://qatar-weill.cornell.edu/event/systematic-review-workshop/accreditation"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "closed",
+        "url": "https://qatar-weill.cornell.edu/event/systematic-review-workshop/registration",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://qatar-weill.cornell.edu/event/systematic-review-workshop/accreditation",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://qatar-weill.cornell.edu/event/systematic-review-workshop/registration",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "dates",
+            "format",
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "hmc-qatar-health-congress-january-2026",
+      "title": "Qatar Health Congress 2026",
+      "kind": "single",
+      "provider": {
+        "name": "Hamad Medical Corporation",
+        "url": "https://www.hamad.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-01-28-31",
+          "start_date": "2026-01-28",
+          "end_date": "2026-01-31",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": "Itqan Clinical Simulation & Innovation Center (28 Jan); Sheraton Doha & Convention Hotel (29–31 Jan)"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 22.75,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "In person",
+          "audience": "Consultants, associate consultants and specialists",
+          "format": "in_person",
+          "amount": 500,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "In person",
+          "audience": "Physicians in training, fellows, residents and interns",
+          "format": "in_person",
+          "amount": 350,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "In person",
+          "audience": "Clinical pharmacists, nurses and allied health professionals",
+          "format": "in_person",
+          "amount": 350,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "In person",
+          "audience": "Full-time university students",
+          "format": "in_person",
+          "amount": 250,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "In person with workshops",
+          "audience": "Clinical pharmacists, nurses and allied health professionals",
+          "format": "in_person",
+          "amount": 450,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "Virtual",
+          "audience": "Physicians and allied health professionals",
+          "format": "online",
+          "amount": 500,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Registration lists Allied Health Professionals; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": null,
+        "evidence_url": "https://www.hamad.qa/EN/All-Events/QatarHealth2026/Pages/default.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": "https://registration.masterbadge.com/NewOnlineRegister.aspx?Eventid=891",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.hamad.qa/EN/All-Events/QatarHealth2026/Pages/default.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://www.hamad.qa/EN/All-Events/QatarHealth2026/Date-and-Venue/Pages/default.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "dates",
+            "format"
+          ]
+        },
+        {
+          "url": "https://hamad.qa/EN/All-Events/QatarHealth2026/Registration/Pages/default.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "format",
+            "price",
+            "eligibility",
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": "January congress. Separate from the similarly named November Qatar Health 2026 event."
+    },
+    {
+      "id": "sidra-essentials-tracheostomy-care-pediatrics-2026",
+      "title": "Essentials of Tracheostomy Care in Pediatrics",
+      "kind": "series",
+      "provider": {
+        "name": "Sidra Medicine",
+        "url": "https://www.sidra.org/"
+      },
+      "sessions": [
+        {
+          "id": "2026-06-10",
+          "start_date": "2026-06-10",
+          "end_date": "2026-06-10",
+          "start_time": "07:45",
+          "end_time": "15:30",
+          "format": "in_person",
+          "venue": "Sidra Medicine Simulation Center Mall Level room CM303"
+        },
+        {
+          "id": "2026-08-05",
+          "start_date": "2026-08-05",
+          "end_date": "2026-08-05",
+          "start_time": "07:45",
+          "end_time": "15:30",
+          "format": "in_person",
+          "venue": "Sidra Medicine Out-Patient Clinic Building Mall level room CM 303"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 3.75,
+          "basis": "per_session",
+          "session_ids": null
+        },
+        {
+          "category": 3,
+          "amount": 2.25,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "External attendee",
+          "audience": null,
+          "format": "in_person",
+          "amount": 200,
+          "currency": "QAR",
+          "basis": "per_session",
+          "notes": null
+        },
+        {
+          "label": "Sidra Medicine staff",
+          "audience": "Sidra Medicine staff",
+          "format": "in_person",
+          "amount": 0,
+          "currency": "QAR",
+          "basis": "per_session",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Provider explicitly lists Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": null,
+        "evidence_url": "https://www.sidra.org/events/essentials-of-tracheostomy-care-in-pediatrics-3/"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": "https://www.sidra.org/events/essentials-of-tracheostomy-care-in-pediatrics-3/",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.sidra.org/events/essentials-of-tracheostomy-care-in-pediatrics-2/",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "price",
+            "eligibility",
+            "accreditation",
+            "registration"
+          ]
+        },
+        {
+          "url": "https://www.sidra.org/events/essentials-of-tracheostomy-care-in-pediatrics-3/",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "price",
+            "eligibility",
+            "accreditation",
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": "Past sessions retained; the provider lists separate Category 1 and 3 awards."
+    },
+    {
+      "id": "sidra-health-literacy-education-workshop-2026",
+      "title": "Health Literacy Education Workshop",
+      "kind": "series",
+      "provider": {
+        "name": "Sidra Medicine",
+        "url": "https://www.sidra.org/"
+      },
+      "sessions": [
+        {
+          "id": "2026-10-13",
+          "start_date": "2026-10-13",
+          "end_date": "2026-10-13",
+          "start_time": "08:00",
+          "end_time": "15:30",
+          "format": "in_person",
+          "venue": "Sidra Medicine, Tower D, Training Room (2D-200A)"
+        },
+        {
+          "id": "2026-11-10",
+          "start_date": "2026-11-10",
+          "end_date": "2026-11-10",
+          "start_time": "08:00",
+          "end_time": "15:30",
+          "format": "in_person",
+          "venue": "Sidra Medicine, Tower D, Training Room (2D-200A)"
+        },
+        {
+          "id": "2026-12-08",
+          "start_date": "2026-12-08",
+          "end_date": "2026-12-08",
+          "start_time": "08:00",
+          "end_time": "15:30",
+          "format": "in_person",
+          "venue": "Sidra Medicine, Tower D, Training Room (2D-200A)"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 4.5,
+          "basis": "per_session",
+          "session_ids": null
+        },
+        {
+          "category": 3,
+          "amount": 1.5,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "External attendee",
+          "audience": null,
+          "format": "in_person",
+          "amount": 190,
+          "currency": "QAR",
+          "basis": "per_session",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Provider includes Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": null,
+        "evidence_url": "https://www.sidra.org/events/health-literacy-education-workshop-oct-2026/"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": "https://payments.sidra.org/events/eventDetails?event_id=164",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.sidra.org/events/health-literacy-education-workshop-oct-2026/",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation",
+            "registration"
+          ]
+        },
+        {
+          "url": "https://www.sidra.org/events/health-literacy-education-workshop-nov-2026/",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation",
+            "registration"
+          ]
+        },
+        {
+          "url": "https://www.sidra.org/events/health-literacy-education-workshop-dec-2026/",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation",
+            "registration"
+          ]
+        },
+        {
+          "url": "https://payments.sidra.org/events/eventDetails?event_id=164",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "price",
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": "The provider publishes 4.5 Category 1 and 1.5 Category 3 points for each dated workshop."
+    },
+    {
+      "id": "al-emadi-physician-grand-rounds-2026",
+      "title": "Physician Grand Rounds",
+      "kind": "single",
+      "provider": {
+        "name": "Al Emadi Hospital",
+        "url": "https://alemadihospital.com.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-29",
+          "start_date": "2026-09-29",
+          "end_date": "2026-09-29",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "no",
+        "paramedic": "unknown",
+        "explanation": null
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-01-P41",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": "Internal staff only according to the DHP activity listing."
+    },
+    {
+      "id": "al-emadi-ai-transforming-patient-care-2026",
+      "title": "Artificial Intelligence in Healthcare: Transforming Patient Care and Clinical Practice",
+      "kind": "single",
+      "provider": {
+        "name": "Al Emadi Hospital",
+        "url": "https://alemadihospital.com.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-12-05",
+          "start_date": "2026-12-05",
+          "end_date": "2026-12-05",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "DHP lists Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-01-P60",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": "Internal staff only according to the DHP activity listing."
+    },
+    {
+      "id": "al-emadi-patient-fall-prevention-2026",
+      "title": "Enhancing Quality of Care Through Patient Fall Prevention",
+      "kind": "single",
+      "provider": {
+        "name": "Al Emadi Hospital",
+        "url": "https://alemadihospital.com.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-27",
+          "start_date": "2026-09-27",
+          "end_date": "2026-09-27",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 2,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "DHP lists Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-01-P63",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": "Internal staff only according to the DHP activity listing."
+    },
+    {
+      "id": "al-emadi-clinical-insights-specialties-2026",
+      "title": "Clinical Insights Across Medical Specialties",
+      "kind": "single",
+      "provider": {
+        "name": "Al Emadi Hospital",
+        "url": "https://alemadihospital.com.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-10-16",
+          "start_date": "2026-10-16",
+          "end_date": "2026-10-16",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 5,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "DHP lists Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-01-P65",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": "Internal staff only according to the DHP activity listing."
+    },
+    {
+      "id": "al-ahli-mm-emergency-dept-2026",
+      "title": "Morbidity and Mortality - Emergency Dept.",
+      "kind": "series",
+      "provider": {
+        "name": "Al-Ahli Hospital",
+        "url": "https://www.ahlihospital.com/"
+      },
+      "sessions": [
+        {
+          "id": "2026-10-11",
+          "start_date": "2026-10-11",
+          "end_date": "2026-10-11",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-11-08",
+          "start_date": "2026-11-08",
+          "end_date": "2026-11-08",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-12-13",
+          "start_date": "2026-12-13",
+          "end_date": "2026-12-13",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "online",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "DHP lists Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-02-P35",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": "Internal staff only according to the DHP activity listing."
+    },
+    {
+      "id": "al-ahli-grand-rounds-2026",
+      "title": "Grand Rounds",
+      "kind": "series",
+      "provider": {
+        "name": "Al-Ahli Hospital",
+        "url": "https://www.ahlihospital.com/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-30",
+          "start_date": "2026-09-30",
+          "end_date": "2026-09-30",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-10-21",
+          "start_date": "2026-10-21",
+          "end_date": "2026-10-21",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-11-18",
+          "start_date": "2026-11-18",
+          "end_date": "2026-11-18",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-12-16",
+          "start_date": "2026-12-16",
+          "end_date": "2026-12-16",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "DHP lists Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-02-P39",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": "Internal staff only according to the DHP activity listing."
+    },
+    {
+      "id": "al-ahli-mm-hospital-wide-2026",
+      "title": "Morbidity and Mortality - Hospital wide",
+      "kind": "series",
+      "provider": {
+        "name": "Al-Ahli Hospital",
+        "url": "https://www.ahlihospital.com/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-30",
+          "start_date": "2026-09-30",
+          "end_date": "2026-09-30",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        },
+        {
+          "id": "2026-10-07",
+          "start_date": "2026-10-07",
+          "end_date": "2026-10-07",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        },
+        {
+          "id": "2026-10-28",
+          "start_date": "2026-10-28",
+          "end_date": "2026-10-28",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        },
+        {
+          "id": "2026-11-04",
+          "start_date": "2026-11-04",
+          "end_date": "2026-11-04",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        },
+        {
+          "id": "2026-11-25",
+          "start_date": "2026-11-25",
+          "end_date": "2026-11-25",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        },
+        {
+          "id": "2026-12-02",
+          "start_date": "2026-12-02",
+          "end_date": "2026-12-02",
+          "start_time": null,
+          "end_time": null,
+          "format": "hybrid",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "hybrid",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "DHP lists Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-02-P42",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": "Internal staff only according to the DHP activity listing."
+    },
+    {
+      "id": "al-ahli-mm-nursing-dept-2026",
+      "title": "Morbidity and Mortality Nursing Dept",
+      "kind": "series",
+      "provider": {
+        "name": "Al-Ahli Hospital",
+        "url": "https://www.ahlihospital.com/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-28",
+          "start_date": "2026-09-28",
+          "end_date": "2026-09-28",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-10-12",
+          "start_date": "2026-10-12",
+          "end_date": "2026-10-12",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-10-26",
+          "start_date": "2026-10-26",
+          "end_date": "2026-10-26",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-11-09",
+          "start_date": "2026-11-09",
+          "end_date": "2026-11-09",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-11-23",
+          "start_date": "2026-11-23",
+          "end_date": "2026-11-23",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-12-14",
+          "start_date": "2026-12-14",
+          "end_date": "2026-12-14",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        },
+        {
+          "id": "2026-12-28",
+          "start_date": "2026-12-28",
+          "end_date": "2026-12-28",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "online",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "DHP lists Allied Health Practitioners; paramedics are not specifically named."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-02-P46",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": "Internal staff only according to the DHP activity listing."
+    },
+    {
+      "id": "al-ahli-nursing-cpr-2026-2027",
+      "title": "From Recognition to Resuscitation: Nursing CPR",
+      "kind": "series",
+      "provider": {
+        "name": "Al-Ahli Hospital",
+        "url": "https://www.ahlihospital.com/"
+      },
+      "sessions": [
+        {
+          "id": "2026-10-08",
+          "start_date": "2026-10-08",
+          "end_date": "2026-10-08",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-10-29",
+          "start_date": "2026-10-29",
+          "end_date": "2026-10-29",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-11-05",
+          "start_date": "2026-11-05",
+          "end_date": "2026-11-05",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-11-26",
+          "start_date": "2026-11-26",
+          "end_date": "2026-11-26",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-12-03",
+          "start_date": "2026-12-03",
+          "end_date": "2026-12-03",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2026-12-17",
+          "start_date": "2026-12-17",
+          "end_date": "2026-12-17",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2027-01-14",
+          "start_date": "2027-01-14",
+          "end_date": "2027-01-14",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        },
+        {
+          "id": "2027-01-28",
+          "start_date": "2027-01-28",
+          "end_date": "2027-01-28",
+          "start_time": null,
+          "end_time": null,
+          "format": "in_person",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "per_session",
+          "session_ids": null
+        },
+        {
+          "category": 3,
+          "amount": 1,
+          "basis": "per_session",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "no",
+        "paramedic": "unknown",
+        "explanation": null
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "PH-02-P49",
+        "evidence_url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://accreditation.moph.gov.qa/_layouts/15/Accred_Website/Other/CPDActivityList.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": "Internal staff only according to the DHP activity listing."
+    },
+    {
+      "id": "udst-dxa-clinical-practice-2026",
+      "title": "The ABCs of Dual-energy X-ray Absorptiometry (DXA) in Clinical Practice: Principles, Precision, and Clinical Indication",
+      "kind": "single",
+      "provider": {
+        "name": "University of Doha for Science and Technology",
+        "url": "https://www.udst.edu.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-06-06",
+          "start_date": "2026-06-06",
+          "end_date": "2026-06-06",
+          "start_time": null,
+          "end_time": null,
+          "format": "unknown",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": null,
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "UDST lists Allied Health Practitioners; the dental workshop limits this to dental-background practitioners. Paramedic eligibility is not specifically confirmed."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "API-01-P229",
+        "evidence_url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "udst-mri-brain-morphometry-2026",
+      "title": "MRI-Based Quantitative Brain Morphometry",
+      "kind": "single",
+      "provider": {
+        "name": "University of Doha for Science and Technology",
+        "url": "https://www.udst.edu.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-06-20",
+          "start_date": "2026-06-20",
+          "end_date": "2026-06-20",
+          "start_time": null,
+          "end_time": null,
+          "format": "unknown",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": null,
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "UDST lists Allied Health Practitioners; the dental workshop limits this to dental-background practitioners. Paramedic eligibility is not specifically confirmed."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "API-01-P228",
+        "evidence_url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "udst-evolving-landscape-skin-cancer-2026",
+      "title": "The Evolving Landscape of Skin Cancer",
+      "kind": "single",
+      "provider": {
+        "name": "University of Doha for Science and Technology",
+        "url": "https://www.udst.edu.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-06-25",
+          "start_date": "2026-06-25",
+          "end_date": "2026-06-25",
+          "start_time": null,
+          "end_time": null,
+          "format": "unknown",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": null,
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "UDST lists Allied Health Practitioners; the dental workshop limits this to dental-background practitioners. Paramedic eligibility is not specifically confirmed."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "API-01-P231",
+        "evidence_url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "udst-preceptor-workshop-2026",
+      "title": "Preceptor Workshop",
+      "kind": "single",
+      "provider": {
+        "name": "University of Doha for Science and Technology",
+        "url": "https://www.udst.edu.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-08-24-25",
+          "start_date": "2026-08-24",
+          "end_date": "2026-08-25",
+          "start_time": null,
+          "end_time": null,
+          "format": "unknown",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 7,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": null,
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "UDST lists Allied Health Practitioners; the dental workshop limits this to dental-background practitioners. Paramedic eligibility is not specifically confirmed."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "API-01-P221",
+        "evidence_url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "udst-dxa-quality-assurance-2026",
+      "title": "Optimizing Dual-energy X-ray Absorptiometry (DXA) Practice: Quality Assurance, Artefacts, and Reporting Accuracy",
+      "kind": "single",
+      "provider": {
+        "name": "University of Doha for Science and Technology",
+        "url": "https://www.udst.edu.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-12",
+          "start_date": "2026-09-12",
+          "end_date": "2026-09-12",
+          "start_time": null,
+          "end_time": null,
+          "format": "unknown",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": null,
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "UDST lists Allied Health Practitioners; the dental workshop limits this to dental-background practitioners. Paramedic eligibility is not specifically confirmed."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "API-01-P232",
+        "evidence_url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": "https://events.teams.microsoft.com/event/a37accf8-12fc-445c-9a72-a3a14ca6b6bc@b30f4b44-46c6-4070-9997-f87b38d4771c",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "eligibility",
+            "accreditation",
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "udst-pediatric-oral-health-prevention-2026",
+      "title": "Pediatric Oral Health: Primary Prevention Strategies",
+      "kind": "single",
+      "provider": {
+        "name": "University of Doha for Science and Technology",
+        "url": "https://www.udst.edu.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-23",
+          "start_date": "2026-09-23",
+          "end_date": "2026-09-23",
+          "start_time": null,
+          "end_time": null,
+          "format": "unknown",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": null,
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "UDST lists Allied Health Practitioners; the dental workshop limits this to dental-background practitioners. Paramedic eligibility is not specifically confirmed."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "API-01-P233",
+        "evidence_url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": "https://events.teams.microsoft.com/event/ee785f36-906e-4a95-be0f-42bdb7deba50@b30f4b44-46c6-4070-9997-f87b38d4771c?source=copyLinkLegacyShareEventDialog",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "eligibility",
+            "accreditation",
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": "Dental-background Allied Health Practitioners only."
+    },
+    {
+      "id": "udst-early-recognition-pediatric-cancer-2026",
+      "title": "When It is More Than a Common Childhood Illness: Early Recognition of Pediatric Cancer in Primary Care",
+      "kind": "single",
+      "provider": {
+        "name": "University of Doha for Science and Technology",
+        "url": "https://www.udst.edu.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-09-30",
+          "start_date": "2026-09-30",
+          "end_date": "2026-09-30",
+          "start_time": null,
+          "end_time": null,
+          "format": "unknown",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 1,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": null,
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "UDST lists Allied Health Practitioners; the dental workshop limits this to dental-background practitioners. Paramedic eligibility is not specifically confirmed."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "API-01-P234",
+        "evidence_url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": "https://events.teams.microsoft.com/event/6f47e8d4-9d63-484f-b019-0f962b478fac@b30f4b44-46c6-4070-9997-f87b38d4771c",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "credits",
+            "eligibility",
+            "accreditation",
+            "registration"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "qu-complementary-medicine-curriculum-2026",
+      "title": "Developing an Academic Curriculum for Complementary Medicine in the Region",
+      "kind": "single",
+      "provider": {
+        "name": "Qatar University Health",
+        "url": "https://www.qu.edu.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-01-14",
+          "start_date": "2026-01-14",
+          "end_date": "2026-01-14",
+          "start_time": "18:00",
+          "end_time": "20:00",
+          "format": "online",
+          "venue": "Microsoft Teams"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 2,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "online",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Provider lists Allied Health Professionals or all healthcare professions; paramedics are not specifically confirmed."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "AGI-03-P203",
+        "evidence_url": "https://qu.edu.qa/en-us/Colleges/health/clinical-affairs/cpd-hp/cpd-events/Pages/default.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://qu.edu.qa/en-us/Colleges/health/clinical-affairs/cpd-hp/cpd-events/Pages/default.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "qu-islamic-spirituality-mental-health-2026",
+      "title": "Integrating Islamic Spirituality Across Mental Health Services in the Middle East",
+      "kind": "single",
+      "provider": {
+        "name": "Qatar University Health",
+        "url": "https://www.qu.edu.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-02-04-05",
+          "start_date": "2026-02-04",
+          "end_date": "2026-02-05",
+          "start_time": "08:00",
+          "end_time": "17:00",
+          "format": "in_person",
+          "venue": "Hamad Bin Khalifa University, Minaretein Center, Auditorium"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 10.5,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Provider lists Allied Health Professionals or all healthcare professions; paramedics are not specifically confirmed."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "AGI-03-P204",
+        "evidence_url": "https://qu.edu.qa/en-us/Colleges/health/clinical-affairs/cpd-hp/cpd-events/Pages/default.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://qu.edu.qa/en-us/Colleges/health/clinical-affairs/cpd-hp/cpd-events/Pages/default.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": null
+    },
+    {
+      "id": "qu-orientation-complementary-integrative-medicine-2026",
+      "title": "Orientation Course of Complementary and Integrative Medicine for Healthcare Professionals",
+      "kind": "series",
+      "provider": {
+        "name": "Qatar University Health",
+        "url": "https://www.qu.edu.qa/"
+      },
+      "sessions": [
+        {
+          "id": "2026-10-08",
+          "start_date": "2026-10-08",
+          "end_date": "2026-10-08",
+          "start_time": "08:00",
+          "end_time": "16:30",
+          "format": "in_person",
+          "venue": "Qatar University, College of Education, Building I10, Auditorium C306"
+        },
+        {
+          "id": "2026-10-10",
+          "start_date": "2026-10-10",
+          "end_date": "2026-10-10",
+          "start_time": "08:00",
+          "end_time": "15:00",
+          "format": "in_person",
+          "venue": "Qatar University, College of Education, Building I10, Auditorium C306"
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 11.25,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [
+        {
+          "label": "Price not published",
+          "audience": null,
+          "format": "in_person",
+          "amount": null,
+          "currency": null,
+          "basis": "whole_activity",
+          "notes": null
+        }
+      ],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "unknown",
+        "explanation": "Provider lists Allied Health Professionals or all healthcare professions; paramedics are not specifically confirmed."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "AGI-03-P208",
+        "evidence_url": "https://qu.edu.qa/en-us/Colleges/health/clinical-affairs/cpd-hp/cpd-events/Pages/default.aspx"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": null,
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://qu.edu.qa/en-us/Colleges/health/clinical-affairs/cpd-hp/cpd-events/Pages/default.aspx",
+          "checked_at": "2026-09-26",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        }
+      ],
+      "public_notes": "Full two-day attendance is required for credit."
+    }
+  ]
+}
