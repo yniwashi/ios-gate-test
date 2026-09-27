@@ -286,17 +286,13 @@ export async function run(mountEl) {
     .cpd-tabs button{min-height:44px;padding:8px;border:1px solid var(--border);border-radius:11px;background:var(--surface);color:var(--muted);font:inherit;font-size:13px;font-weight:800;cursor:pointer}
     .cpd-tabs button[aria-pressed="true"]{background:#0f766e;border-color:#0f766e;color:#fff}
     .cpd-tabs button:focus-visible{outline:2px solid #0f766e;outline-offset:2px}
-    .cpd-filter-summary{display:flex;align-items:center;gap:10px;min-height:50px;padding:10px 14px;list-style:none;cursor:pointer;color:var(--text);font-size:14px;font-weight:850}
-    .cpd-filter-summary::-webkit-details-marker{display:none}.cpd-filter-summary span:nth-child(2){margin-left:auto;color:var(--muted);font-size:11px;font-weight:750}
-    .cpd-filter-summary svg{flex:none;transition:transform .18s ease}.cpd-controls[open] .cpd-filter-summary svg{transform:rotate(180deg)}
-    .cpd-filter-summary:focus-visible{outline:2px solid #0f766e;outline-offset:-3px}
-    .cpd-filter-fields{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));padding:14px;border-top:1px solid var(--border)}
+    .cpd-filter-heading{padding:14px 14px 0;font-size:14px;font-weight:850;color:var(--text)}
+    .cpd-filter-fields{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));padding:12px 14px 14px}
     .cpd-controls label{display:grid;gap:5px;font-size:12px;font-weight:800;color:var(--muted)}
-    .cpd-controls select,.cpd-controls input[type="search"],.cpd-controls input[type="date"]{box-sizing:border-box;width:100%;min-width:0;min-height:43px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:inherit;padding:8px}
-    .cpd-search-field,.cpd-date-fields,.cpd-search-actions,.cpd-filter-error{grid-column:1/-1}
-    .cpd-date-fields{display:grid;grid-template-columns:1fr;gap:12px}
-    .cpd-search-actions{display:flex;align-items:center;justify-content:space-between;gap:10px}.cpd-search-actions span{font-size:11px;color:var(--muted)}
-    .cpd-search-actions button{min-height:36px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;font-size:12px;font-weight:800}
+    .cpd-controls select,.cpd-controls input[type="date"]{box-sizing:border-box;width:100%;min-width:0;min-height:43px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:inherit;padding:8px}
+    .cpd-date-actions,.cpd-filter-error{grid-column:1/-1}
+    .cpd-date-actions{display:flex;align-items:center;justify-content:space-between;gap:10px}.cpd-date-actions span{font-size:11px;color:var(--muted)}
+    .cpd-date-actions button{min-height:36px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;font-size:12px;font-weight:800}
     .cpd-filter-error{color:#a33a2b;font-size:12px;font-weight:750}.cpd-filter-error[hidden]{display:none}
     .cpd-switches{grid-column:1/-1;border-top:1px solid var(--border);padding-top:10px}.cpd-switches[hidden]{display:none}
     .cpd-switches label{display:flex;align-items:center;gap:9px;color:var(--text);font-size:13px;font-weight:800}
@@ -339,8 +335,7 @@ export async function run(mountEl) {
     .cpd-link-actions button:focus-visible{outline:2px solid #0f766e;outline-offset:2px}
     .cpd-link-copy-fallback[hidden]{display:none}.cpd-link-copy-fallback{margin-top:12px}.cpd-link-copy-fallback p{margin:0 0 6px}
     .cpd-link-copy-fallback input{box-sizing:border-box;width:100%;min-height:42px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;font-size:12px}
-    .cpd-link-feedback{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10001;max-width:min(90vw,360px);padding:10px 14px;border-radius:10px;background:#0f766e;color:#fff;font-size:13px;font-weight:800;box-shadow:0 8px 24px rgba(2,6,23,.25);text-align:center}
-    .cpd-link-feedback[hidden]{display:none}
+    .cpd-link-feedback{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10001;max-width:min(90vw,360px);padding:10px 14px;border-radius:10px;background:#0f766e;color:#fff;font-size:13px;font-weight:800;box-shadow:0 8px 24px rgba(2,6,23,.25);text-align:center;pointer-events:none}
     .cpd-empty{padding:15px;color:var(--muted);font-size:13px;line-height:1.5}
     :root[data-theme="dark"] .cpd-fact-value{background:#193d37;color:#8ee0ce}
     :root[data-theme="dark"] .cpd-fact-date .cpd-fact-value,:root[data-theme="dark"] .cpd-fact-format .cpd-fact-value{background:var(--bg);color:var(--text)}
@@ -356,28 +351,23 @@ export async function run(mountEl) {
   <div class="cpd-wrap">
     <div class="cpd-intro"><h2>Qatar CPD Opportunities</h2><div class="cpd-meta"><p id="cpdCoverage">CPD activities</p><span class="cpd-update"><span>Updated</span><span class="cpd-updated" id="cpdUpdated">--</span></span></div><p class="cpd-tip">Tip: If you press <strong>Open inside Ambulance App</strong> for a CPD link, swipe from left to right to return to CPD. Or press <strong>Copy link</strong> to paste it into another browser.</p></div>
     <div class="cpd-tabs" role="group" aria-label="CPD event period"><button id="cpdTabUpcoming" type="button" aria-pressed="true" aria-controls="cpdResults">Upcoming</button><button id="cpdTabPast" type="button" aria-pressed="false" aria-controls="cpdResults">Past Events</button></div>
-    <details class="cpd-controls" id="cpdFilters"><summary class="cpd-filter-summary"><span>Search & filters</span><span id="cpdFilterSummary">Optional</span><svg viewBox="0 0 20 20" width="20" height="20" fill="none" aria-hidden="true"><path d="m4 7 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><div class="cpd-filter-fields">
-      <label class="cpd-search-field">Search events<input id="cpdSearch" type="search" inputmode="search" placeholder="Search..." autocomplete="off"></label>
-      <div class="cpd-date-fields">
-        <label>From date<input id="cpdDateFrom" type="date"></label>
-        <label>To date<input id="cpdDateTo" type="date"></label>
-      </div>
-      <div class="cpd-search-actions"><span>Use one date for a day, or both for a range.</span><button id="cpdClearSearch" type="button">Clear search</button></div>
-      <div class="cpd-filter-error" id="cpdFilterError" role="status" hidden></div>
+    <div class="cpd-controls" id="cpdFilters"><div class="cpd-filter-heading">Filters</div><div class="cpd-filter-fields">
       <label>Category<select id="cpdCategory"><option value="all">All categories</option><option value="1">Category 1</option><option value="2">Category 2</option><option value="3">Category 3</option></select></label>
       <label>Format<select id="cpdFormat"><option value="all">All formats</option><option value="online">Online</option><option value="hybrid">Blended / Hybrid</option><option value="in_person">In person</option></select></label>
       <label style="grid-column:1/-1">Provider<select id="cpdProvider"><option value="all">All providers</option></select></label>
+      <label>From date<input id="cpdDateFrom" type="date"></label>
+      <label>To date<input id="cpdDateTo" type="date"></label>
+      <div class="cpd-date-actions"><span>Leave either date empty for an open-ended range.</span><button id="cpdClearDates" type="button">Clear dates</button></div>
+      <div class="cpd-filter-error" id="cpdFilterError" role="status" hidden></div>
       <div class="cpd-switches" id="cpdInternalControl" hidden><label><input id="cpdInternal" type="checkbox" checked> Show HMC staff-only events</label></div>
-    </div></details>
+    </div></div>
     <div id="cpdResults" aria-live="polite"><div class="cpd-empty">Loading CPD activities...</div></div>
-    <div id="cpdLinkDialogHost"></div><div class="cpd-link-feedback" id="cpdLinkFeedback" role="status" hidden></div>
+    <div id="cpdLinkDialogHost"></div>
   </div>`;
   const results = mountEl.querySelector("#cpdResults");
-  const search = mountEl.querySelector("#cpdSearch");
   const dateFrom = mountEl.querySelector("#cpdDateFrom");
   const dateTo = mountEl.querySelector("#cpdDateTo");
   const filterError = mountEl.querySelector("#cpdFilterError");
-  const filterSummary = mountEl.querySelector("#cpdFilterSummary");
   const category = mountEl.querySelector("#cpdCategory");
   const format = mountEl.querySelector("#cpdFormat");
   const provider = mountEl.querySelector("#cpdProvider");
@@ -385,9 +375,9 @@ export async function run(mountEl) {
   const pastTab = mountEl.querySelector("#cpdTabPast");
   const includeInternal = mountEl.querySelector("#cpdInternal");
   const dialogHost = mountEl.querySelector("#cpdLinkDialogHost");
-  const linkFeedback = mountEl.querySelector("#cpdLinkFeedback");
   let activePeriod = "upcoming";
   let feedbackTimer;
+  let linkFeedback;
   let data;
   try {
     const response = await fetch(HELPER_URL, { cache:"no-cache" });
@@ -410,20 +400,13 @@ export async function run(mountEl) {
   const rows = activityRows({ activities:visibleActivities }).filter((row) => row.activity.status !== "cancelled");
   function render() {
     const now = qatarNow();
-    const words = search.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
-    const dateStart = dateFrom.value || dateTo.value;
-    const dateEnd = dateTo.value || dateFrom.value;
     const invalidRange = !!(dateFrom.value && dateTo.value && dateTo.value < dateFrom.value);
-    const activeFilters = Number(Boolean(words.length)) + Number(Boolean(dateStart)) + Number(category.value !== "all")
-      + Number(format.value !== "all") + Number(provider.value !== "all")
-      + Number(!mountEl.querySelector("#cpdInternalControl").hidden && !includeInternal.checked);
-    filterSummary.textContent = activeFilters ? `${activeFilters} active` : "Optional";
     filterError.textContent = invalidRange ? "To date must be on or after From date." : "";
     filterError.hidden = !invalidRange;
     const filtered = rows.filter(({ activity, session }) =>
       !invalidRange
-      && (!words.length || words.every((word) => [activity.title, activity.provider?.name, activity.accreditation?.activity_code, activity.public_notes, session.venue].filter(Boolean).join(" ").toLocaleLowerCase().includes(word)))
-      && (!dateStart || (session.start_date <= dateEnd && session.end_date >= dateStart))
+      && (!dateFrom.value || session.end_date >= dateFrom.value)
+      && (!dateTo.value || session.start_date <= dateTo.value)
       && (category.value === "all" || activity.credits.some((credit) => String(credit.category) === category.value && (!credit.session_ids || credit.session_ids.includes(session.id))))
       && (format.value === "all" || session.format === format.value)
       && (provider.value === "all" || activity.provider?.name === provider.value)
@@ -451,14 +434,17 @@ export async function run(mountEl) {
   upcomingTab.addEventListener("click", () => { activePeriod = "upcoming"; render(); });
   pastTab.addEventListener("click", () => { activePeriod = "past"; render(); });
   for (const control of [category, format, provider, includeInternal]) control.addEventListener("change", render);
-  search.addEventListener("input", render);
   for (const control of [dateFrom, dateTo]) control.addEventListener("change", render);
-  mountEl.querySelector("#cpdClearSearch").addEventListener("click", () => { search.value = ""; dateFrom.value = ""; dateTo.value = ""; render(); });
+  mountEl.querySelector("#cpdClearDates").addEventListener("click", () => { dateFrom.value = ""; dateTo.value = ""; render(); });
   function showLinkFeedback(message) {
+    linkFeedback?.remove();
+    linkFeedback = document.createElement("div");
+    linkFeedback.className = "cpd-link-feedback";
+    linkFeedback.setAttribute("role", "status");
     linkFeedback.textContent = message;
-    linkFeedback.hidden = false;
+    document.body.appendChild(linkFeedback);
     clearTimeout(feedbackTimer);
-    feedbackTimer = setTimeout(() => { linkFeedback.hidden = true; }, 2800);
+    feedbackTimer = setTimeout(() => { linkFeedback?.remove(); linkFeedback = null; }, 2800);
   }
   function showLinkOptions(link) {
     const url = safeUrl(link.href);
