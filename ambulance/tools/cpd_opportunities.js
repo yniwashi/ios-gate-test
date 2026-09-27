@@ -288,7 +288,7 @@ export async function run(mountEl) {
     .cpd-tabs button:focus-visible{outline:2px solid #0f766e;outline-offset:2px}
     .cpd-filter-heading{padding:14px 14px 0;font-size:14px;font-weight:850;color:var(--text)}
     .cpd-filter-fields{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));padding:12px 14px 14px}
-    .cpd-controls label{display:grid;gap:5px;font-size:12px;font-weight:800;color:var(--muted)}
+    .cpd-controls label{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;gap:5px;font-size:12px;font-weight:800;color:var(--muted)}
     .cpd-controls select,.cpd-controls input[type="date"]{box-sizing:border-box;width:100%;min-width:0;min-height:43px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:inherit;padding:8px}
     .cpd-date-actions,.cpd-filter-error{grid-column:1/-1}
     .cpd-date-actions{display:flex;align-items:center;justify-content:space-between;gap:10px}.cpd-date-actions span{font-size:11px;color:var(--muted)}
@@ -346,6 +346,7 @@ export async function run(mountEl) {
     :root[data-theme="dark"] .cpd-expand-count{background:#28564d}
     :root[data-theme="dark"] .cpd-links a{border-color:#4a9e8f;color:#8ee0ce}
     @media(prefers-color-scheme:dark){:root[data-theme="auto"] .cpd-fact-value{background:#193d37;color:#8ee0ce}:root[data-theme="auto"] .cpd-fact-date .cpd-fact-value,:root[data-theme="auto"] .cpd-fact-format .cpd-fact-value{background:var(--bg);color:var(--text)}:root[data-theme="auto"] .cpd-internal{background:#4b3410;color:#ffd68a}:root[data-theme="auto"] .cpd-card{border-color:var(--border);box-shadow:0 4px 15px rgba(0,0,0,.3)}:root[data-theme="auto"] .cpd-card[open]{border-color:#4c9286}:root[data-theme="auto"] .cpd-expand{background:#183e38;border-color:#376e64;color:#b9eee2}:root[data-theme="auto"] .cpd-expand-count{background:#28564d}:root[data-theme="auto"] .cpd-links a{border-color:#4a9e8f;color:#8ee0ce}}
+    @media(max-width:480px){.cpd-date-filter{grid-column:1/-1}}
     @media(max-width:390px){.cpd-wrap{padding:10px 9px 24px}.cpd-filter-fields{grid-template-columns:1fr}}
   </style>
   <div class="cpd-wrap">
@@ -355,8 +356,8 @@ export async function run(mountEl) {
       <label>Category<select id="cpdCategory"><option value="all">All categories</option><option value="1">Category 1</option><option value="2">Category 2</option><option value="3">Category 3</option></select></label>
       <label>Format<select id="cpdFormat"><option value="all">All formats</option><option value="online">Online</option><option value="hybrid">Blended / Hybrid</option><option value="in_person">In person</option></select></label>
       <label style="grid-column:1/-1">Provider<select id="cpdProvider"><option value="all">All providers</option></select></label>
-      <label>From date<input id="cpdDateFrom" type="date"></label>
-      <label>To date<input id="cpdDateTo" type="date"></label>
+      <label class="cpd-date-filter">From date<input id="cpdDateFrom" type="date"></label>
+      <label class="cpd-date-filter">To date<input id="cpdDateTo" type="date"></label>
       <div class="cpd-date-actions"><span>Leave either date empty for an open-ended range.</span><button id="cpdClearDates" type="button">Clear dates</button></div>
       <div class="cpd-filter-error" id="cpdFilterError" role="status" hidden></div>
       <div class="cpd-switches" id="cpdInternalControl" hidden><label><input id="cpdInternal" type="checkbox" checked> Show HMC staff-only events</label></div>
