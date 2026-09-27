@@ -290,6 +290,8 @@ export async function run(mountEl) {
     .cpd-filter-fields{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));padding:12px 14px 14px}
     .cpd-controls label{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;gap:5px;font-size:12px;font-weight:800;color:var(--muted)}
     .cpd-controls select,.cpd-controls input[type="date"]{box-sizing:border-box;width:100%;min-width:0;min-height:43px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:inherit;padding:8px}
+    .cpd-controls .cpd-date-filter{display:flex;flex-direction:column;align-items:stretch}
+    .cpd-controls .cpd-date-filter input[type="date"]{width:auto;max-width:100%;flex:none}
     .cpd-date-actions,.cpd-filter-error{grid-column:1/-1}
     .cpd-date-actions{display:flex;align-items:center;justify-content:space-between;gap:10px}.cpd-date-actions span{font-size:11px;color:var(--muted)}
     .cpd-date-actions button{min-height:36px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;font-size:12px;font-weight:800}
