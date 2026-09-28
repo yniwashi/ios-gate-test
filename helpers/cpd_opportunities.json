@@ -7,7 +7,7 @@
     "end_date": "2027-12-31",
     "timezone": "Asia/Qatar"
   },
-  "updated_at": "2026-09-26T18:10:55+03:00",
+  "updated_at": "2026-09-28T02:48:30+03:00",
   "activities": [
     {
       "id": "aspetar-tuesday-lecture-series-2026-2027",
@@ -324,14 +324,14 @@
       },
       "registration": {
         "status": "open",
-        "url": "https://www.aspetar.com/en/professionals/our-events/tuesday-lecture2026",
+        "url": "https://crm.aspirezone.qa/Registrations/AspetarTuesdayLectures.aspx?event=yACeiz86MRPbsMdmMbQ8iw%3D%3D",
         "deadline_date": null
       },
       "status": "active",
       "sources": [
         {
           "url": "https://www.aspetar.com/en/professionals/our-events/tuesday-lecture2026",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -345,7 +345,8 @@
           ]
         }
       ],
-      "public_notes": "Registration is for the entire series; dates are subject to change."
+      "public_notes": "Registration is for the entire series; dates are subject to change.",
+      "verification_url": "https://www.aspetar.com/en/professionals/our-events/tuesday-lecture2026"
     },
     {
       "id": "aspetar-wednesday-webinar-series-2026-2027",
@@ -464,14 +465,14 @@
       },
       "registration": {
         "status": "open",
-        "url": "https://www.aspetar.com/en/professionals/our-events/aspetar-wednesday-webinar-series-26",
+        "url": "https://crm.aspirezone.qa/Registrations/AspetarWednesdayWebinar.aspx?event=8oFWZfkfsDPTBu%2BMS%2Br90w%3D%3D",
         "deadline_date": null
       },
       "status": "active",
       "sources": [
         {
           "url": "https://www.aspetar.com/en/professionals/our-events/aspetar-wednesday-webinar-series-26",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -485,7 +486,8 @@
           ]
         }
       ],
-      "public_notes": "Registration is for the entire series."
+      "public_notes": "Registration is for the entire series.",
+      "verification_url": "https://www.aspetar.com/en/professionals/our-events/aspetar-wednesday-webinar-series-26"
     },
     {
       "id": "aspetar-orthopaedic-masterclass-2026",
@@ -548,7 +550,7 @@
       "sources": [
         {
           "url": "https://www.aspetar.com/en/professionals/our-events/orthopaedic-masterclass-live",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -561,7 +563,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.aspetar.com/en/professionals/our-events/orthopaedic-masterclass-live"
     },
     {
       "id": "aspetar-healthcare-coaching-workshop-2026",
@@ -624,7 +627,7 @@
       "sources": [
         {
           "url": "https://www.aspetar.com/en/professionals/our-events/healthcare-coaching-workshop",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -637,7 +640,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.aspetar.com/en/professionals/our-events/healthcare-coaching-workshop"
     },
     {
       "id": "hmc-3rd-qatar-nephrology-conference-2026",
@@ -668,8 +672,8 @@
       ],
       "pricing_options": [
         {
-          "label": "Other medical/paramedical – physical",
-          "audience": null,
+          "label": "Nurses and other medical/paramedical – physical",
+          "audience": "Nurses and other medical/paramedical professionals",
           "format": "in_person",
           "amount": 300,
           "currency": "QAR",
@@ -677,8 +681,8 @@
           "notes": null
         },
         {
-          "label": "Other medical/paramedical – virtual",
-          "audience": null,
+          "label": "Nurses and other medical/paramedical – virtual",
+          "audience": "Nurses and other medical/paramedical professionals",
           "format": "online",
           "amount": 150,
           "currency": "QAR",
@@ -687,7 +691,7 @@
         },
         {
           "label": "Physician – physical",
-          "audience": null,
+          "audience": "Physicians",
           "format": "in_person",
           "amount": 400,
           "currency": "QAR",
@@ -696,7 +700,7 @@
         },
         {
           "label": "Physician – virtual",
-          "audience": null,
+          "audience": "Physicians",
           "format": "online",
           "amount": 200,
           "currency": "QAR",
@@ -727,7 +731,7 @@
       "sources": [
         {
           "url": "https://www.hamad.qa/EN/All-Events/3QNC2026/Pages/default.aspx",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -738,7 +742,7 @@
         },
         {
           "url": "https://www.hamad.qa/EN/All-Events/3QNC2026/Registration/Pages/default.aspx",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "format",
             "price",
@@ -754,7 +758,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.hamad.qa/EN/All-Events/3QNC2026/Pages/default.aspx"
     },
     {
       "id": "sidra-mena-microbiome-conference-2026",
@@ -826,7 +831,7 @@
       "sources": [
         {
           "url": "https://sidraweb.sidra.org/events/research/mena-microbiome-conference-2026/",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -837,7 +842,7 @@
         },
         {
           "url": "https://sidraweb.sidra.org/events/research/mena-microbiome-conference-2026/registration-fees/",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "price",
             "registration"
@@ -851,7 +856,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://sidraweb.sidra.org/events/research/mena-microbiome-conference-2026/"
     },
     {
       "id": "wcmq-certificate-in-lifestyle-medicine-2026",
@@ -914,7 +920,7 @@
       "sources": [
         {
           "url": "https://qatar-weill.cornell.edu/event/certificate-in-lifestyle-medicine/accreditation",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -925,7 +931,7 @@
         },
         {
           "url": "https://qatar-weill.cornell.edu/event/certificate-in-lifestyle-medicine/registration",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "format",
             "price",
@@ -934,7 +940,8 @@
           ]
         }
       ],
-      "public_notes": "Registration page offers a waitlist."
+      "public_notes": "Registration page offers a waitlist.",
+      "verification_url": "https://qatar-weill.cornell.edu/event/certificate-in-lifestyle-medicine/accreditation"
     },
     {
       "id": "wcmq-updates-in-primary-care-2026",
@@ -1006,7 +1013,7 @@
       "sources": [
         {
           "url": "https://qatar-weill.cornell.edu/event/alumni-conference/accreditation",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -1017,7 +1024,7 @@
         },
         {
           "url": "https://qatar-weill.cornell.edu/event/alumni-conference/registration",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "price",
             "registration"
@@ -1031,7 +1038,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://qatar-weill.cornell.edu/event/alumni-conference/accreditation"
     },
     {
       "id": "wcmq-understanding-basics-of-health-research-2026",
@@ -1094,7 +1102,7 @@
       "sources": [
         {
           "url": "https://qatar-weill.cornell.edu/event/understanding-basics-of-health-research/accreditation",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -1112,7 +1120,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://qatar-weill.cornell.edu/event/understanding-basics-of-health-research/accreditation"
     },
     {
       "id": "dhp-national-clinical-guidelines-rounds-2026",
@@ -1202,7 +1211,8 @@
           ]
         }
       ],
-      "public_notes": "Open for all; follow official DHP joining instructions."
+      "public_notes": "Open for all; follow official DHP joining instructions.",
+      "verification_url": "https://www.moph.gov.qa/english/departments/policyaffairs/DHP/Pages/MemosDetails.aspx?ItemId=489"
     },
     {
       "id": "dhp-mental-health-educational-rounds-2026",
@@ -1283,7 +1293,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.moph.gov.qa/english/mediacenter/Announcements/Pages/AnnouncementsDetails.aspx?ItemId=567"
     },
     {
       "id": "aman-bls-provider-2025-guidelines-2026",
@@ -1391,7 +1402,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://amanhospital.org/"
     },
     {
       "id": "al-ahli-diabetes-endocrine-conference-2026",
@@ -1472,7 +1484,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.ahlihospital.com/"
     },
     {
       "id": "al-ahli-journal-club-educational-session-2026",
@@ -1598,7 +1611,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.ahlihospital.com/"
     },
     {
       "id": "aman-acls-provider-2025-guidelines-2026",
@@ -1697,7 +1711,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://amanhospital.org/"
     },
     {
       "id": "aspetar-surgery-department-journal-club-2026-2027",
@@ -1823,7 +1838,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.aspetar.com/"
     },
     {
       "id": "al-emadi-transforming-nursing-2026",
@@ -1904,7 +1920,8 @@
           ]
         }
       ],
-      "public_notes": "Internal staff only."
+      "public_notes": "Internal staff only.",
+      "verification_url": "https://alemadihospital.com.qa/"
     },
     {
       "id": "wcmq-smart-health-changing-world-2026",
@@ -1967,7 +1984,7 @@
       "sources": [
         {
           "url": "https://qatar-weill.cornell.edu/event/shcw/accreditation",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -1985,7 +2002,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://qatar-weill.cornell.edu/event/shcw/accreditation"
     },
     {
       "id": "wcmq-introduction-systematic-review-meta-analysis-2026",
@@ -2048,7 +2066,7 @@
       "sources": [
         {
           "url": "https://qatar-weill.cornell.edu/event/systematic-review-workshop/accreditation",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -2067,7 +2085,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://qatar-weill.cornell.edu/event/systematic-review-workshop/accreditation"
     },
     {
       "id": "hmc-qatar-health-congress-january-2026",
@@ -2150,6 +2169,33 @@
           "currency": "QAR",
           "basis": "whole_activity",
           "notes": null
+        },
+        {
+          "label": "In person with workshops",
+          "audience": "Consultants, associate consultants and specialists",
+          "format": "in_person",
+          "amount": 600,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "In person with workshops",
+          "audience": "Physicians in training, fellows, residents and interns",
+          "format": "in_person",
+          "amount": 450,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
+        },
+        {
+          "label": "In person with workshops",
+          "audience": "Full-time university students",
+          "format": "in_person",
+          "amount": 350,
+          "currency": "QAR",
+          "basis": "whole_activity",
+          "notes": null
         }
       ],
       "eligibility": {
@@ -2175,7 +2221,7 @@
       "sources": [
         {
           "url": "https://www.hamad.qa/EN/All-Events/QatarHealth2026/Pages/default.aspx",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -2194,7 +2240,7 @@
         },
         {
           "url": "https://hamad.qa/EN/All-Events/QatarHealth2026/Registration/Pages/default.aspx",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "format",
             "price",
@@ -2203,7 +2249,8 @@
           ]
         }
       ],
-      "public_notes": "January congress. Separate from the similarly named November Qatar Health 2026 event."
+      "public_notes": "January congress. Separate from the similarly named November Qatar Health 2026 event.",
+      "verification_url": "https://www.hamad.qa/EN/All-Events/QatarHealth2026/Pages/default.aspx"
     },
     {
       "id": "sidra-essentials-tracheostomy-care-pediatrics-2026",
@@ -2290,7 +2337,7 @@
       "sources": [
         {
           "url": "https://www.sidra.org/events/essentials-of-tracheostomy-care-in-pediatrics-2/",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -2305,7 +2352,7 @@
         },
         {
           "url": "https://www.sidra.org/events/essentials-of-tracheostomy-care-in-pediatrics-3/",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -2319,7 +2366,8 @@
           ]
         }
       ],
-      "public_notes": "Past sessions retained; the provider lists separate Category 1 and 3 awards."
+      "public_notes": "Past sessions retained; the provider lists separate Category 1 and 3 awards.",
+      "verification_url": "https://www.sidra.org/events/essentials-of-tracheostomy-care-in-pediatrics-2/"
     },
     {
       "id": "sidra-health-literacy-education-workshop-2026",
@@ -2406,7 +2454,7 @@
       "sources": [
         {
           "url": "https://www.sidra.org/events/health-literacy-education-workshop-oct-2026/",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -2420,7 +2468,7 @@
         },
         {
           "url": "https://www.sidra.org/events/health-literacy-education-workshop-nov-2026/",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -2434,7 +2482,7 @@
         },
         {
           "url": "https://www.sidra.org/events/health-literacy-education-workshop-dec-2026/",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -2455,7 +2503,8 @@
           ]
         }
       ],
-      "public_notes": "The provider publishes 4.5 Category 1 and 1.5 Category 3 points for each dated workshop."
+      "public_notes": "The provider publishes 4.5 Category 1 and 1.5 Category 3 points for each dated workshop.",
+      "verification_url": "https://www.sidra.org/events/health-literacy-education-workshop-oct-2026/"
     },
     {
       "id": "al-emadi-physician-grand-rounds-2026",
@@ -2530,7 +2579,8 @@
           ]
         }
       ],
-      "public_notes": "Internal staff only according to the DHP activity listing."
+      "public_notes": "Internal staff only according to the DHP activity listing.",
+      "verification_url": "https://alemadihospital.com.qa/"
     },
     {
       "id": "al-emadi-ai-transforming-patient-care-2026",
@@ -2605,7 +2655,8 @@
           ]
         }
       ],
-      "public_notes": "Internal staff only according to the DHP activity listing."
+      "public_notes": "Internal staff only according to the DHP activity listing.",
+      "verification_url": "https://alemadihospital.com.qa/"
     },
     {
       "id": "al-emadi-patient-fall-prevention-2026",
@@ -2680,7 +2731,8 @@
           ]
         }
       ],
-      "public_notes": "Internal staff only according to the DHP activity listing."
+      "public_notes": "Internal staff only according to the DHP activity listing.",
+      "verification_url": "https://alemadihospital.com.qa/"
     },
     {
       "id": "al-emadi-clinical-insights-specialties-2026",
@@ -2755,7 +2807,8 @@
           ]
         }
       ],
-      "public_notes": "Internal staff only according to the DHP activity listing."
+      "public_notes": "Internal staff only according to the DHP activity listing.",
+      "verification_url": "https://alemadihospital.com.qa/"
     },
     {
       "id": "al-ahli-mm-emergency-dept-2026",
@@ -2848,7 +2901,8 @@
           ]
         }
       ],
-      "public_notes": "Internal staff only according to the DHP activity listing."
+      "public_notes": "Internal staff only according to the DHP activity listing.",
+      "verification_url": "https://www.ahlihospital.com/"
     },
     {
       "id": "al-ahli-grand-rounds-2026",
@@ -2950,7 +3004,8 @@
           ]
         }
       ],
-      "public_notes": "Internal staff only according to the DHP activity listing."
+      "public_notes": "Internal staff only according to the DHP activity listing.",
+      "verification_url": "https://www.ahlihospital.com/"
     },
     {
       "id": "al-ahli-mm-hospital-wide-2026",
@@ -3070,7 +3125,8 @@
           ]
         }
       ],
-      "public_notes": "Internal staff only according to the DHP activity listing."
+      "public_notes": "Internal staff only according to the DHP activity listing.",
+      "verification_url": "https://www.ahlihospital.com/"
     },
     {
       "id": "al-ahli-mm-nursing-dept-2026",
@@ -3199,7 +3255,8 @@
           ]
         }
       ],
-      "public_notes": "Internal staff only according to the DHP activity listing."
+      "public_notes": "Internal staff only according to the DHP activity listing.",
+      "verification_url": "https://www.ahlihospital.com/"
     },
     {
       "id": "al-ahli-nursing-cpr-2026-2027",
@@ -3343,7 +3400,8 @@
           ]
         }
       ],
-      "public_notes": "Internal staff only according to the DHP activity listing."
+      "public_notes": "Internal staff only according to the DHP activity listing.",
+      "verification_url": "https://www.ahlihospital.com/"
     },
     {
       "id": "udst-dxa-clinical-practice-2026",
@@ -3406,7 +3464,7 @@
       "sources": [
         {
           "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -3417,7 +3475,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.udst.edu.qa/"
     },
     {
       "id": "udst-mri-brain-morphometry-2026",
@@ -3480,7 +3539,7 @@
       "sources": [
         {
           "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -3491,7 +3550,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.udst.edu.qa/"
     },
     {
       "id": "udst-evolving-landscape-skin-cancer-2026",
@@ -3554,7 +3614,7 @@
       "sources": [
         {
           "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -3565,7 +3625,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.udst.edu.qa/"
     },
     {
       "id": "udst-preceptor-workshop-2026",
@@ -3628,7 +3689,7 @@
       "sources": [
         {
           "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -3639,7 +3700,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.udst.edu.qa/"
     },
     {
       "id": "udst-dxa-quality-assurance-2026",
@@ -3702,7 +3764,7 @@
       "sources": [
         {
           "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -3714,7 +3776,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.udst.edu.qa/"
     },
     {
       "id": "udst-pediatric-oral-health-prevention-2026",
@@ -3777,7 +3840,7 @@
       "sources": [
         {
           "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -3789,7 +3852,8 @@
           ]
         }
       ],
-      "public_notes": "Dental-background Allied Health Practitioners only."
+      "public_notes": "Dental-background Allied Health Practitioners only.",
+      "verification_url": "https://www.udst.edu.qa/"
     },
     {
       "id": "udst-early-recognition-pediatric-cancer-2026",
@@ -3852,7 +3916,7 @@
       "sources": [
         {
           "url": "https://www.udst.edu.qa/academic/our-colleges/college-health-sciences/continuing-professional-development-cpd-program/cpd",
-          "checked_at": "2026-09-26",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -3864,7 +3928,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.udst.edu.qa/"
     },
     {
       "id": "qu-complementary-medicine-curriculum-2026",
@@ -3926,8 +3991,8 @@
       "status": "active",
       "sources": [
         {
-          "url": "https://qu.edu.qa/en-us/Colleges/health/clinical-affairs/cpd-hp/cpd-events/Pages/default.aspx",
-          "checked_at": "2026-09-26",
+          "url": "https://www.qu.edu.qa/en-us/Colleges/health/clinical-affairs/cpd-hp/cpd-events/",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -3939,7 +4004,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.qu.edu.qa/"
     },
     {
       "id": "qu-islamic-spirituality-mental-health-2026",
@@ -4001,8 +4067,8 @@
       "status": "active",
       "sources": [
         {
-          "url": "https://qu.edu.qa/en-us/Colleges/health/clinical-affairs/cpd-hp/cpd-events/Pages/default.aspx",
-          "checked_at": "2026-09-26",
+          "url": "https://www.qu.edu.qa/en-us/Colleges/health/clinical-affairs/cpd-hp/cpd-events/",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -4014,7 +4080,8 @@
           ]
         }
       ],
-      "public_notes": null
+      "public_notes": null,
+      "verification_url": "https://www.qu.edu.qa/"
     },
     {
       "id": "qu-orientation-complementary-integrative-medicine-2026",
@@ -4085,8 +4152,8 @@
       "status": "active",
       "sources": [
         {
-          "url": "https://qu.edu.qa/en-us/Colleges/health/clinical-affairs/cpd-hp/cpd-events/Pages/default.aspx",
-          "checked_at": "2026-09-26",
+          "url": "https://www.qu.edu.qa/en-us/Colleges/health/clinical-affairs/cpd-hp/cpd-events/",
+          "checked_at": "2026-09-28",
           "supports": [
             "title",
             "provider",
@@ -4098,7 +4165,8 @@
           ]
         }
       ],
-      "public_notes": "Full two-day attendance is required for credit."
+      "public_notes": "Full two-day attendance is required for credit.",
+      "verification_url": "https://www.qu.edu.qa/"
     }
   ]
 }

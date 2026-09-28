@@ -207,9 +207,10 @@ function renderDateList(activity, sessions, past) {
 
 function renderDetails(activity, sessions, past) {
   const session = sessions[0];
-  const primarySource = safeUrl(activity.sources?.[0]?.url);
+  const verificationUrl = safeUrl(activity.verification_url);
   const registrationUrl = !past && activity.registration?.status === "open" ? safeUrl(activity.registration.url) : null;
   const providerUrl = safeUrl(activity.provider?.url);
+  const providerFallback = verificationUrl && verificationUrl === providerUrl;
   const prices = [...new Set((activity.pricing_options || []).filter((option) => option.amount != null).map(moneyText))];
   const price = prices.length > 1
     ? `<ul>${prices.map((value) => `<li>${escapeHtml(value)}</li>`).join("")}</ul>`
@@ -238,8 +239,8 @@ function renderDetails(activity, sessions, past) {
   ].filter(Boolean).join("");
   const links = [
     registrationUrl ? `<a href="${escapeHtml(registrationUrl)}" target="_blank" rel="noopener noreferrer">Register for activity</a>` : "",
-    primarySource ? `<a href="${escapeHtml(primarySource)}" target="_blank" rel="noopener noreferrer">Verify activity</a>` : "",
-    providerUrl && providerUrl !== primarySource ? `<a href="${escapeHtml(providerUrl)}" target="_blank" rel="noopener noreferrer">Provider</a>` : ""
+    verificationUrl && !providerFallback ? `<a href="${escapeHtml(verificationUrl)}" target="_blank" rel="noopener noreferrer">Verify activity</a>` : "",
+    providerUrl ? `<a href="${escapeHtml(providerUrl)}" target="_blank" rel="noopener noreferrer">${providerFallback ? "Provider website" : "Provider"}</a>` : ""
   ].filter(Boolean).join("");
   return `
     <div class="cpd-detail">
