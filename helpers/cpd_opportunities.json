@@ -1,13 +1,13 @@
 {
   "helper_type": "cpd_opportunities",
   "schema_version": "1.0",
-  "version": "2026-09-26-3",
+  "version": "2026-09-28-2",
   "coverage": {
     "start_date": "2026-01-01",
     "end_date": "2027-12-31",
     "timezone": "Asia/Qatar"
   },
-  "updated_at": "2026-09-28T02:48:30+03:00",
+  "updated_at": "2026-09-28T14:13:22+03:00",
   "activities": [
     {
       "id": "aspetar-tuesday-lecture-series-2026-2027",
@@ -4167,6 +4167,182 @@
       ],
       "public_notes": "Full two-day attendance is required for credit.",
       "verification_url": "https://www.qu.edu.qa/"
+    },
+    {
+      "id": "sidra-qpem-international-conference-2026",
+      "title": "The 10th Qatar Pediatric Emergency Medicine International Conference (QPEM 2026)",
+      "kind": "single",
+      "provider": {
+        "name": "Sidra Medicine",
+        "url": "https://www.sidra.org/"
+      },
+      "sessions": [
+        {
+          "id": "2026-01-16",
+          "start_date": "2026-01-16",
+          "end_date": "2026-01-18",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 20,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "yes",
+        "explanation": "The official conference page expressly names Allied Health Professionals and Paramedics in its target audience."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": "HSGI-01-P593",
+        "evidence_url": "https://sidra.cloud-cme.com/course/courseoverview?EID=19213&P=5"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "closed",
+        "url": "https://registration.masterbadge.com/NewOnlineRegisterSidra.aspx?Eventid=867",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://www.sidra.org/events/qpem-2026/",
+          "checked_at": "2026-09-28",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "eligibility",
+            "registration"
+          ]
+        },
+        {
+          "url": "https://q-pem.com/qpem-2026-program/",
+          "checked_at": "2026-09-28",
+          "supports": [
+            "title",
+            "dates",
+            "format",
+            "credits",
+            "eligibility",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://sidra.cloud-cme.com/course/courseoverview?EID=19213&P=5",
+          "checked_at": "2026-09-28",
+          "supports": [
+            "title",
+            "provider",
+            "credits",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://registration.masterbadge.com/NewOnlineRegisterSidra.aspx?Eventid=867",
+          "checked_at": "2026-09-28",
+          "supports": [
+            "registration"
+          ]
+        },
+        {
+          "url": "https://q-pem.com/faqs/",
+          "checked_at": "2026-09-28",
+          "supports": [
+            "credits"
+          ]
+        }
+      ],
+      "public_notes": "Sidra Medicine annual Q-PEM conference. Up to 20 DHP Category 1 hours; individual credit depends on attendance.",
+      "verification_url": "https://www.sidra.org/events/qpem-2026/"
+    },
+    {
+      "id": "sidra-qpem-international-conference-2027",
+      "title": "The 11th Qatar Pediatric Emergency Medicine International Conference (QPEM 2027)",
+      "kind": "single",
+      "provider": {
+        "name": "Sidra Medicine",
+        "url": "https://www.sidra.org/"
+      },
+      "sessions": [
+        {
+          "id": "2027-01-15",
+          "start_date": "2027-01-15",
+          "end_date": "2027-01-17",
+          "start_time": null,
+          "end_time": null,
+          "format": "online",
+          "venue": null
+        }
+      ],
+      "credits": [
+        {
+          "category": 1,
+          "amount": 20,
+          "basis": "whole_activity",
+          "session_ids": null
+        }
+      ],
+      "pricing_options": [],
+      "eligibility": {
+        "allied_health": "yes",
+        "paramedic": "yes",
+        "explanation": "The official conference page expressly names Allied Health Professionals and Paramedics in its target audience."
+      },
+      "accreditation": {
+        "status": "confirmed",
+        "activity_code": null,
+        "evidence_url": "https://q-pem.com/about-us/"
+      },
+      "attendance_reporting": {
+        "status": "unknown",
+        "evidence_url": null
+      },
+      "registration": {
+        "status": "unknown",
+        "url": "https://q-pem.com/",
+        "deadline_date": null
+      },
+      "status": "active",
+      "sources": [
+        {
+          "url": "https://q-pem.com/",
+          "checked_at": "2026-09-28",
+          "supports": [
+            "title",
+            "provider",
+            "dates",
+            "format",
+            "eligibility",
+            "accreditation"
+          ]
+        },
+        {
+          "url": "https://q-pem.com/about-us/",
+          "checked_at": "2026-09-28",
+          "supports": [
+            "title",
+            "credits",
+            "accreditation",
+            "eligibility"
+          ]
+        }
+      ],
+      "public_notes": "Sidra Medicine annual Q-PEM conference. Up to 20 DHP Category 1 hours; individual credit depends on attendance.",
+      "verification_url": "https://q-pem.com/about-us/"
     }
   ]
 }
