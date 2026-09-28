@@ -1,4 +1,7 @@
 // ios/ambulance/tools/websites.js
+// CHANGELOG (2026-09-28):
+// - Give website links the same Copy link / Open inside Ambulance App choices as CPD.
+//
 // CHANGELOG (2026-06-06):
 // - Dismiss the Websites search keyboard when the list or page scrolls.
 // - Align Websites UI with Android directory/search/card layout while preserving iOS Open and Share actions.
@@ -45,7 +48,7 @@ export async function run(mountEl){
       .ws-chip{flex:none;border:1px solid var(--border,#e7ecf3);background:var(--surface,#fff);color:var(--text,#0c1230);border-radius:14px;padding:8px 11px;font-size:12px;font-weight:950;white-space:nowrap}
       .ws-chip[data-active="true"]{background:var(--ws-accent);border-color:transparent;color:#fff}
       .ws-list{display:flex;flex-direction:column;gap:8px}
-      .ws-item{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface,#fff);border:1px solid var(--border,#E1E7EF);border-radius:16px;padding:14px;cursor:pointer;box-shadow:0 5px 12px rgba(15,23,42,.06)}
+      .ws-item{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface,#fff);border:1px solid var(--border,#E1E7EF);border-radius:16px;padding:14px;box-shadow:0 5px 12px rgba(15,23,42,.06)}
       .ws-main{display:flex;align-items:center;gap:12px;min-width:0}
       .ws-icon{width:50px;height:50px;border-radius:14px;flex:none;background:#E6FFFB;border:0;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--ws-accent);font-weight:950;font-size:18px}
       .ws-icon img{width:40px;height:40px;object-fit:contain;display:block}
@@ -55,7 +58,17 @@ export async function run(mountEl){
       .ws-sub{font-size:13px;font-weight:750;color:#475467;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .ws-host{font-size:12px;font-weight:700;color:#98A2B3;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .ws-actions{display:flex;gap:8px;flex:none}
-      .ws-open{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:12px;background:var(--surface,#f3f6fb);border:1px solid var(--border,#dbe0ea);color:var(--text,#0c1230)}
+      .ws-open{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;background:var(--surface,#f3f6fb);border:1px solid var(--border,#dbe0ea);color:var(--text,#0c1230)}
+      .ws-open:focus-visible,.ws-link-actions button:focus-visible{outline:2px solid var(--ws-accent);outline-offset:2px}
+      .ws-link-dialog{box-sizing:border-box;width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;padding:18px;border:0;background:rgba(15,23,42,.58);place-items:center;z-index:10000}
+      .ws-link-dialog[open]{display:grid}.ws-link-dialog::backdrop{background:transparent}
+      .ws-link-sheet{width:min(420px,100%);padding:20px;border:1px solid var(--border);border-radius:17px;background:var(--surface);color:var(--text);box-shadow:0 22px 54px rgba(2,6,23,.3)}
+      .ws-link-sheet h3{margin:0 0 7px;font-size:18px}.ws-link-sheet p{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.45}
+      .ws-link-actions{display:grid;gap:9px}.ws-link-actions button{min-height:46px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;font-weight:800;text-align:center}
+      .ws-link-actions .ws-link-inside{background:var(--ws-accent);border-color:var(--ws-accent);color:#fff}.ws-link-actions .ws-link-cancel{background:transparent;color:var(--muted)}
+      .ws-link-copy-fallback[hidden]{display:none}.ws-link-copy-fallback{margin-top:12px}.ws-link-copy-fallback p{margin:0 0 6px}
+      .ws-link-copy-fallback input{box-sizing:border-box;width:100%;min-height:42px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;font-size:12px}
+      .ws-link-feedback{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10001;max-width:min(90vw,360px);padding:10px 14px;border-radius:10px;background:var(--ws-accent);color:#fff;font-size:13px;font-weight:800;box-shadow:0 8px 24px rgba(2,6,23,.25);text-align:center;pointer-events:none}
       .material-symbols-rounded{font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24;font-size:20px}
       .ws-empty{background:var(--surface,#fff);border:1px dashed var(--border,#e7ecf3);border-radius:16px;padding:18px;color:var(--muted,#6e7b91);font-weight:850;line-height:1.35;text-align:center}
       :root[data-theme="dark"] .ws-card,:root[data-theme="dark"] .ws-item{box-shadow:none}
@@ -64,16 +77,16 @@ export async function run(mountEl){
       :root[data-theme="dark"] .ws-icon{background:rgba(15,118,110,.18);color:#5eead4}
       :root[data-theme="dark"] .ws-sub{color:#CBD5E1}:root[data-theme="dark"] .ws-host{color:#94A3B8}
       @media(prefers-color-scheme:dark){:root[data-theme="auto"] .ws-card,:root[data-theme="auto"] .ws-item{box-shadow:none}:root[data-theme="auto"] .ws-item,:root[data-theme="auto"] .ws-empty,:root[data-theme="auto"] .ws-search,:root[data-theme="auto"] .ws-chip{background:#12151c;border-color:#232a37}:root[data-theme="auto"] .ws-open,:root[data-theme="auto"] .ws-icon,:root[data-theme="auto"] .ws-clear{background:#12151c;border-color:#232a37;color:#eef2ff}:root[data-theme="auto"] .ws-icon{background:rgba(15,118,110,.18);color:#5eead4}:root[data-theme="auto"] .ws-sub{color:#CBD5E1}:root[data-theme="auto"] .ws-host{color:#94A3B8}}
-      @media(max-width:390px){.ws-wrap{padding:12px 10px}.ws-item{padding:12px}.ws-icon{width:46px;height:46px}.ws-icon img{width:36px;height:36px}.ws-actions{gap:6px}.ws-open{width:36px;height:36px}}
+      @media(max-width:390px){.ws-wrap{padding:12px 10px}.ws-item{padding:12px}.ws-icon{width:46px;height:46px}.ws-icon img{width:36px;height:36px}}
     </style>
 
     <div class="ws-wrap">
       <div class="ws-card">
         <div class="ws-head"><h3 class="ws-title">Directory</h3><div id="wsCount" class="ws-count">0 links</div></div>
         <p class="ws-note">
-          Tip: If you choose to open a site inside the Ambulance App, you can swipe from
-          left to right to go back. Or use the <strong>Share</strong> button to open the link
-          in Safari or copy it to another browser.
+          Tip: If you press <strong>Open inside Ambulance App</strong> for a website link, swipe
+          from left to right to return to Websites. Or press <strong>Copy link</strong> to paste
+          it into another browser.
         </p>
       </div>
       <div class="ws-card">
@@ -87,6 +100,7 @@ export async function run(mountEl){
         </div>
         <div id="wsList" class="ws-list"><div class="ws-empty">Loading websites...</div></div>
       </div>
+      <div id="wsLinkDialogHost"></div>
     </div>
   `;
 
@@ -95,8 +109,11 @@ export async function run(mountEl){
   const wsClear = mountEl.querySelector('#wsClear');
   const wsFilters = mountEl.querySelector('#wsFilters');
   const wsCount = mountEl.querySelector('#wsCount');
+  const dialogHost = mountEl.querySelector('#wsLinkDialogHost');
   let allSites = [];
   let activeCategory = 'All';
+  let feedbackTimer;
+  let linkFeedback;
 
   function escapeHtml(value){
     return String(value || "")
@@ -119,6 +136,81 @@ export async function run(mountEl){
   function hostOf(url){
     try { return new URL(url).hostname.replace(/^www\./, ""); }
     catch (_) { return ""; }
+  }
+
+  function safeUrl(value){
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" ? url.href : null;
+    } catch (_) { return null; }
+  }
+
+  async function copyLink(url){
+    if (navigator.clipboard?.writeText) {
+      try { await navigator.clipboard.writeText(url); return true; }
+      catch (_) {}
+    }
+    const input = document.createElement("textarea");
+    input.value = url;
+    input.setAttribute("readonly", "");
+    input.style.cssText = "position:fixed;top:-1000px;left:-1000px";
+    document.body.appendChild(input);
+    input.select();
+    input.setSelectionRange(0, input.value.length);
+    let copied = false;
+    try { copied = document.execCommand("copy"); }
+    catch (_) {}
+    input.remove();
+    return copied;
+  }
+
+  function showLinkFeedback(message){
+    linkFeedback?.remove();
+    linkFeedback = document.createElement("div");
+    linkFeedback.className = "ws-link-feedback";
+    linkFeedback.setAttribute("role", "status");
+    linkFeedback.textContent = message;
+    document.body.appendChild(linkFeedback);
+    clearTimeout(feedbackTimer);
+    feedbackTimer = setTimeout(() => { linkFeedback?.remove(); linkFeedback = null; }, 2800);
+  }
+
+  function showLinkOptions(button, url, title){
+    dialogHost.innerHTML = `<dialog class="ws-link-dialog" aria-labelledby="wsLinkTitle">
+      <div class="ws-link-sheet">
+        <h3 id="wsLinkTitle">${escapeHtml(title)}</h3>
+        <p>Choose how to use this website link.</p>
+        <div class="ws-link-actions">
+          <button type="button" class="ws-link-copy">Copy link</button>
+          <button type="button" class="ws-link-inside">Open inside Ambulance App</button>
+          <button type="button" class="ws-link-cancel">Cancel</button>
+        </div>
+        <div class="ws-link-copy-fallback" hidden><p>Automatic copy is unavailable. Touch and hold this link to copy it.</p><input type="text" readonly value="${escapeHtml(url)}" aria-label="Website link to copy"></div>
+      </div>
+    </dialog>`;
+    const dialog = dialogHost.querySelector("dialog");
+    const close = () => {
+      if (dialog?.open) dialog.close();
+      dialogHost.innerHTML = "";
+      button.focus();
+    };
+    if (typeof dialog?.showModal === "function") dialog.showModal();
+    else dialog?.setAttribute("open", "");
+    dialogHost.querySelector(".ws-link-cancel")?.addEventListener("click", close);
+    dialogHost.querySelector(".ws-link-inside")?.addEventListener("click", () => {
+      close();
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+    dialogHost.querySelector(".ws-link-copy")?.addEventListener("click", async () => {
+      if (await copyLink(url)) { close(); showLinkFeedback("Link copied"); }
+      else {
+        const fallback = dialogHost.querySelector(".ws-link-copy-fallback");
+        fallback.hidden = false;
+        fallback.querySelector("input").select();
+      }
+    });
+    dialog?.addEventListener("click", (event) => { if (event.target === dialog) close(); });
+    dialog?.addEventListener("cancel", (event) => { event.preventDefault(); close(); });
   }
 
   function renderFilters(items){
@@ -148,7 +240,7 @@ export async function run(mountEl){
     }
 
     wsList.innerHTML = [...items].sort((a, b) => String(a.title).localeCompare(String(b.title))).map((item) => `
-          <div class="ws-item" data-url="${encodeURIComponent(item.url)}" data-title="${escapeHtml(item.title)}">
+          <div class="ws-item" data-url="${encodeURIComponent(item.url)}">
             <div class="ws-main">
               <div class="ws-icon" aria-hidden="true">
                 ${item.icon_url ? `<img src="${escapeHtml(item.icon_url)}" alt="" loading="lazy" decoding="async" onerror="this.remove();this.parentElement.textContent='${escapeHtml(fallbackLetter(item.title))}'">` : escapeHtml(fallbackLetter(item.title))}
@@ -161,11 +253,8 @@ export async function run(mountEl){
               </div>
             </div>
             <div class="ws-actions">
-              <button class="ws-open" data-action="open" aria-label="Open ${escapeHtml(item.title)}">
+              <button class="ws-open" type="button" aria-label="Open options for ${escapeHtml(item.title)}">
                 <span class="material-symbols-rounded" aria-hidden="true">open_in_new</span>
-              </button>
-              <button class="ws-open" data-action="share" aria-label="Share ${escapeHtml(item.title)}">
-                <span class="material-symbols-rounded" aria-hidden="true">ios_share</span>
               </button>
             </div>
           </div>
@@ -198,31 +287,14 @@ export async function run(mountEl){
     applyFilters();
   });
 
-  wsList.addEventListener('click', async (e) => {
+  wsList.addEventListener('click', (e) => {
     const btn = e.target.closest('button.ws-open');
     if (!btn) return;
     const item = btn.closest('.ws-item');
-    const url = decodeURIComponent(item?.dataset.url || '');
-    const title = item?.dataset.title || 'Website';
+    const url = safeUrl(decodeURIComponent(item?.dataset.url || ''));
+    const title = item?.querySelector('.ws-name')?.textContent || 'Website';
     if (!url) return;
-
-    if (btn.dataset.action === 'open') {
-      window.open(url, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    try {
-      if (navigator.share) {
-        await navigator.share({ url });
-      } else if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(url);
-        alert('Link copied. Paste into Safari to open.');
-      } else {
-        location.href = url;
-      }
-    } catch (err) {
-      console.debug('Share cancelled:', err);
-    }
+    showLinkOptions(btn, url, title);
   });
 
   try {

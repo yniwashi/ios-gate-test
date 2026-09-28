@@ -1,5 +1,4 @@
-// DHP CPD opportunities. Gate Test uses its own static review helper until the
-// shared Backend app-data route and R2 object are approved for publication.
+// Gate Test uses its same-origin CPD review helper for pre-release testing.
 
 const API_URL = "https://api.niwashibase.com/api/v1/ambulance/app-data/cpd-opportunities";
 const TEST_HOST = location.hostname === "ios-gate-test.niwashibase.com"
@@ -10,6 +9,16 @@ const TEST_HOST = location.hostname === "ios-gate-test.niwashibase.com"
 const HELPER_URL = TEST_HOST
   ? new URL("../../helpers/cpd_opportunities.json", import.meta.url).href
   : API_URL;
+const RESOURCE_ID = "helpers.cpd_opportunities";
+let resourceStatusPromise;
+
+function trackResource(method, ...args) {
+  if (!resourceStatusPromise) {
+    const version = globalThis.window?.__AMBULANCE_ASSET_VERSION || "dev";
+    resourceStatusPromise = import(`../resource_status.js?ver=${version}`).catch(() => null);
+  }
+  resourceStatusPromise.then((module) => module?.[method]?.(...args)).catch(() => {});
+}
 
 const FORMAT_LABELS = { online:"Online", hybrid:"Hybrid", in_person:"In person", unknown:"--" };
 const FORMAT_ORDER = { online:0, hybrid:1, in_person:2, unknown:3 };
@@ -383,11 +392,20 @@ export async function run(mountEl) {
   let feedbackTimer;
   let linkFeedback;
   let data;
+  trackResource("markChecked", RESOURCE_ID);
   try {
     const response = await fetch(HELPER_URL, { cache:"no-cache" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     data = validate(await response.json());
-  } catch (_) {
+    trackResource("markDownloaded", RESOURCE_ID, "remote", {
+      active_version:String(data.version || ""),
+      active_schema_version:String(data.schema_version || ""),
+      activity_count:data.activities.length,
+      session_count:data.activities.reduce((count, activity) => count + activity.sessions.length, 0),
+      source_url:HELPER_URL
+    });
+  } catch (error) {
+    trackResource("markError", RESOURCE_ID, error, { source_url:HELPER_URL });
     results.innerHTML = `<div class="cpd-empty">CPD activities could not be loaded. Please try again later.</div>`;
     return;
   }

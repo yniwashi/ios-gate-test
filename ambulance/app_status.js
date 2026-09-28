@@ -1,4 +1,7 @@
 // /ambulance/app_status.js
+// CHANGELOG (2026-09-28):
+// - Include CPD Opportunities in Admin Panel helper diagnostics.
+//
 // CHANGELOG (2026-06-12):
 // - Add privacy-safe CPR settings, active-state, saved-record count, and Wake Lock diagnostics.
 // - Expand Admin Panel diagnostics with gate timing, resource source status, search cache, document grouping, and web runtime details.
@@ -23,6 +26,8 @@ const APP_CONFIG_ENDPOINTS = {
   production: "https://api.niwashibase.com/api/v1/ambulance/ios-app-config/production",
   backup: "https://api.niwashibase.com/api/v1/ambulance/ios-app-config/backup"
 };
+
+const CPD_API_URL = "https://api.niwashibase.com/api/v1/ambulance/app-data/cpd-opportunities";
 
 const CPR_KEYS = {
   settings: "cpr_android_parity_settings_v1",
@@ -506,6 +511,12 @@ export async function buildAppStatus(options = {}) {
         ...configuredBlock(config, "formulary", includeAdmin),
         cache: cacheStatus(CACHE_KEYS.formulary, { count: value => value?.items?.length }),
         status: mergeResource(resourceApi, "helpers.formulary", includeAdmin)
+      },
+      cpd_opportunities: {
+        configured: true,
+        delivery: "fixed_url",
+        ...(includeAdmin ? { api_url: CPD_API_URL } : {}),
+        status: mergeResource(resourceApi, "helpers.cpd_opportunities", includeAdmin)
       }
     },
     websites: {
