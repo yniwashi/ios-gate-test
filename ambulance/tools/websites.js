@@ -1,4 +1,7 @@
 // ios/ambulance/tools/websites.js
+// CHANGELOG (2026-09-29):
+// - Keep Copy link feedback visible when it is mounted outside the Websites theme scope.
+//
 // CHANGELOG (2026-09-28):
 // - Give website links the same Copy link / Open inside Ambulance App choices as CPD.
 //
@@ -68,7 +71,7 @@ export async function run(mountEl){
       .ws-link-actions .ws-link-inside{background:var(--ws-accent);border-color:var(--ws-accent);color:#fff}.ws-link-actions .ws-link-cancel{background:transparent;color:var(--muted)}
       .ws-link-copy-fallback[hidden]{display:none}.ws-link-copy-fallback{margin-top:12px}.ws-link-copy-fallback p{margin:0 0 6px}
       .ws-link-copy-fallback input{box-sizing:border-box;width:100%;min-height:42px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;font-size:12px}
-      .ws-link-feedback{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10001;max-width:min(90vw,360px);padding:10px 14px;border-radius:10px;background:var(--ws-accent);color:#fff;font-size:13px;font-weight:800;box-shadow:0 8px 24px rgba(2,6,23,.25);text-align:center;pointer-events:none}
+      .ws-link-feedback{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:10001;max-width:min(90vw,360px);padding:10px 14px;border-radius:10px;background:#0F766E;color:#fff;font-size:13px;font-weight:800;box-shadow:0 8px 24px rgba(2,6,23,.25);text-align:center;pointer-events:none}
       .material-symbols-rounded{font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24;font-size:20px}
       .ws-empty{background:var(--surface,#fff);border:1px dashed var(--border,#e7ecf3);border-radius:16px;padding:18px;color:var(--muted,#6e7b91);font-weight:850;line-height:1.35;text-align:center}
       :root[data-theme="dark"] .ws-card,:root[data-theme="dark"] .ws-item{box-shadow:none}
